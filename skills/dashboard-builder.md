@@ -156,7 +156,7 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 
 ## Design — exact UI spec (self-contained, no source file needed)
 
-**Foundation:** Font `-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif`; base 13px, line-height 1.5, text `#111827`, page bg `#F7F8FA`. Cards: white, `1px solid #E5E7EB`, radius 8px. Max content width 1440px centered, 16px page padding.
+**Foundation:** Font `-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif`; base 13px, line-height 1.5, text `#111827`, page bg `#F7F8FA`. The dashboard commits to a single light theme, so declare it: `:root{color-scheme:light}`, and give every `input`, `textarea` and `select` an explicit `background`. Without both, a dark-mode host darkens the user-agent form controls while the explicit dark text colour stays put, and every field in both modals becomes dark-on-dark. A control that sets a text colour must set its background from the same palette. Cards: white, `1px solid #E5E7EB`, radius 8px. Max content width 1440px centered, 16px page padding.
 
 **Header (sticky, 52px):** white bg, bottom border `#E5E7EB`. Logo 15px/700 with accent char in `#E07040`. Nav links 12px/500 `#6B7280`; active/hover bg `#F3F4F6`, text `#111827`. Right meta text 11px `#9CA3AF`.
 
@@ -233,6 +233,7 @@ Every item here came from a real bug. Run it as a test pass, not a self-assessme
 
 **Before shipping**
 - Grep for references to renamed or removed fields; a rename in one place silently breaks a sort button or renderer elsewhere.
+- Open both modals with the OS in dark mode, and again with `color-scheme:dark` forced on the root. Every field must stay light-on-white; a field with a text colour but no background is the classic dark-on-dark bug.
 - Run the script through a real parser (`node --check`) rather than eyeballing brace balance, and confirm `{`/`}` balance in the style block and `<div>` balance in the body.
 - Counts in labels ("4 ad sets", "6 videos") are computed from the data at render time, never typed. Use `syncTabCounts()`.
 

@@ -198,6 +198,13 @@ tbody tr.empty-row{cursor:default;}
 .kb-card.dragging{cursor:grabbing;opacity:0.45;}
 .kb-card-perf{display:block;}
 .kb-card-ids{font-size:9px;color:#9CA3AF;font-family:'SF Mono','Fira Code',monospace;margin-bottom:6px;word-break:break-all;}
+/* This dashboard deliberately commits to one light theme, so it says so to the
+   browser. Without color-scheme, a dark-mode host darkens UA form controls while
+   our explicit dark text colour stays put — dark text on a dark field. The
+   explicit backgrounds below hold even where color-scheme is overridden. */
+:root{color-scheme:light;}
+input,textarea,select{background:#fff;color:#111827;}
+input::placeholder,textarea::placeholder{color:#9CA3AF;opacity:1;}
 </style>
 </head>
 <body>
