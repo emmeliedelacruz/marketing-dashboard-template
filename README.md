@@ -17,9 +17,24 @@ No build step, no backend required — it's one HTML file you open in a browser.
 
 1. Open `dashboard-example-filled.html` in a browser to see it working.
 2. Copy `dashboard-template-blank.html` to start your own.
-3. Find the `<script>` block near the bottom — replace the placeholder `CHANNELS`, `MONTHLY`, `WEEKLY`, `DAILY`, `CREATIVES`, `ADD`/`CUT` (optimization) arrays with your own data.
-4. Update the KPI labels in the `PL_LABELS` / `PL_KEYS` arrays if your metrics differ (e.g. product-led teams: swap SAL/SQL/ICP for Signup/Activation/PQL — see the skill file for full definitions).
-5. Open in a browser. That's it — no server needed.
+3. Replace the placeholder names in the markup: `[Company Name]` (page title and logo), `[Reporting Period]`, and the `[Channel 1]` / `[Channel 2]` labels (nav tabs, section headers, table captions) with your own.
+4. Fill in the data arrays at the top of the `<script>` block — they all ship empty:
+
+   | Array | Page and grain |
+   |---|---|
+   | `MM` / `GM` | Monthly — Channel 1 (ad set) / Channel 2 (ad group) |
+   | `MW` / `GW` | Weekly — same grain as Monthly |
+   | `MD` / `GD` | Daily — campaign level, per channel |
+   | `CR` | Creatives — Channel 1, ad level |
+   | `ADD` / `CUT` | Optimization — Scale Up / Pull Back |
+   | `VM` / `VG` | Funnel heatmap segments, per channel |
+   | `ADS` | Ad Library gallery |
+
+   `dashboard-example-filled.html` has all of these populated — copy the row shapes from there.
+5. Update the KPI labels if your metrics differ. Each table has a matching `*_LABELS` / `*_KEYS` / `*_RIGHTS` triple, all the same length: `PL_MW_*` and `GL_MW_*` (Monthly and Weekly), `PL_D_*` and `GL_D_*` (Daily), `REC_*` (Optimization), `CR_*` (Creatives). `LABELS` sets the header text, `KEYS` names the field sorting reads, `RIGHTS` right-aligns the column.
+
+   Note that the table cells themselves are emitted by the `render*` functions (`renderMW`, `renderGMW`, `renderDaily`, `renderGDaily`, `renderRec`, `renderCr`), which reference row fields by name. To swap a metric end to end (e.g. product-led teams trading SAL/SQL/ICP for Signup/Activation/PQL — see the skill file for full definitions), edit the label array *and* the matching render function.
+6. Open in a browser. That's it — no server needed.
 
 ## Quick start (with Claude)
 
