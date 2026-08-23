@@ -2,10 +2,10 @@
 
 **Changelog**
 - 2026-08-22: Initial creation.
-- 2026-08-22: Views locked to match hearth-dashboard-v2.html exactly. Onboarding scoped to channels, access/action, and per-timeframe metrics. Dimensions fixed per timeframe. Refresh cadence fixed to automatic daily.
+- 2026-08-22: Views locked to match the original source dashboard exactly (that file is not in this repo; `dashboard-template-blank.html` supersedes it). Onboarding scoped to channels, access/action, and per-timeframe metrics. Dimensions fixed per timeframe. Refresh cadence fixed to automatic daily.
 - 2026-08-23: Onboarding asked one question at a time, not as a batch table. Added motion-type question (Product-led vs Sales-led). Clarified: template (pages, tabs, views, layout) is identical across companies; only company name, channels, and KPIs/metrics vary.
 - 2026-08-23: Documented reporting granularity per page — Monthly/Weekly = ad set/ad group level, Daily = campaign level, Creatives = ad level. KPIs vary by company/motion type; only granularity level is fixed.
-- 2026-08-23: Adopted richer 4-column Kanban spec (Duplicate/Hypothesis/Verdict) as canonical, replacing the simpler 3-column hearth-HTML version. Pause and unpause both fire live MCP calls (symmetric).
+- 2026-08-23: Adopted richer 4-column Kanban spec (Duplicate/Hypothesis/Verdict) as canonical, replacing an earlier simpler 3-column version. Pause and unpause both fire live MCP calls (symmetric).
 - 2026-08-23: Added Product-led metric definitions (parallel to Sales-led set) so the motion-type onboarding question has concrete defaults for both paths.
 - 2026-08-23: Added Ecommerce as a third motion type with its own metric definitions and funnel-stage analog. Worked examples now ship for all three motions (`dashboard-example-filled.html` sales-led, `dashboard-example-ecommerce.html`, `dashboard-example-product-led.html`).
 - 2026-08-23: Channel count is two **or three** — the funnel and heatmap grids reflow, and every per-channel surface (tabs, panes, platform-changelog panels) repeats per channel. Both three-channel examples use index-based array names (M1/M2/M3 …) rather than channel initials.
@@ -23,6 +23,7 @@
 - 2026-08-23: Two deployment options, not four — an AI link or a server with a database — chosen by how many people edit the board at once and whether the dashboard should act on ads or only report. Records that the shared board runs on a Claude-specific hook: on any other assistant the page renders but the board is one-per-person, so that must be said rather than assumed.
 - 2026-08-23: The board stays editable, always. A sheet-sourced test log would mean a read-only board — a page cannot write cells to Sheets — so that option is struck and the choice is now only whether the board is *also* mirrored out to the `test_log` tab. The mirror is one-way, which has to be said out loud or someone types into the copy and loses it.
 - 2026-08-23: One sheet per build, provisioned at onboarding. This is a template repo, so no sheet ID is ever committed and no build reuses another's data. Split provisioning (a one-time `create_file`, which the Drive connector handles fine) from the recurring refresh write (which it cannot do at all). `sheet-template/` pins only `test_log` and `platform_log` — the tabs a human edits; metric columns are derived per build. The examples get no sheet: demo data, nothing to refresh, nothing to persist.
+- 2026-08-23 (latest): Fixed the pointers an AI actually follows. The Purpose line told it to clone `hearth-dashboard-v2.html`, which is not in this repo, and the design step sent it to a `frontend-design` skill that does not ship here — both resolved to nothing. Added a file-by-file table of what to read and an explicit rule never to invent names for the data arrays, label triples or renderers, since the drill-downs, sorts and `ad_id` joins all key off the exact names in the examples. Onboarding's three technical questions now ask what a marketer can answer and leave the mechanism to the builder.
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
 
@@ -31,7 +32,21 @@
 ---
 
 ## Purpose / When to use
-Build a single-file HTML performance dashboard by cloning the hearth-dashboard-v2.html template exactly — same pages, tabs, views, layout — re-skinned with a company's own channels and KPIs. Triggers: "build me a dashboard," "make a Hearth-style dashboard for [company]," "dashboard from this sheet."
+Build a single-file HTML performance dashboard by cloning this repo's template exactly — same pages, tabs, views, layout — re-skinned with a company's own channels and KPIs. Triggers: "build me a dashboard," "make a Hearth-style dashboard for [company]," "dashboard from this sheet."
+
+**Read the repo files before writing anything.** This skill specifies *what* the dashboard contains and *why*; the files are the authority on *how* it is wired:
+
+| File | Read it for |
+|---|---|
+| `dashboard-template-blank.html` | The starting point. Copy this, then fill it in |
+| `dashboard-example-filled.html` | Sales-led, 2 channels — the reference for data shapes, `*_LABELS`/`*_KEYS`/`*_RIGHTS` triples, the `render*` functions, `CONFIGS`, `DRILL` |
+| `dashboard-example-ecommerce.html` | Ecommerce, 3 channels — and the index-based naming (`M1`/`M2`/`M3`) to copy for a third channel |
+| `dashboard-example-product-led.html` | Product-led, 3 channels |
+| `README.md` | The array-by-array and config-by-config reference for what to fill in |
+| `sheet-template/README.md` | The `test_log` and `platform_log` column-to-field mapping |
+| `docs/railway-setup.md` | Only if they chose the server route |
+
+Never invent names for the data arrays, label triples or renderers — take them from the example that matches the motion type. Inventing them produces a dashboard that renders and is wired to nothing: the drill-downs, the sort buttons and the Changelog's `ad_id` joins all key off these exact names.
 
 ## Fixed template (identical across every company, never asked)
 Funnel → Monthly → Weekly → Daily → Creatives → Optimization → Changelog.
@@ -197,7 +212,7 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 
 **Optimization:** Net-row banner (Scale-Up Potential / Weekly Bleed to Stop / Net Weekly Opportunity + rule callout). Two tables: Scale Up, Pull Back — Unit, Platform, EV/Spend, $/SAL, Spend, SAL, Net EV $. Row click → Changelog note modal. Unit name link → ad preview modal + "Open in Ads Manager."
 
-**Changelog (fixed, richer spec — canonical over hearth-HTML's simpler version):**
+**Changelog (fixed, richer spec):**
 - Header with "Archive Done" button
 - **4-column Kanban:** To Test → Testing → Evaluated → Completed. Drag-and-drop.
 - **Card fields:** Note (always) · Hypothesis (always, styled distinctly) · Variable Being Tested (always) · Test Setup (visible on anything past To Test — a card that has been evaluated still needs to show how it was set up) · Control vs Test perf strip, three rows: Spend, CTR and the motion's conversion rate (`PERF_RATE_LABEL` / `PERF_RATE_KEY` — Submit% / ATC% / Signup%), **auto-populated on any card past To Test** · Ad IDs, control and test, shown with it · Verdict (visible once Evaluated/Completed)
@@ -224,11 +239,11 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 ## Onboarding — ask one question at a time, wait for each answer
 1. Motion type: Sales-led, Ecommerce, or Product-led? *(Determines relevant KPIs — template stays identical, only metric set changes.)*
 2. Channels to track? *(Two or three. Beyond three the tab rows and funnel grid stop being readable — push back and suggest folding the smallest channel into a combined view.)*
-3. The sheet: create a new one for this company, or point at an existing sheet? *(Every build gets its own — never reuse another company's, and never hardcode a sheet ID into the template. If creating, provision it from `sheet-template/` and report the new file ID back. Then ask how the refresh job will write to it: service account, Apps Script endpoint, or manual for now.)*
+3. "Do you want me to make a Google Sheet to hold the numbers, or do you already have one?" *(Every build gets its own — never reuse another company's, never hardcode a sheet ID. If creating, provision it and report the file ID back.)* Then: **"Once it's set up, would you rather paste the numbers in yourself, or have them update automatically each day?"** Automatic needs a one-time developer setup (Sheets API with a service account, or an Apps Script endpoint) — say that plainly and offer manual as the perfectly good starting point. Do not ask them to choose between those two mechanisms by name.
 4. Where will this run — an AI link, or a server with a database? *(See **Where the dashboard lives** below. It decides whether the board can be shared, whether the numbers can be read live, and whether ad actions can run for real. If they name a non-Claude assistant, tell them the shared board will not work there. Ask before building, not after.)*
 5. Should the test log be mirrored to the sheet, or live only in the dashboard? *(The board is editable either way — see **Where the Changelog board lives** below. Default to mirroring when there is a sheet and a refresh job. Either way, declare `capabilities: {artifact: {}}` at publish and verify the shared-board state line.)*
-6. Per channel — data access: Google Sheet / Direct MCP / Both?
-7. Per channel — action layer: Read-only, or read-only + specific actions (name + which MCP)?
+6. Per channel — **"Where should this channel's numbers come from: the sheet, or straight from the ad platform?"** *(Sheet = they maintain it; straight from the platform = a connected ad-platform MCP server pulls it. Both is fine — sheet for the fields a person writes, platform for the live numbers. Decide the mechanism yourself; do not ask them to name a connector.)*
+7. **"Should the dashboard be able to change things in your ad accounts — pause an ad set, create a test — or only report on them?"** *(Reporting only is the safe default; say so. If they want actions, work out which MCP server or platform each one needs yourself, and confirm what is actually connected rather than assuming.)*
 8. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. *(Do not ask about date ranges — the windows are fixed above.)* Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
 
 ## Motion-type default metrics
@@ -289,9 +304,11 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 1. Run onboarding (above).
 2. Pull data — see **Data pipeline** above. The sheet is the database; MCP populates it on a schedule; the HTML is baked from it. Never call a connector client-side except through the artifact `mcp` capability.
 3. Refresh cadence — fixed: auto daily, to support Daily/Weekly/MTD views. No hardcoded snapshot arrays.
-4. Design — follow `frontend-design` skill; see design spec below.
+4. Design — follow the design spec below. It is complete on its own; do not go looking for a separate design skill.
 
-## Design — exact UI spec (self-contained, no source file needed)
+## Design — exact UI spec
+
+Complete on its own for *visual* decisions — colours, type, spacing, components. It is **not** a substitute for reading the example files, which remain the authority on the data layer and wiring (see **Purpose** above).
 
 **Foundation:** Font `-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif`; base 13px, line-height 1.5, text `#111827`, page bg `#F7F8FA`. The dashboard commits to a single light theme, so declare it: `:root{color-scheme:light}`, and give every `input`, `textarea` and `select` an explicit `background`. Without both, a dark-mode host darkens the user-agent form controls while the explicit dark text colour stays put, and every field in both modals becomes dark-on-dark. A control that sets a text colour must set its background from the same palette. Cards: white, `1px solid #E5E7EB`, radius 8px. Max content width 1440px centered, 16px page padding.
 
