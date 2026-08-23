@@ -10,7 +10,8 @@
 - 2026-08-23: Added Ecommerce as a third motion type with its own metric definitions and funnel-stage analog. Worked examples now ship for all three motions (`dashboard-example-filled.html` sales-led, `dashboard-example-ecommerce.html`, `dashboard-example-product-led.html`).
 - 2026-08-23: Channel count is two **or three** — the funnel and heatmap grids reflow, and every per-channel surface (tabs, panes, platform-changelog panels) repeats per channel. Both three-channel examples use index-based array names (M1/M2/M3 …) rather than channel initials.
 - 2026-08-23: Fixed the Monthly/Weekly row-inclusion rule — period tables show every unit that was active at any point in the window, including paused and deleted ones, scoped by delivery rather than current status.
-- 2026-08-23 (latest): Specified the two navigation behaviours — Monthly/Weekly row click drills into that unit's creatives, and clicking a Changelog card opens it for editing. Note logging moves to a per-row pencil button on Monthly/Weekly.
+- 2026-08-23: Specified the two navigation behaviours — Monthly/Weekly row click drills into that unit's creatives, and clicking a Changelog card opens it for editing. Note logging moves to a per-row pencil button on Monthly/Weekly.
+- 2026-08-23 (latest): Added the pre-ship checklist, a `hostPrompt()` guard for host callbacks, and `syncTabCounts()` so label counts are computed from data rather than typed.
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
 
@@ -172,5 +173,39 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 - Never scope Monthly/Weekly rows to currently-active units. Period tables report what happened in the period, so anything that delivered in the window belongs in the table even if it is paused or deleted now — otherwise spend goes missing and the totals stop reconciling with the ad platform.
 - Channel count drives repetition, not structure: adding a third channel means one more funnel card, heatmap card, tab, pane, `CONFIGS` entry and changelog panel — never a new page or a different layout. Use the ad-group renderers (`renderGMW`/`renderGDaily`, which add Campaign and Status) for the search-like channel and the plain ones for the rest.
 
+## Pre-ship checklist (run before calling a build done)
+
+Every item here came from a real bug. Run it as a test pass, not a self-assessment — open the file in a browser and check.
+
+**Data completeness**
+- For any table filtered to specific creatives, confirm the underlying ad set / campaign actually has no more members than shown. Pull the full list filtered by `spend > 0`, not a fixed top-N, unless the person asked for a leaderboard.
+- Every metric implied by the page title is present. An "ad-level performance" page needs impressions, clicks, spend *and* a cost-per metric — not just a cost ratio.
+- Every entity active during the window appears, paused ones included (see the row-inclusion rule above).
+- Every period row resolves to at least one creative. If it cannot, the drill-down shows an empty state and the creative data is incomplete.
+
+**Data sourcing**
+- If two sources exist for one metric (platform-reported results vs. analytics conversions), confirm which is the source of truth and apply it to *every* table, not just the one that was mentioned.
+- Any channel or connector unavailable this session is flagged in the UI, never silently zeroed or omitted.
+- Spot-check one aggregate against its line items — creative spend should roll up to the channel's spend, and the funnel footer should equal the sum of the period table. Grouping by a leading ID inside a compound string is where rows quietly vanish or double-count.
+
+**Interactions — click every clickable thing**
+- Anything with a pointer or grab cursor has a working handler; anything with a handler looks clickable.
+- Every modal exists on every page it belongs on, not just the one it was first wired to.
+- Buttons that claim to scope ("View creatives" from an ad set) actually filter to that thing rather than navigating to a generic page.
+- Every callback into the host (`sendPrompt()` and friends) is wrapped in a guard. Those functions do not exist when the file is opened standalone, and an unguarded call throws and silently kills the rest of the handler. Use the `hostPrompt()` wrapper.
+- After adding a click handler to something already draggable or containing buttons (Kanban cards, rows with an inline pause button), confirm the inner controls still work — `event.stopPropagation()` everywhere it is needed.
+
+**Responsive**
+- Check at desktop (~1440px), tablet (~768–900px) and phone (~375–430px).
+- Page-level horizontal overflow must be **zero** at every width. Wide content scrolls inside its own container instead.
+- Tables, nav and filter/sort bars scroll rather than break. On phones, hide the header's reporting-period text so the nav keeps its room.
+- Multi-column grids — funnel cards, heatmaps, Kanban, ad gallery — collapse to one column at phone width.
+- Modals stay inside the viewport (`max-width:calc(100vw - 32px)`).
+
+**Before shipping**
+- Grep for references to renamed or removed fields; a rename in one place silently breaks a sort button or renderer elsewhere.
+- Run the script through a real parser (`node --check`) rather than eyeballing brace balance, and confirm `{`/`}` balance in the style block and `<div>` balance in the body.
+- Counts in labels ("4 ad sets", "6 videos") are computed from the data at render time, never typed. Use `syncTabCounts()`.
+
 ## Output format
-Single HTML artifact, exact template structure (7 fixed pages), channels/metrics/actions populated per onboarding answers, action buttons (Pause/Unpause/Duplicate/Sync) call back via `sendPrompt()` for confirmation rather than direct MCP execution. Auto-refreshes daily.
+Single HTML artifact, exact template structure (7 fixed pages), channels/metrics/actions populated per onboarding answers, action buttons (Pause/Unpause/Duplicate/Sync) call back via `sendPrompt()` — always through the `hostPrompt()` guard — for confirmation rather than direct MCP execution. Auto-refreshes daily.

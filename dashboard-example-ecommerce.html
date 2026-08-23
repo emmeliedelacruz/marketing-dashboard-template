@@ -167,6 +167,27 @@ tbody tr{cursor:pointer;}
 .cr-filter button{margin-left:auto;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #BFDBFE;background:#fff;color:#1D4ED8;}
 .kb-card{cursor:pointer;}
 .tbl-empty{text-align:center;color:#9CA3AF;padding:18px;font-size:12px;}
+/* Kanban scrolls inside its own container instead of pushing the page sideways,
+   and collapses to a single column on phones. */
+.kb-board{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
+@media (max-width:900px){
+  .kb-board{display:flex;overflow-x:auto;gap:10px;-webkit-overflow-scrolling:touch;}
+  .kb-col{flex:0 0 82vw;max-width:320px;}
+}
+@media (max-width:480px){
+  .kb-board{display:grid;grid-template-columns:1fr;overflow-x:visible;}
+  .kb-col{flex:none;max-width:none;}
+}
+tbody tr.empty-row{cursor:default;}
+.tbl-empty{cursor:default;}
+/* On phones the reporting-period text starves the nav of space; hide the text
+   (the gear keeps its own inline font-size) and let the nav take the room. */
+@media (max-width:600px){
+  .hdr-right{font-size:0;gap:0;}
+  nav{flex:1 1 auto;min-width:0;}
+  .logo{font-size:14px;margin-right:6px;}
+  header{gap:2px;}
+}
 </style>
 </head>
 <body>
@@ -327,7 +348,7 @@ tbody tr{cursor:pointer;}
     <details class="cl-panel">
       <summary class="cl-summary">
         <span style="font-weight:700;font-size:13px;">Meta Platform Changes</span>
-        <button class="cl-sync-btn" onclick="event.preventDefault();alert('Wire this to your MCP connector to sync live changes.')">Sync</button>
+        <button class="cl-sync-btn" onclick="event.preventDefault();hostPrompt('Pull the last 30 platform change-log entries for this channel.')">Sync</button>
         <span class="cl-chevron">&#9660;</span>
       </summary>
       <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for Meta to pull live change history.</div></div>
@@ -335,7 +356,7 @@ tbody tr{cursor:pointer;}
     <details class="cl-panel">
       <summary class="cl-summary">
         <span style="font-weight:700;font-size:13px;">Google Shopping Platform Changes</span>
-        <button class="cl-sync-btn" onclick="event.preventDefault();alert('Wire this to your MCP connector to sync live changes.')">Sync</button>
+        <button class="cl-sync-btn" onclick="event.preventDefault();hostPrompt('Pull the last 30 platform change-log entries for this channel.')">Sync</button>
         <span class="cl-chevron">&#9660;</span>
       </summary>
       <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for Google Shopping to pull live change history.</div></div>
@@ -343,7 +364,7 @@ tbody tr{cursor:pointer;}
     <details class="cl-panel">
       <summary class="cl-summary">
         <span style="font-weight:700;font-size:13px;">TikTok Platform Changes</span>
-        <button class="cl-sync-btn" onclick="event.preventDefault();alert('Wire this to your MCP connector to sync live changes.')">Sync</button>
+        <button class="cl-sync-btn" onclick="event.preventDefault();hostPrompt('Pull the last 30 platform change-log entries for this channel.')">Sync</button>
         <span class="cl-chevron">&#9660;</span>
       </summary>
       <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for TikTok to pull live change history.</div></div>
@@ -457,21 +478,21 @@ var D3=[
   {name:"TikTok_Creator_Retarget",spend:95,atc:19,atc_cost:5.00,feed_rate:100,cvr:5.8,checkout_rate:42.1,purchase_rate:62.5,refund_rate:0,profit:125}
 ];
 var CR1=[
-  {name:"Kitchen_Hero_Static",ad_set:"Kitchen_Broad_Prospect",fmt:"Static",copy:"Product Hero",impr:1240000,clicks:14800,ctr:1.19,atc_pct:8.0,checkout_rate:43.4,purchase_rate:52.3,atc_cost:12.03,refund_rate:7.8},
-  {name:"UGC_Unboxing_V2",ad_set:"Lighting_Video_UGC",fmt:"UGC Video",copy:"Social Proof",impr:890000,clicks:9600,ctr:1.08,atc_pct:4.0,checkout_rate:45.4,purchase_rate:50.0,atc_cost:13.14,refund_rate:8.0},
-  {name:"Cart_Reminder_Dynamic",ad_set:"Retarget_Cart_7D",fmt:"Dynamic Product",copy:"Urgency",impr:210000,clicks:4200,ctr:2.00,atc_pct:16.4,checkout_rate:58.3,purchase_rate:65.2,atc_cost:4.93,refund_rate:3.1},
-  {name:"Outdoor_Lifestyle_Carousel",ad_set:"Outdoor_Advantage_Plus",fmt:"Carousel",copy:"Lifestyle",impr:640000,clicks:7100,ctr:1.11,atc_pct:10.5,checkout_rate:52.3,purchase_rate:55.2,atc_cost:11.99,refund_rate:5.1}
+  {name:"Kitchen_Hero_Static",ad_set:"Kitchen_Broad_Prospect",fmt:"Static",copy:"Product Hero",impr:1240000,clicks:14800,ctr:1.19,atc_pct:8.0,checkout_rate:43.4,purchase_rate:52.3,atc_cost:12.03,refund_rate:7.8,spend:14200},
+  {name:"UGC_Unboxing_V2",ad_set:"Lighting_Video_UGC",fmt:"UGC Video",copy:"Social Proof",impr:890000,clicks:9600,ctr:1.08,atc_pct:4.0,checkout_rate:45.4,purchase_rate:50.0,atc_cost:13.14,refund_rate:8.0,spend:5100},
+  {name:"Cart_Reminder_Dynamic",ad_set:"Retarget_Cart_7D",fmt:"Dynamic Product",copy:"Urgency",impr:210000,clicks:4200,ctr:2.00,atc_pct:16.4,checkout_rate:58.3,purchase_rate:65.2,atc_cost:4.93,refund_rate:3.1,spend:3400},
+  {name:"Outdoor_Lifestyle_Carousel",ad_set:"Outdoor_Advantage_Plus",fmt:"Carousel",copy:"Lifestyle",impr:640000,clicks:7100,ctr:1.11,atc_pct:10.5,checkout_rate:52.3,purchase_rate:55.2,atc_cost:11.99,refund_rate:5.1,spend:8900}
 ];
 var CR2=[
-  {name:"Branded_Shopping",fmt:"Shopping",copy:"Brand Terms",impr:148000,clicks:9200,ctr:6.22,atc_pct:8.8,checkout_rate:66.7,purchase_rate:74.4,atc_cost:5.68,refund_rate:2.2},
-  {name:"PMax_Kitchen",fmt:"Performance Max",copy:"Auto Assets",impr:620000,clicks:11400,ctr:1.84,atc_pct:5.3,checkout_rate:53.3,purchase_rate:57.8,atc_cost:15.40,refund_rate:7.5},
-  {name:"Shopping_Outdoor_NB",fmt:"Shopping",copy:"Category Terms",impr:310000,clicks:7800,ctr:2.52,atc_pct:6.6,checkout_rate:57.8,purchase_rate:60.1,atc_cost:12.11,refund_rate:4.5},
-  {name:"Clearance_Bath",fmt:"Shopping",copy:"Clearance",impr:82000,clicks:1400,ctr:1.71,atc_pct:6.9,checkout_rate:39.6,purchase_rate:36.8,atc_cost:18.75,refund_rate:14.3}
+  {name:"Branded_Shopping",fmt:"Shopping",copy:"Brand Terms",impr:148000,clicks:9200,ctr:6.22,atc_pct:8.8,checkout_rate:66.7,purchase_rate:74.4,atc_cost:5.68,refund_rate:2.2,spend:4600},
+  {name:"PMax_Kitchen",fmt:"Performance Max",copy:"Auto Assets",impr:620000,clicks:11400,ctr:1.84,atc_pct:5.3,checkout_rate:53.3,purchase_rate:57.8,atc_cost:15.40,refund_rate:7.5,spend:9300},
+  {name:"Shopping_Outdoor_NB",fmt:"Shopping",copy:"Category Terms",impr:310000,clicks:7800,ctr:2.52,atc_pct:6.6,checkout_rate:57.8,purchase_rate:60.1,atc_cost:12.11,refund_rate:4.5,spend:6200},
+  {name:"Clearance_Bath",fmt:"Shopping",copy:"Clearance",impr:82000,clicks:1400,ctr:1.71,atc_pct:6.9,checkout_rate:39.6,purchase_rate:36.8,atc_cost:18.75,refund_rate:14.3,spend:1800}
 ];
 var CR3=[
-  {name:"Spark_Kitchen_Creator1",ad_set:"Spark_UGC_Kitchen",fmt:"Spark Ad",copy:"Creator Demo",impr:2100000,clicks:31000,ctr:1.48,atc_pct:3.0,checkout_rate:34.6,purchase_rate:44.7,atc_cost:7.39,refund_rate:11.3},
-  {name:"Outdoor_Setup_Tutorial",ad_set:"Creator_Outdoor_Q3",fmt:"In-Feed Video",copy:"Tutorial",impr:1180000,clicks:16800,ctr:1.42,atc_pct:2.9,checkout_rate:40.7,purchase_rate:48.5,atc_cost:8.64,refund_rate:9.4},
-  {name:"Lighting_Trend_Audio",ad_set:"Trending_Lighting_Hook",fmt:"In-Feed Video",copy:"Trend Audio",impr:740000,clicks:8900,ctr:1.20,atc_pct:2.4,checkout_rate:34.6,purchase_rate:41.9,atc_cost:12.15,refund_rate:12.9}
+  {name:"Spark_Kitchen_Creator1",ad_set:"Spark_UGC_Kitchen",fmt:"Spark Ad",copy:"Creator Demo",impr:2100000,clicks:31000,ctr:1.48,atc_pct:3.0,checkout_rate:34.6,purchase_rate:44.7,atc_cost:7.39,refund_rate:11.3,spend:6800},
+  {name:"Outdoor_Setup_Tutorial",ad_set:"Creator_Outdoor_Q3",fmt:"In-Feed Video",copy:"Tutorial",impr:1180000,clicks:16800,ctr:1.42,atc_pct:2.9,checkout_rate:40.7,purchase_rate:48.5,atc_cost:8.64,refund_rate:9.4,spend:4200},
+  {name:"Lighting_Trend_Audio",ad_set:"Trending_Lighting_Hook",fmt:"In-Feed Video",copy:"Trend Audio",impr:740000,clicks:8900,ctr:1.20,atc_pct:2.4,checkout_rate:34.6,purchase_rate:41.9,atc_cost:12.15,refund_rate:12.9,spend:2600}
 ];
 var ADD=[
   {name:"Retarget_Cart_7D",platform:"c1",spend:3400,pv:2.21,order_cost:13,orders:262,profit:7530},
@@ -531,9 +552,9 @@ var GL_D_RIGHTS=[false,false,true,true,true,true,true,true,true,true];
 var REC_LABELS=['Unit','Platform','Profit/Spend','$/Order','Spend','Orders','Net Profit'];
 var REC_KEYS  =['name','platform','pv','order_cost','spend','orders','profit'];
 var REC_RIGHTS=[false,false,true,true,true,true,true];
-var CR_LABELS=['Ad Creative','Format','Copy Angle','Impr','CTR','% ATC','Checkout%','Purchase%','$/ATC','Refund%'];
-var CR_KEYS  =['name','fmt','copy','impr','ctr','atc_pct','checkout_rate','purchase_rate','atc_cost','refund_rate'];
-var CR_RIGHTS=[false,false,false,true,true,true,true,true,true,true];
+var CR_LABELS=['Ad Creative','Format','Copy Angle','Impr','Clicks','CTR','Spend','% ATC','Checkout%','Purchase%','$/ATC','Refund%'];
+var CR_KEYS  =['name','fmt','copy','impr','clicks','ctr','spend','atc_pct','checkout_rate','purchase_rate','atc_cost','refund_rate'];
+var CR_RIGHTS=[false,false,false,true,true,true,true,true,true,true,true,true];
 
 function showPage(id,el){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
@@ -590,7 +611,7 @@ function rerender(id){
   cfg.lastSorted=sorted;
   var body=sorted.length
     ?'<tbody>'+sorted.map(function(r){return'<tr>'+cfg.render(r)+'</tr>';}).join('')+'</tbody>'
-    :'<tbody><tr><td class="tbl-empty" colspan="'+cfg.labels.length+'">Nothing matches this filter.</td></tr></tbody>';
+    :'<tbody><tr class="empty-row"><td class="tbl-empty" colspan="'+cfg.labels.length+'">Nothing matches this filter.</td></tr></tbody>';
   document.getElementById(id).innerHTML=head+body;
 }
 
@@ -636,7 +657,9 @@ function renderCr(r){
   return'<td class="nm">'+r.name+(r.ad_set?'<div class="nsub">'+r.ad_set+'</div>':'')+'</td>'
     +'<td><span class="fmt-tag">'+(r.fmt||'')+'</span></td>'
     +'<td style="color:#6B7280;">'+(r.copy||'')+'</td>'+'<td class="r">'+fmtImpr(r.impr)+'</td>'
-    +'<td class="r">'+(r.ctr?r.ctr.toFixed(2)+'%':'\u2014')+'</td>'+rateTd(r.atc_pct)
+    +'<td class="r">'+fn(r.clicks)+'</td>'
+    +'<td class="r">'+(r.ctr?r.ctr.toFixed(2)+'%':'\u2014')+'</td>'
+    +'<td class="r" style="color:#9CA3AF;">'+fs(r.spend)+'</td>'+rateTd(r.atc_pct)
     +rateTd(r.checkout_rate)+rateTd(r.purchase_rate)
     +'<td class="r">'+atcChip(r.atc_cost)+'</td>'+refundTd(r.refund_rate);
 }
@@ -811,7 +834,7 @@ function duplicateCard(id,e){
   // log old/new ad IDs back onto the card, and move it to Testing.
   n.status='doing';
   n.testAdId=n.testAdId?(parseInt(n.testAdId)+1):2;
-  alert('Stub: connect an MCP tool here to actually duplicate the ad. Card moved to Testing.');
+  hostPrompt('Duplicate the top ad in ad set "'+n.unit+'" with a version suffix, then report the new ad ID.');
   renderKanban();
 }
 function clearDoneCards(){NOTES=NOTES.filter(function(n){return n.status!=='completed';});renderKanban();}
@@ -873,6 +896,50 @@ function saveNote(){
       date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})});
   }
   closeNoteModal();renderKanban();
+}
+
+// ── HOST CALLBACK GUARD ────────────────────────────────────────────────────
+// Live actions call back into the host app (e.g. the Visualizer widget) through
+// sendPrompt(). That function does not exist when this file is opened as a
+// standalone HTML file, and an unguarded call throws — killing the rest of the
+// handler silently. Every outbound action goes through this wrapper.
+function hostPrompt(msg){
+  if(typeof sendPrompt==='function'){
+    try{sendPrompt(msg);return true;}
+    catch(err){console.warn('sendPrompt failed:',err);}
+  }
+  alert('Not connected to a host app.\n\nThis action would send:\n\n'+msg);
+  return false;
+}
+
+// ── LIVE LABEL COUNTS ──────────────────────────────────────────────────────
+// Tab and filter counts are derived from the data on every render. Typing them
+// into the markup means they go stale the moment the arrays change.
+function syncTabCounts(){
+  document.querySelectorAll('.ch-tabs .ch-tab').forEach(function(t){
+    var ct=t.querySelector('.ct');if(!ct)return;
+    var m=(t.getAttribute('onclick')||'').match(/showCh\('([a-z]+)','([a-z0-9]+)'/);
+    if(!m)return;
+    var n=null;
+    if(m[2]==='adlib'){n=(ADS||[]).length;}
+    else{
+      var pane=document.getElementById('ch-'+m[1]+'-'+m[2]);
+      var tbl=pane&&pane.querySelector('table');
+      var cfg=tbl&&CONFIGS[tbl.id];
+      if(cfg&&cfg.data)n=cfg.data.length;
+    }
+    if(n===null)return;
+    var noun=ct.textContent.replace(/^[\d,]+\s*/,'').replace(/s$/,'');
+    ct.textContent=n+' '+noun+(n===1?'':'s');
+  });
+  var ads=ADS||[];
+  [['adf-all',ads.length],
+   ['adf-video',ads.filter(function(a){return a.type==='video';}).length],
+   ['adf-image',ads.filter(function(a){return a.type==='image';}).length]
+  ].forEach(function(x){
+    var e=document.getElementById(x[0]);
+    if(e)e.innerHTML=e.innerHTML.replace(/\((\d+)\)/,'('+x[1]+')');
+  });
 }
 
 // ── DRILL-DOWN: Monthly/Weekly row → that unit's ads on the Creatives page ──

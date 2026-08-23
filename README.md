@@ -85,6 +85,10 @@ Use the "ad group" renderers (`renderGMW` / `renderGDaily`, which add Campaign a
 
 The Settings modal (gear icon, top right) accepts an API key and account ID for live actions via MCP-connected tools. **Never commit real API keys to this repo or any fork of it** — they're meant to be entered locally in your browser session, not stored in code.
 
+## Testing a build
+
+`skills/dashboard-builder.md` carries a pre-ship checklist covering data completeness, sourcing, interactions, responsive behaviour and pre-ship greps. The short version: page-level horizontal overflow must be zero at 375px, every clickable thing needs a handler, label counts must be computed from the data rather than typed, and one aggregate should be spot-checked against its line items (creative spend rolls up to channel spend in all three examples).
+
 ## Contributing
 
 This is a community template — PRs welcome for additional channel integrations, metric presets, or bug fixes. Please don't submit PRs containing real company data or credentials.

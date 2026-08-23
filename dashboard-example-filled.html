@@ -69,7 +69,7 @@ tbody tr{cursor:pointer;}
 .plat.c1{background:#EFF6FF;color:#1D4ED8;}.plat.c2{background:#F0FDF4;color:#16A34A;}
 .fmt-tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#F5F3FF;color:#6D28D9;}
 
-.funnel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.funnel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;}
 .f-col-title{font-size:13px;font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;}
 .f-stage{display:grid;grid-template-columns:72px 1fr 52px 44px;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #F9FAFB;}
 .f-stage:last-child{border-bottom:none;}
@@ -83,7 +83,7 @@ tbody tr{cursor:pointer;}
 .f-sum-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:#9CA3AF;display:block;margin-bottom:2px;}
 .f-sum-val{font-size:16px;font-weight:700;color:#111827;}
 
-.hm-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.hm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;}
 .hm-title{font-size:13px;font-weight:600;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;}
 .hmt{width:100%;border-collapse:separate;border-spacing:2px;font-size:11px;}
 .hmt th{background:none;padding:4px 6px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#9CA3AF;text-align:center;cursor:default;border:none;}
@@ -167,6 +167,27 @@ tbody tr{cursor:pointer;}
 .cr-filter button{margin-left:auto;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #BFDBFE;background:#fff;color:#1D4ED8;}
 .kb-card{cursor:pointer;}
 .tbl-empty{text-align:center;color:#9CA3AF;padding:18px;font-size:12px;}
+/* Kanban scrolls inside its own container instead of pushing the page sideways,
+   and collapses to a single column on phones. */
+.kb-board{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
+@media (max-width:900px){
+  .kb-board{display:flex;overflow-x:auto;gap:10px;-webkit-overflow-scrolling:touch;}
+  .kb-col{flex:0 0 82vw;max-width:320px;}
+}
+@media (max-width:480px){
+  .kb-board{display:grid;grid-template-columns:1fr;overflow-x:visible;}
+  .kb-col{flex:none;max-width:none;}
+}
+tbody tr.empty-row{cursor:default;}
+.tbl-empty{cursor:default;}
+/* On phones the reporting-period text starves the nav of space; hide the text
+   (the gear keeps its own inline font-size) and let the nav take the room. */
+@media (max-width:600px){
+  .hdr-right{font-size:0;gap:0;}
+  nav{flex:1 1 auto;min-width:0;}
+  .logo{font-size:14px;margin-right:6px;}
+  header{gap:2px;}
+}
 </style>
 </head>
 <body>
@@ -190,8 +211,8 @@ tbody tr{cursor:pointer;}
   <div class="ph"><h2>Funnel Overview</h2><span class="ph-sub">Aug MTD &middot; Meta vs Google</span></div>
   <div class="sec-title">Pipeline by Channel</div>
   <div class="funnel-grid" style="margin-top:10px;">
-    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#2563EB;" id="c1-funnel-title">Meta &mdash; $0 spend</div><div id="c1-funnel"></div></div>
-    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#16A34A;" id="c2-funnel-title">Google &mdash; $0 spend</div><div id="c2-funnel"></div></div>
+    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#2563EB;" id="c1-funnel-title">Meta &mdash; $18,900 spend</div><div id="c1-funnel"></div></div>
+    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#16A34A;" id="c2-funnel-title">Google &mdash; $10,600 spend</div><div id="c2-funnel"></div></div>
   </div>
   <div class="sec-title" style="margin-top:20px;">Conversion by Segment</div>
   <div class="hm-grid" style="margin-top:10px;">
@@ -315,7 +336,7 @@ tbody tr{cursor:pointer;}
     <details class="cl-panel">
       <summary class="cl-summary">
         <span style="font-weight:700;font-size:13px;">Meta Platform Changes</span>
-        <button class="cl-sync-btn" onclick="event.preventDefault();alert('Wire this to your MCP connector to sync live changes.')">Sync</button>
+        <button class="cl-sync-btn" onclick="event.preventDefault();hostPrompt('Pull the last 30 platform change-log entries for this channel.')">Sync</button>
         <span class="cl-chevron">&#9660;</span>
       </summary>
       <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for Meta to pull live change history.</div></div>
@@ -323,7 +344,7 @@ tbody tr{cursor:pointer;}
     <details class="cl-panel">
       <summary class="cl-summary">
         <span style="font-weight:700;font-size:13px;">Google Platform Changes</span>
-        <button class="cl-sync-btn" onclick="event.preventDefault();alert('Wire this to your MCP connector to sync live changes.')">Sync</button>
+        <button class="cl-sync-btn" onclick="event.preventDefault();hostPrompt('Pull the last 30 platform change-log entries for this channel.')">Sync</button>
         <span class="cl-chevron">&#9660;</span>
       </summary>
       <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for Google to pull live change history.</div></div>
@@ -416,8 +437,10 @@ var GD=[
   {name:"Branded",campaign:"",status:"ENABLED",spend:140,sal:1.3,sql:1.2,icp:0.9,btc:0,dpc:0,sal_cost:108,stuck:0.2,ev_net:118,hs_sfdc_pct:100,submit_pct:5.1,won:0,ros:0,sold_cost:0,sold:0}
 ];
 var CR=[
-  {name:"StormDamage_Video1",ad_set:"CreatorMode_Storm",fmt:"Talent Video",copy:"Urgency",impr:184000,clicks:1450,ctr:0.79,submit_pct:1.4,icp_pct:58,dpc_pct:22,sal_cost:164,stuck_pct:33,sal:33},
-  {name:"RoofingLP_Static1",ad_set:"Roofing_Broad_LP",fmt:"Static",copy:"Control",impr:96000,clicks:820,ctr:0.85,submit_pct:1.6,icp_pct:62,dpc_pct:27,sal_cost:158,stuck_pct:27,sal:52}
+  {name:"StormDamage_Video1",ad_set:"CreatorMode_Storm",fmt:"Talent Video",copy:"Urgency",impr:184000,clicks:1450,ctr:0.79,submit_pct:1.4,icp_pct:58,dpc_pct:22,sal_cost:164,stuck_pct:33,sal:33,spend:5400},
+  {name:"RoofingLP_Static1",ad_set:"Roofing_Broad_LP",fmt:"Static",copy:"Control",impr:96000,clicks:820,ctr:0.85,submit_pct:1.6,icp_pct:62,dpc_pct:27,sal_cost:158,stuck_pct:27,sal:52,spend:8200},
+  {name:"Retarget_Carousel1",ad_set:"Retargeting_30Day",fmt:"Carousel",copy:"Retargeting",impr:54000,clicks:620,ctr:1.15,submit_pct:3.9,icp_pct:67,dpc_pct:33,sal_cost:129,stuck_pct:25,sal:24,spend:3100},
+  {name:"TalentVideo_Q3_Cut",ad_set:"Talent_Video_Q3",fmt:"Talent Video",copy:"Testimonial",impr:71000,clicks:540,ctr:0.76,submit_pct:3.5,icp_pct:63,dpc_pct:26,sal_cost:116,stuck_pct:26,sal:19,spend:2200}
 ];
 var ADD=[
   {name:"Retargeting_30Day",platform:"c1",spend:3100,ev_x:1.6,sal_cost:129,ev_net:2870,sal:24},
@@ -442,9 +465,9 @@ var ADS=[
   {id:"demo2",type:"image",body:"Worried about the cost of a new roof? Ask about our flexible payment plans \u2014 zero money down options available for qualified homeowners.",title:"Flexible Roofing Financing",cta:"See details",link:"#",img:"",vid:""}
 ];
 var GCR=[
-  {name:"Branded",fmt:"Search",copy:"Brand Terms",impr:62000,clicks:4100,ctr:6.61,submit_pct:1.0,icp_pct:71,dpc_pct:41,sal_cost:102,stuck_pct:15},
-  {name:"NB > Roofing",fmt:"Search",copy:"Category Terms",impr:148000,clicks:2600,ctr:1.76,submit_pct:0.5,icp_pct:57,dpc_pct:29,sal_cost:271,stuck_pct:29},
-  {name:"NB > Storm Damage",fmt:"Search",copy:"Event Terms",impr:96000,clicks:2100,ctr:2.19,submit_pct:0.9,icp_pct:63,dpc_pct:32,sal_cost:137,stuck_pct:26}
+  {name:"Branded",fmt:"Search",copy:"Brand Terms",impr:62000,clicks:4100,ctr:6.61,submit_pct:1.0,icp_pct:71,dpc_pct:41,sal_cost:102,stuck_pct:15,spend:4200},
+  {name:"NB > Roofing",fmt:"Search",copy:"Category Terms",impr:148000,clicks:2600,ctr:1.76,submit_pct:0.5,icp_pct:57,dpc_pct:29,sal_cost:271,stuck_pct:29,spend:3800},
+  {name:"NB > Storm Damage",fmt:"Search",copy:"Event Terms",impr:96000,clicks:2100,ctr:2.19,submit_pct:0.9,icp_pct:63,dpc_pct:32,sal_cost:137,stuck_pct:26,spend:2600}
 ];
 var REC_AD_LINK={};
 var DRILL={'tbl-mm':{ch:'c1',cr:'tbl-cr'},'tbl-mw':{ch:'c1',cr:'tbl-cr'},
@@ -467,9 +490,9 @@ var GL_D_RIGHTS=[false,false,true,true,true,true,true,true,true,true,true];
 var REC_LABELS=['Unit','Platform','EV/Spend','$/SAL','Spend','SAL','Net EV $'];
 var REC_KEYS  =['name','platform','ev_x','sal_cost','spend','sal','ev_net'];
 var REC_RIGHTS=[false,false,true,true,true,true,true];
-var CR_LABELS=['Ad Creative','Format','Copy Angle','Impr','CTR','% Submit','ICP%','DPC%','$/SAL','Stuck%'];
-var CR_KEYS  =['name','fmt','copy','impr','ctr','submit_pct','icp_pct','dpc_pct','sal_cost','stuck_pct'];
-var CR_RIGHTS=[false,false,false,true,true,true,true,true,true,true];
+var CR_LABELS=['Ad Creative','Format','Copy Angle','Impr','Clicks','CTR','Spend','% Submit','ICP%','DPC%','$/SAL','Stuck%'];
+var CR_KEYS  =['name','fmt','copy','impr','clicks','ctr','spend','submit_pct','icp_pct','dpc_pct','sal_cost','stuck_pct'];
+var CR_RIGHTS=[false,false,false,true,true,true,true,true,true,true,true,true];
 
 function showPage(id,el){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
@@ -521,7 +544,7 @@ function rerender(id){
   cfg.lastSorted=sorted;
   var body=sorted.length
     ?'<tbody>'+sorted.map(function(r){return'<tr>'+cfg.render(r)+'</tr>';}).join('')+'</tbody>'
-    :'<tbody><tr><td class="tbl-empty" colspan="'+cfg.labels.length+'">Nothing matches this filter.</td></tr></tbody>';
+    :'<tbody><tr class="empty-row"><td class="tbl-empty" colspan="'+cfg.labels.length+'">Nothing matches this filter.</td></tr></tbody>';
   document.getElementById(id).innerHTML=head+body;
 }
 
@@ -569,7 +592,9 @@ function renderCr(r){
   function fmtImpr(n){if(!n)return'<span style="color:#9CA3AF;">\u2014</span>';return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(0)+'K':n.toString();}
   return'<td class="nm">'+r.name+'</td>'+'<td><span class="fmt-tag">'+(r.fmt||'')+'</span></td>'
     +'<td style="color:#6B7280;">'+(r.copy||'')+'</td>'+'<td class="r">'+fmtImpr(r.impr)+'</td>'
-    +'<td class="r">'+(r.ctr?r.ctr.toFixed(2)+'%':'\u2014')+'</td>'+'<td class="r">'+pct(r.submit_pct)+'</td>'
+    +'<td class="r">'+fn(r.clicks)+'</td>'
+    +'<td class="r">'+(r.ctr?r.ctr.toFixed(2)+'%':'\u2014')+'</td>'
+    +'<td class="r" style="color:#9CA3AF;">'+fs(r.spend)+'</td>'+'<td class="r">'+pct(r.submit_pct)+'</td>'
     +'<td class="r">'+pct(r.icp_pct)+'</td>'+'<td class="r">'+pct(r.dpc_pct)+'</td>'
     +'<td class="r">'+salChip(r.sal_cost)+'</td>'+'<td class="r">'+pct(r.stuck_pct)+'</td>';
 }
@@ -642,11 +667,12 @@ document.addEventListener('DOMContentLoaded', function() {
     SORT[x[0]]={col:x[6],dir:x[7]||'desc'};
     rerender(x[0]);
   });
-  renderFunnel('c1-funnel',[{l:'Clicks',n:9820},{l:'Submits',n:210},{l:'SAL',n:128},{l:'SQL',n:115},{l:'ICP',n:78},{l:'BTC',n:70},{l:'DPC',n:36},{l:'Sold',n:7.6}],'#2563EB',19100,{spend:19100,wonRev:19100});
-  renderFunnel('c2-funnel',[{l:'Clicks',n:2140},{l:'Submits',n:88},{l:'SAL',n:74},{l:'SQL',n:67},{l:'ICP',n:49},{l:'BTC',n:44},{l:'DPC',n:27},{l:'Sold',n:8.9}],'#16A34A',10600,{spend:10600,wonRev:23900});
+  renderFunnel('c1-funnel',[{l:'Clicks',n:9820},{l:'Submits',n:210},{l:'SAL',n:128},{l:'SQL',n:115},{l:'ICP',n:78},{l:'BTC',n:70},{l:'DPC',n:36},{l:'Sold',n:7.6}],'#2563EB',9820,{spend:18900,wonRev:19100});
+  renderFunnel('c2-funnel',[{l:'Clicks',n:2140},{l:'Submits',n:88},{l:'SAL',n:74},{l:'SQL',n:67},{l:'ICP',n:49},{l:'BTC',n:44},{l:'DPC',n:27},{l:'Sold',n:8.9}],'#16A34A',2140,{spend:10600,wonRev:23900});
   renderHm('c1-hm', VM);
   renderHm('c2-hm', VG);
   renderKanban();
+  syncTabCounts();
 });
 
 // ── KANBAN (4-column: To Test / Testing / Evaluated / Completed) ───────────
@@ -694,7 +720,7 @@ function duplicateCard(id,e){
   // log old/new ad IDs back onto the card, and move it to Testing.
   n.status='doing';
   n.testAdId=n.testAdId?(parseInt(n.testAdId)+1):2;
-  alert('Stub: connect an MCP tool here to actually duplicate the ad. Card moved to Testing.');
+  hostPrompt('Duplicate the top ad in ad set "'+n.unit+'" with a version suffix, then report the new ad ID.');
   renderKanban();
 }
 function clearDoneCards(){NOTES=NOTES.filter(function(n){return n.status!=='completed';});renderKanban();}
@@ -756,6 +782,50 @@ function saveNote(){
       date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})});
   }
   closeNoteModal();renderKanban();
+}
+
+// ── HOST CALLBACK GUARD ────────────────────────────────────────────────────
+// Live actions call back into the host app (e.g. the Visualizer widget) through
+// sendPrompt(). That function does not exist when this file is opened as a
+// standalone HTML file, and an unguarded call throws — killing the rest of the
+// handler silently. Every outbound action goes through this wrapper.
+function hostPrompt(msg){
+  if(typeof sendPrompt==='function'){
+    try{sendPrompt(msg);return true;}
+    catch(err){console.warn('sendPrompt failed:',err);}
+  }
+  alert('Not connected to a host app.\n\nThis action would send:\n\n'+msg);
+  return false;
+}
+
+// ── LIVE LABEL COUNTS ──────────────────────────────────────────────────────
+// Tab and filter counts are derived from the data on every render. Typing them
+// into the markup means they go stale the moment the arrays change.
+function syncTabCounts(){
+  document.querySelectorAll('.ch-tabs .ch-tab').forEach(function(t){
+    var ct=t.querySelector('.ct');if(!ct)return;
+    var m=(t.getAttribute('onclick')||'').match(/showCh\('([a-z]+)','([a-z0-9]+)'/);
+    if(!m)return;
+    var n=null;
+    if(m[2]==='adlib'){n=(ADS||[]).length;}
+    else{
+      var pane=document.getElementById('ch-'+m[1]+'-'+m[2]);
+      var tbl=pane&&pane.querySelector('table');
+      var cfg=tbl&&CONFIGS[tbl.id];
+      if(cfg&&cfg.data)n=cfg.data.length;
+    }
+    if(n===null)return;
+    var noun=ct.textContent.replace(/^[\d,]+\s*/,'').replace(/s$/,'');
+    ct.textContent=n+' '+noun+(n===1?'':'s');
+  });
+  var ads=ADS||[];
+  [['adf-all',ads.length],
+   ['adf-video',ads.filter(function(a){return a.type==='video';}).length],
+   ['adf-image',ads.filter(function(a){return a.type==='image';}).length]
+  ].forEach(function(x){
+    var e=document.getElementById(x[0]);
+    if(e)e.innerHTML=e.innerHTML.replace(/\((\d+)\)/,'('+x[1]+')');
+  });
 }
 
 // ── DRILL-DOWN: Monthly/Weekly row → that unit's ads on the Creatives page ──

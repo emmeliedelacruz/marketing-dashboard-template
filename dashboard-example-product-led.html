@@ -167,6 +167,27 @@ tbody tr{cursor:pointer;}
 .cr-filter button{margin-left:auto;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #BFDBFE;background:#fff;color:#1D4ED8;}
 .kb-card{cursor:pointer;}
 .tbl-empty{text-align:center;color:#9CA3AF;padding:18px;font-size:12px;}
+/* Kanban scrolls inside its own container instead of pushing the page sideways,
+   and collapses to a single column on phones. */
+.kb-board{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
+@media (max-width:900px){
+  .kb-board{display:flex;overflow-x:auto;gap:10px;-webkit-overflow-scrolling:touch;}
+  .kb-col{flex:0 0 82vw;max-width:320px;}
+}
+@media (max-width:480px){
+  .kb-board{display:grid;grid-template-columns:1fr;overflow-x:visible;}
+  .kb-col{flex:none;max-width:none;}
+}
+tbody tr.empty-row{cursor:default;}
+.tbl-empty{cursor:default;}
+/* On phones the reporting-period text starves the nav of space; hide the text
+   (the gear keeps its own inline font-size) and let the nav take the room. */
+@media (max-width:600px){
+  .hdr-right{font-size:0;gap:0;}
+  nav{flex:1 1 auto;min-width:0;}
+  .logo{font-size:14px;margin-right:6px;}
+  header{gap:2px;}
+}
 </style>
 </head>
 <body>
@@ -327,7 +348,7 @@ tbody tr{cursor:pointer;}
     <details class="cl-panel">
       <summary class="cl-summary">
         <span style="font-weight:700;font-size:13px;">Meta Platform Changes</span>
-        <button class="cl-sync-btn" onclick="event.preventDefault();alert('Wire this to your MCP connector to sync live changes.')">Sync</button>
+        <button class="cl-sync-btn" onclick="event.preventDefault();hostPrompt('Pull the last 30 platform change-log entries for this channel.')">Sync</button>
         <span class="cl-chevron">&#9660;</span>
       </summary>
       <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for Meta to pull live change history.</div></div>
@@ -335,7 +356,7 @@ tbody tr{cursor:pointer;}
     <details class="cl-panel">
       <summary class="cl-summary">
         <span style="font-weight:700;font-size:13px;">LinkedIn Platform Changes</span>
-        <button class="cl-sync-btn" onclick="event.preventDefault();alert('Wire this to your MCP connector to sync live changes.')">Sync</button>
+        <button class="cl-sync-btn" onclick="event.preventDefault();hostPrompt('Pull the last 30 platform change-log entries for this channel.')">Sync</button>
         <span class="cl-chevron">&#9660;</span>
       </summary>
       <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for LinkedIn to pull live change history.</div></div>
@@ -343,7 +364,7 @@ tbody tr{cursor:pointer;}
     <details class="cl-panel">
       <summary class="cl-summary">
         <span style="font-weight:700;font-size:13px;">Google Platform Changes</span>
-        <button class="cl-sync-btn" onclick="event.preventDefault();alert('Wire this to your MCP connector to sync live changes.')">Sync</button>
+        <button class="cl-sync-btn" onclick="event.preventDefault();hostPrompt('Pull the last 30 platform change-log entries for this channel.')">Sync</button>
         <span class="cl-chevron">&#9660;</span>
       </summary>
       <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for Google to pull live change history.</div></div>
@@ -458,21 +479,21 @@ var D3=[
   {name:"NB_Competitor_Alt",status:"ENABLED",spend:340,signups:4,signup_cost:85,event_rate:96,cvr:1.7,activation_rate:50.0,pql_rate:17.5,paid_rate:7.5,churn_rate:0,net_mrr:63}
 ];
 var CR1=[
-  {name:"Trial_Offer_Static",ad_set:"Lookalike_Trial_Starters",fmt:"Static",copy:"Free Trial",impr:1840000,clicks:22000,ctr:1.20,signup_rate:1.2,activation_rate:35.1,pql_rate:7.8,signup_cost:20,churn_rate:25.0},
-  {name:"Dashboard_Demo_Video",ad_set:"Interest_DevTools_Broad",fmt:"Video",copy:"Product Demo",impr:2600000,clicks:28400,ctr:1.09,signup_rate:1.1,activation_rate:22.8,pql_rate:3.8,signup_cost:15,churn_rate:50.0},
-  {name:"Site_Retarget_Carousel",ad_set:"Retarget_Site_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:310000,clicks:6100,ctr:1.97,signup_rate:1.6,activation_rate:53.1,pql_rate:17.7,signup_cost:22,churn_rate:11.1}
+  {name:"Trial_Offer_Static",ad_set:"Lookalike_Trial_Starters",fmt:"Static",copy:"Free Trial",impr:1840000,clicks:22000,ctr:1.20,signup_rate:1.2,activation_rate:35.1,pql_rate:7.8,signup_cost:20,churn_rate:25.0,spend:5400},
+  {name:"Dashboard_Demo_Video",ad_set:"Interest_DevTools_Broad",fmt:"Video",copy:"Product Demo",impr:2600000,clicks:28400,ctr:1.09,signup_rate:1.1,activation_rate:22.8,pql_rate:3.8,signup_cost:15,churn_rate:50.0,spend:4700},
+  {name:"Site_Retarget_Carousel",ad_set:"Retarget_Site_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:310000,clicks:6100,ctr:1.97,signup_rate:1.6,activation_rate:53.1,pql_rate:17.7,signup_cost:22,churn_rate:11.1,spend:2100}
 ];
 var CR2=[
-  {name:"Migration_Guide_Doc",ad_set:"ICP_Eng_Leaders",fmt:"Document Ad",copy:"Migration",impr:412000,clicks:3100,ctr:0.75,signup_rate:5.4,activation_rate:57.1,pql_rate:24.4,signup_cost:74,churn_rate:9.1},
-  {name:"Benchmark_Report_Static",ad_set:"Lookalike_DevTools",fmt:"Single Image",copy:"Benchmark Data",impr:680000,clicks:4900,ctr:0.72,signup_rate:4.4,activation_rate:41.1,pql_rate:12.1,signup_cost:40,churn_rate:27.3},
-  {name:"DocsRetarget_Carousel",ad_set:"Retarget_Docs_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:96000,clicks:1840,ctr:1.92,signup_rate:7.2,activation_rate:63.6,pql_rate:28.8,signup_cost:22,churn_rate:4.2},
-  {name:"Founder_Talking_Head",ad_set:"Thought_Leadership_Video",fmt:"Video",copy:"Founder POV",impr:540000,clicks:2200,ctr:0.41,signup_rate:4.4,activation_rate:32.3,pql_rate:8.3,signup_cost:66,churn_rate:33.3}
+  {name:"Migration_Guide_Doc",ad_set:"ICP_Eng_Leaders",fmt:"Document Ad",copy:"Migration",impr:412000,clicks:3100,ctr:0.75,signup_rate:5.4,activation_rate:57.1,pql_rate:24.4,signup_cost:74,churn_rate:9.1,spend:12400},
+  {name:"Benchmark_Report_Static",ad_set:"Lookalike_DevTools",fmt:"Single Image",copy:"Benchmark Data",impr:680000,clicks:4900,ctr:0.72,signup_rate:4.4,activation_rate:41.1,pql_rate:12.1,signup_cost:40,churn_rate:27.3,spend:8600},
+  {name:"DocsRetarget_Carousel",ad_set:"Retarget_Docs_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:96000,clicks:1840,ctr:1.92,signup_rate:7.2,activation_rate:63.6,pql_rate:28.8,signup_cost:22,churn_rate:4.2,spend:2900},
+  {name:"Founder_Talking_Head",ad_set:"Thought_Leadership_Video",fmt:"Video",copy:"Founder POV",impr:540000,clicks:2200,ctr:0.41,signup_rate:4.4,activation_rate:32.3,pql_rate:8.3,signup_cost:66,churn_rate:33.3,spend:6300}
 ];
 var CR3=[
-  {name:"Branded_Search",fmt:"Search",copy:"Brand Terms",impr:74000,clicks:6200,ctr:8.38,signup_rate:3.0,activation_rate:71.0,pql_rate:38.2,signup_cost:17,churn_rate:4.2},
-  {name:"NB_Competitor_Alt",fmt:"Search",copy:"Competitor Alt",impr:210000,clicks:4100,ctr:1.95,signup_rate:2.5,activation_rate:50.0,pql_rate:18.3,signup_cost:71,churn_rate:22.2},
-  {name:"NB_Category_Broad",fmt:"Search",copy:"Category Terms",impr:386000,clicks:5600,ctr:1.45,signup_rate:2.5,activation_rate:40.8,pql_rate:11.3,signup_cost:41,churn_rate:50.0},
-  {name:"NB_Integrations_Exact",fmt:"Search",copy:"Integration Terms",impr:118000,clicks:2100,ctr:1.78,signup_rate:1.8,activation_rate:36.8,pql_rate:7.9,signup_cost:63,churn_rate:0}
+  {name:"Branded_Search",fmt:"Search",copy:"Brand Terms",impr:74000,clicks:6200,ctr:8.38,signup_rate:3.0,activation_rate:71.0,pql_rate:38.2,signup_cost:17,churn_rate:4.2,spend:3100},
+  {name:"NB_Competitor_Alt",fmt:"Search",copy:"Competitor Alt",impr:210000,clicks:4100,ctr:1.95,signup_rate:2.5,activation_rate:50.0,pql_rate:18.3,signup_cost:71,churn_rate:22.2,spend:7400},
+  {name:"NB_Category_Broad",fmt:"Search",copy:"Category Terms",impr:386000,clicks:5600,ctr:1.45,signup_rate:2.5,activation_rate:40.8,pql_rate:11.3,signup_cost:41,churn_rate:50.0,spend:5800},
+  {name:"NB_Integrations_Exact",fmt:"Search",copy:"Integration Terms",impr:118000,clicks:2100,ctr:1.78,signup_rate:1.8,activation_rate:36.8,pql_rate:7.9,signup_cost:63,churn_rate:0,spend:2400}
 ];
 var ADD=[
   {name:"Brand_Exact",platform:"c3",spend:3100,ltv_cac:62.0,signup_cost:17,signups:186,net_mrr:9660},
@@ -530,9 +551,9 @@ var GL_D_RIGHTS=[false,false,true,true,true,true,true,true,true,true,true];
 var REC_LABELS=['Unit','Platform','LTV/CAC','$/Signup','Spend','Signups','Net MRR'];
 var REC_KEYS  =['name','platform','ltv_cac','signup_cost','spend','signups','net_mrr'];
 var REC_RIGHTS=[false,false,true,true,true,true,true];
-var CR_LABELS=['Ad Creative','Format','Copy Angle','Impr','CTR','% Signup','Activation%','PQL%','$/Signup','Churn%'];
-var CR_KEYS  =['name','fmt','copy','impr','ctr','signup_rate','activation_rate','pql_rate','signup_cost','churn_rate'];
-var CR_RIGHTS=[false,false,false,true,true,true,true,true,true,true];
+var CR_LABELS=['Ad Creative','Format','Copy Angle','Impr','Clicks','CTR','Spend','% Signup','Activation%','PQL%','$/Signup','Churn%'];
+var CR_KEYS  =['name','fmt','copy','impr','clicks','ctr','spend','signup_rate','activation_rate','pql_rate','signup_cost','churn_rate'];
+var CR_RIGHTS=[false,false,false,true,true,true,true,true,true,true,true,true];
 
 function showPage(id,el){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
@@ -587,7 +608,7 @@ function rerender(id){
   cfg.lastSorted=sorted;
   var body=sorted.length
     ?'<tbody>'+sorted.map(function(r){return'<tr>'+cfg.render(r)+'</tr>';}).join('')+'</tbody>'
-    :'<tbody><tr><td class="tbl-empty" colspan="'+cfg.labels.length+'">Nothing matches this filter.</td></tr></tbody>';
+    :'<tbody><tr class="empty-row"><td class="tbl-empty" colspan="'+cfg.labels.length+'">Nothing matches this filter.</td></tr></tbody>';
   document.getElementById(id).innerHTML=head+body;
 }
 
@@ -633,7 +654,9 @@ function renderCr(r){
   return'<td class="nm">'+r.name+(r.ad_set?'<div class="nsub">'+r.ad_set+'</div>':'')+'</td>'
     +'<td><span class="fmt-tag">'+(r.fmt||'')+'</span></td>'
     +'<td style="color:#6B7280;">'+(r.copy||'')+'</td>'+'<td class="r">'+fmtImpr(r.impr)+'</td>'
-    +'<td class="r">'+(r.ctr?r.ctr.toFixed(2)+'%':'\u2014')+'</td>'+rateTd(r.signup_rate)
+    +'<td class="r">'+fn(r.clicks)+'</td>'
+    +'<td class="r">'+(r.ctr?r.ctr.toFixed(2)+'%':'\u2014')+'</td>'
+    +'<td class="r" style="color:#9CA3AF;">'+fs(r.spend)+'</td>'+rateTd(r.signup_rate)
     +rateTd(r.activation_rate)+rateTd(r.pql_rate)
     +'<td class="r">'+signupChip(r.signup_cost)+'</td>'+churnTd(r.churn_rate);
 }
@@ -808,7 +831,7 @@ function duplicateCard(id,e){
   // log old/new ad IDs back onto the card, and move it to Testing.
   n.status='doing';
   n.testAdId=n.testAdId?(parseInt(n.testAdId)+1):2;
-  alert('Stub: connect an MCP tool here to actually duplicate the ad. Card moved to Testing.');
+  hostPrompt('Duplicate the top ad in ad set "'+n.unit+'" with a version suffix, then report the new ad ID.');
   renderKanban();
 }
 function clearDoneCards(){NOTES=NOTES.filter(function(n){return n.status!=='completed';});renderKanban();}
@@ -870,6 +893,50 @@ function saveNote(){
       date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})});
   }
   closeNoteModal();renderKanban();
+}
+
+// ── HOST CALLBACK GUARD ────────────────────────────────────────────────────
+// Live actions call back into the host app (e.g. the Visualizer widget) through
+// sendPrompt(). That function does not exist when this file is opened as a
+// standalone HTML file, and an unguarded call throws — killing the rest of the
+// handler silently. Every outbound action goes through this wrapper.
+function hostPrompt(msg){
+  if(typeof sendPrompt==='function'){
+    try{sendPrompt(msg);return true;}
+    catch(err){console.warn('sendPrompt failed:',err);}
+  }
+  alert('Not connected to a host app.\n\nThis action would send:\n\n'+msg);
+  return false;
+}
+
+// ── LIVE LABEL COUNTS ──────────────────────────────────────────────────────
+// Tab and filter counts are derived from the data on every render. Typing them
+// into the markup means they go stale the moment the arrays change.
+function syncTabCounts(){
+  document.querySelectorAll('.ch-tabs .ch-tab').forEach(function(t){
+    var ct=t.querySelector('.ct');if(!ct)return;
+    var m=(t.getAttribute('onclick')||'').match(/showCh\('([a-z]+)','([a-z0-9]+)'/);
+    if(!m)return;
+    var n=null;
+    if(m[2]==='adlib'){n=(ADS||[]).length;}
+    else{
+      var pane=document.getElementById('ch-'+m[1]+'-'+m[2]);
+      var tbl=pane&&pane.querySelector('table');
+      var cfg=tbl&&CONFIGS[tbl.id];
+      if(cfg&&cfg.data)n=cfg.data.length;
+    }
+    if(n===null)return;
+    var noun=ct.textContent.replace(/^[\d,]+\s*/,'').replace(/s$/,'');
+    ct.textContent=n+' '+noun+(n===1?'':'s');
+  });
+  var ads=ADS||[];
+  [['adf-all',ads.length],
+   ['adf-video',ads.filter(function(a){return a.type==='video';}).length],
+   ['adf-image',ads.filter(function(a){return a.type==='image';}).length]
+  ].forEach(function(x){
+    var e=document.getElementById(x[0]);
+    if(e)e.innerHTML=e.innerHTML.replace(/\((\d+)\)/,'('+x[1]+')');
+  });
 }
 
 // ── DRILL-DOWN: Monthly/Weekly row → that unit's ads on the Creatives page ──
