@@ -1118,8 +1118,10 @@ function togglePause(unit,tableId,e){
   e.stopPropagation();
   var idx=PAUSED.indexOf(unit);
   var willPause=idx<0;
-  if(!confirm((willPause?'Pause':'Resume')+' "'+unit+'" via your connected ad platform MCP?'))return;
-  // Wire both branches to your MCP tool's pause/resume/enable call — this stub is dashboard-only.
+  if(!confirm((willPause?'Pause':'Resume')+' "'+unit+'" on the live ad account?'))return;
+  // Both branches fire a real host call through the guard — pause and resume are
+  // symmetric, and neither is dashboard-only state.
+  hostPrompt((willPause?'Pause':'Resume')+' the unit named "'+unit+'" on the connected ad platform, then confirm its new status.');
   if(idx>=0){PAUSED.splice(idx,1);}
   else{
     PAUSED.push(unit);
