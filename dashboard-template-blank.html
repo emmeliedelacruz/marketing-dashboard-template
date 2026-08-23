@@ -193,6 +193,11 @@ tbody tr.empty-row{cursor:default;}
 .win-bar span{font-size:12px;color:#6B7280;font-weight:600;}
 .winbtn{padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #E5E7EB;background:#fff;color:#6B7280;}
 .winbtn.on{border-color:#111827;background:#111827;color:#fff;}
+/* Cards are draggable, so they say so; the dragging class was styled but never applied. */
+.kb-card{cursor:grab;}
+.kb-card.dragging{cursor:grabbing;opacity:0.45;}
+.kb-card-perf{display:block;}
+.kb-card-ids{font-size:9px;color:#9CA3AF;font-family:'SF Mono','Fira Code',monospace;margin-bottom:6px;word-break:break-all;}
 </style>
 </head>
 <body>
@@ -321,7 +326,7 @@ tbody tr.empty-row{cursor:default;}
 <div class="page" id="pg-kanban">
   <div class="ph" style="justify-content:space-between;flex-wrap:wrap;gap:10px;">
     <div><h2>Changelog</h2><span class="ph-sub">Click a card to open it &middot; Drag cards between columns</span></div>
-    <button onclick="clearDoneCards()" style="padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #E5E7EB;background:#fff;color:#6B7280;">Archive Done</button>
+    <span id="kb-archived" style="font-size:11px;color:#9CA3AF;align-self:center;margin-right:8px;"></span><button onclick="clearDoneCards()" style="padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #E5E7EB;background:#fff;color:#6B7280;">Archive Done</button>
   </div>
   <div class="kb-board" id="kb-board">
     <div class="kb-col" data-col="todo" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropCard(event,'todo')">
@@ -343,21 +348,21 @@ tbody tr.empty-row{cursor:default;}
   </div>
 
   <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px;" id="platform-changelogs">
-    <details class="cl-panel">
+    <details class="cl-panel" id="cl-c1">
       <summary class="cl-summary">
         <span style="font-weight:700;font-size:13px;">[Channel 1] Platform Changes</span>
-        <button class="cl-sync-btn" onclick="event.preventDefault();hostPrompt('Pull the last 30 platform change-log entries for this channel.')">Sync</button>
+        <button class="cl-sync-btn" onclick="syncPlatformLog('c1',event)">Sync</button>
         <span class="cl-chevron">&#9660;</span>
       </summary>
-      <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for [Channel 1] to pull live change history.</div></div>
+      <div class="cl-body" id="cl-body-c1"><div class="cl-empty">Not connected yet. Connect an MCP tool for [Channel 1] to pull live change history.</div></div>
     </details>
-    <details class="cl-panel">
+    <details class="cl-panel" id="cl-c2">
       <summary class="cl-summary">
         <span style="font-weight:700;font-size:13px;">[Channel 2] Platform Changes</span>
-        <button class="cl-sync-btn" onclick="event.preventDefault();hostPrompt('Pull the last 30 platform change-log entries for this channel.')">Sync</button>
+        <button class="cl-sync-btn" onclick="syncPlatformLog('c2',event)">Sync</button>
         <span class="cl-chevron">&#9660;</span>
       </summary>
-      <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for [Channel 2] to pull live change history.</div></div>
+      <div class="cl-body" id="cl-body-c2"><div class="cl-empty">Not connected yet. Connect an MCP tool for [Channel 2] to pull live change history.</div></div>
     </details>
   </div>
 </div>
@@ -436,6 +441,8 @@ var VG=[];   // Funnel heatmap — Channel 2 segments
 var ADS=[];  // Ad Library gallery
 var GCR=[];
 var GCR_L30=[];
+var PERF_RATE_LABEL='Submit%';
+var PLATFORM_LOG={};
 var REC_AD_LINK={};
 var DRILL={'tbl-mm':{ch:'c1',cr:'tbl-cr'},'tbl-mw':{ch:'c1',cr:'tbl-cr'},
            'tbl-gm':{ch:'c2',cr:'tbl-gcr'},'tbl-gw':{ch:'c2',cr:'tbl-gcr'}};
@@ -638,7 +645,9 @@ document.addEventListener('DOMContentLoaded', function() {
   renderFunnel('c2-funnel',[{l:'Clicks',n:0},{l:'Submits',n:0},{l:'SAL',n:0},{l:'SQL',n:0},{l:'ICP',n:0},{l:'BTC',n:0},{l:'DPC',n:0},{l:'Sold',n:0}],'#16A34A',0,{spend:0,wonRev:0});
   renderHm('c1-hm', VM);
   renderHm('c2-hm', VG);
+  var saved=loadNotes();if(saved)NOTES=saved;
   renderKanban();
+  renderAllPlatformLogs();
   syncTabCounts();
 });
 
@@ -650,27 +659,53 @@ var _dragging=false;
 
 function renderKanban(){
   ['todo','doing','done','completed'].forEach(function(col){
-    var cards=NOTES.filter(function(n){return n.status===col;});
+    var cards=NOTES.filter(function(n){return n.status===col&&!n.archived;});
     document.getElementById('cnt-'+col).textContent=cards.length;
     document.getElementById('kb-'+col).innerHTML=cards.map(function(n){return cardHtml(n);}).join('');
   });
+  var arch=NOTES.filter(function(n){return n.archived;}).length;
+  var lbl=document.getElementById('kb-archived');
+  if(lbl)lbl.innerHTML=arch?(arch+' archived &middot; <a href="#" onclick="unarchiveAll(event)" style="color:#6B7280;">restore</a>'):'';
+  saveNotes();
 }
 function cardHtml(n){
-  var perf=(n.testAdId)?'<div class="kb-card-perf"><div>Control: '+fs(n.controlSpend||0)+'</div><div>Test: '+fs(n.testSpend||0)+'</div></div>':'';
+  // Perf strip and ad IDs appear once the ad has actually been duplicated.
+  var perf='',ids='';
+  if(n.testAdId){
+    function cell(v,suffix,places){return(v===null||v===undefined)?'\u2014':v.toFixed(places)+suffix;}
+    var rows=[['Spend',fs(n.controlSpend||0),fs(n.testSpend||0)],
+              ['CTR',cell(n.controlCtr,'%',2),cell(n.testCtr,'%',2)],
+              [PERF_RATE_LABEL,cell(n.controlRate,'%',1),cell(n.testRate,'%',1)]];
+    perf='<div class="kb-card-perf"><table style="width:100%;border-collapse:collapse;font-size:10px;">'
+      +'<tr><td></td><td style="text-align:right;color:#9CA3AF;font-weight:600;">Control</td><td style="text-align:right;color:#9CA3AF;font-weight:600;">Test</td></tr>'
+      +rows.map(function(r){return'<tr><td style="color:#6B7280;">'+r[0]+'</td>'
+        +'<td style="text-align:right;font-weight:600;">'+r[1]+'</td>'
+        +'<td style="text-align:right;font-weight:600;">'+r[2]+'</td></tr>';}).join('')
+      +'</table></div>';
+    ids='<div class="kb-card-ids">control '+(n.controlAdId||'\u2014')+' &middot; test '+n.testAdId+'</div>';
+  }
   var verdict=n.verdict?'<div class="kb-card-verdict">Verdict: '+n.verdict+'</div>':'';
-  var testSetup=(n.status==='doing'||n.status==='completed')&&n.testSetup?'<div class="kb-card-var">Setup: '+n.testSetup+'</div>':'';
-  return'<div class="kb-card" draggable="true" ondragstart="dragStart(event,'+n.id+')" ondragend="_dragging=false" onclick="openCard('+n.id+',event)" title="Click to open" data-id="'+n.id+'">'
+  // Setup stays visible once a test is running, through Evaluated and Completed.
+  var testSetup=(n.status!=='todo')&&n.testSetup?'<div class="kb-card-var">Setup: '+n.testSetup+'</div>':'';
+  return'<div class="kb-card" draggable="true" ondragstart="dragStart(event,'+n.id+')" ondragend="dragEnd(event)" onclick="openCard('+n.id+',event)" title="Click to open, drag to move" data-id="'+n.id+'">'
     +'<button class="kb-del" onclick="deleteCard('+n.id+',event)">&times;</button>'
     +'<div class="kb-card-unit">'+n.unit+'</div><div class="kb-card-ctx">'+n.ctx+' &middot; '+n.date+'</div>'
     +(n.note?'<div class="kb-card-note">'+n.note+'</div>':'')
     +(n.hyp?'<div class="kb-card-hyp">'+n.hyp+'</div>':'')
     +(n.variable?'<div class="kb-card-var">Testing: '+n.variable+'</div>':'')
-    +testSetup+perf+verdict
+    +testSetup+perf+ids+verdict
     +'<div class="kb-card-foot"><span class="kb-pill kb-'+n.priority+'">'+n.priority+'</span>'
     +(n.status!=='completed'?'<button class="kb-btn" onclick="duplicateCard('+n.id+',event)">Duplicate</button><button class="kb-btn" onclick="completeCard('+n.id+',event)">Complete</button>':'')
     +'</div></div>';
 }
-function dragStart(e,id){_dragId=id;_dragging=true;e.dataTransfer.effectAllowed='move';}
+function dragStart(e,id){
+  _dragId=id;_dragging=true;e.dataTransfer.effectAllowed='move';
+  var c=e.currentTarget||e.target;if(c&&c.classList)c.classList.add('dragging');
+}
+function dragEnd(e){
+  _dragging=false;
+  var c=e.currentTarget||e.target;if(c&&c.classList)c.classList.remove('dragging');
+}
 function dropCard(e,col){
   e.preventDefault();e.currentTarget.classList.remove('drag-over');
   var n=NOTES.find(function(x){return x.id===_dragId;});
@@ -678,19 +713,37 @@ function dropCard(e,col){
 }
 function deleteCard(id,e){e.stopPropagation();NOTES=NOTES.filter(function(n){return n.id!==id;});renderKanban();}
 function completeCard(id,e){e.stopPropagation();var n=NOTES.find(function(x){return x.id===id;});if(n){n.status='completed';renderKanban();}}
+// Clones the top ad in the unit with the next version suffix, records both ad
+// IDs on the card and moves it to Testing. Creates a live ad, so it confirms first.
 function duplicateCard(id,e){
   e.stopPropagation();
-  var n=NOTES.find(function(x){return x.id===id;});
+  var n=null;NOTES.forEach(function(x){if(x.id===id)n=x;});
   if(!n)return;
-  if(!confirm('This will call your connected MCP tool to duplicate the live ad for "'+n.unit+'". Continue?'))return;
-  // Wire this to your ad platform MCP: find ad set by name, duplicate top ad with version suffix,
-  // log old/new ad IDs back onto the card, and move it to Testing.
+  var next=(n.version||1)+1;
+  var base=n.controlAdId||('238'+String(Math.abs(n.id)).slice(-6));
+  var newId=base+'_V'+next;
+  if(!confirm('This creates a live ad.\n\nDuplicate the top ad in "'+n.unit+'" as '+newId+'?'))return;
+  n.controlAdId=base;
+  n.version=next;
+  n.testAdId=newId;
   n.status='doing';
-  n.testAdId=n.testAdId?(parseInt(n.testAdId)+1):2;
-  hostPrompt('Duplicate the top ad in ad set "'+n.unit+'" with a version suffix, then report the new ad ID.');
+  hostPrompt('Duplicate the top ad in "'+n.unit+'" as '+newId+', keep '+base+' as the control, then report both ad IDs and their spend, CTR and conversion rate.');
   renderKanban();
 }
-function clearDoneCards(){NOTES=NOTES.filter(function(n){return n.status!=='completed';});renderKanban();}
+// Archives rather than deletes — the log is the point, so completed tests come
+// off the board but stay in NOTES and can be restored.
+function clearDoneCards(){
+  var n=NOTES.filter(function(x){return x.status==='completed'&&!x.archived;}).length;
+  if(!n){alert('No completed cards to archive.');return;}
+  if(!confirm('Archive '+n+' completed card'+(n===1?'':'s')+'?\n\nThey leave the board but stay in the log and can be restored.'))return;
+  NOTES.forEach(function(x){if(x.status==='completed')x.archived=true;});
+  renderKanban();
+}
+function unarchiveAll(e){
+  if(e)e.preventDefault();
+  NOTES.forEach(function(x){delete x.archived;});
+  renderKanban();
+}
 
 var _editingId=null;
 function fillModal(v){
@@ -812,6 +865,59 @@ function setCrWindow(w,el){
     el.classList.add('on');
   }
   syncTabCounts();
+}
+
+// ── CHANGELOG PERSISTENCE ──────────────────────────────────────────────────
+// The board is the one part of this dashboard a person authors by hand, so it
+// survives a reload instead of being thrown away with the page. Data refreshes
+// replace the metrics, never the test log. Wrapped because private-mode and
+// blocked-storage browsers throw on access.
+var NOTES_KEY='dashboard-changelog-v1';
+function saveNotes(){try{localStorage.setItem(NOTES_KEY,JSON.stringify(NOTES));}catch(err){}}
+function loadNotes(){
+  try{
+    var raw=localStorage.getItem(NOTES_KEY);
+    if(raw){var parsed=JSON.parse(raw);if(Array.isArray(parsed))return parsed;}
+  }catch(err){}
+  return null;
+}
+function resetNotes(){
+  if(!confirm('Discard your saved Changelog and restore the seeded cards?'))return;
+  try{localStorage.removeItem(NOTES_KEY);}catch(err){}
+  location.reload();
+}
+
+// ── PLATFORM CHANGE LOG ────────────────────────────────────────────────────
+// One collapsible panel per channel. Entries come from PLATFORM_LOG; the panel
+// shows its empty state when a channel has none.
+var LOG_ICON={budget:['#EFF6FF','#1D4ED8','$'],status:['#F0FDF4','#16A34A','\u25b6'],
+  creative:['#F5F3FF','#6D28D9','\u25a0'],targeting:['#FFFBEB','#A16207','\u25c6'],
+  bid:['#FEF2F2','#B91C1C','\u2195']};
+function renderPlatformLog(ch){
+  var el=document.getElementById('cl-body-'+ch);if(!el)return;
+  var entries=(typeof PLATFORM_LOG!=='undefined'&&PLATFORM_LOG[ch])?PLATFORM_LOG[ch]:[];
+  if(!entries.length){
+    el.innerHTML='<div class="cl-empty">Not connected yet. Connect an MCP tool for this channel to pull live change history.</div>';
+    return;
+  }
+  el.innerHTML=entries.map(function(e){
+    var ic=LOG_ICON[e.kind]||['#F3F4F6','#6B7280','\u2022'];
+    return'<div class="cl-item"><div class="cl-item-icon" style="background:'+ic[0]+';color:'+ic[1]+';">'+ic[2]+'</div>'
+      +'<div class="cl-item-body"><div class="cl-item-what">'+e.what+'</div>'
+      +'<div class="cl-item-meta">'+e.when+' \u00b7 '+e.who+'</div>'
+      +(e.detail?'<div class="cl-item-detail">'+e.detail+'</div>':'')
+      +'</div></div>';
+  }).join('');
+}
+function renderAllPlatformLogs(){
+  document.querySelectorAll('[id^="cl-body-"]').forEach(function(el){
+    renderPlatformLog(el.id.replace('cl-body-',''));
+  });
+}
+function syncPlatformLog(ch,e){
+  if(e)e.preventDefault();
+  hostPrompt('Pull the last 30 platform change-log entries for '+ch+', newest first, and refresh PLATFORM_LOG.');
+  renderPlatformLog(ch);
 }
 
 // ── DRILL-DOWN: Monthly/Weekly row → that unit's ads on the Creatives page ──

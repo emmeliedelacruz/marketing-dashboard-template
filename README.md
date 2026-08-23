@@ -82,6 +82,9 @@ The Creatives toggle swaps a genuine second dataset (`CR1` / `CR1_L30`), not a s
 - **Monthly / Weekly row click** drills into Creatives — it switches to that unit's channel tab and filters the ad table to that ad set or ad group, with a Clear filter button. Names are matched loosely, and the row's campaign is matched too, so search channels reporting creatives at campaign level still resolve.
 - **Pencil button** on those rows logs a Changelog note (the row click is taken by the drill-down). On Daily, Creatives and Optimization the row click still opens the note modal.
 - **Changelog card click** opens the card in the same modal for editing — note, hypothesis, variable, test setup, verdict, priority and column — and saves back to that card.
+- **The Changelog board persists** to `localStorage`, so cards you add or move survive a reload. A data refresh replaces the metrics, not the test log. "Archive Done" archives completed cards (with a restore link) rather than deleting them.
+- **Duplicate** writes versioned ad IDs (`<control>_V2`) onto the card and moves it to Testing, and the card then shows a Control vs Test strip with spend, CTR and the motion's conversion rate.
+- **Platform change-log panels** under the board render from a `PLATFORM_LOG` map, one per channel, and fall back to an empty state for channels with no entries.
 - **Pause** buttons appear on every table row, and dragging cards between Changelog columns works as expected.
 
 ## Adding a third channel

@@ -12,7 +12,8 @@
 - 2026-08-23: Fixed the Monthly/Weekly row-inclusion rule — period tables show every unit that was active at any point in the window, including paused and deleted ones, scoped by delivery rather than current status.
 - 2026-08-23: Specified the two navigation behaviours — Monthly/Weekly row click drills into that unit's creatives, and clicking a Changelog card opens it for editing. Note logging moves to a per-row pencil button on Monthly/Weekly.
 - 2026-08-23: Added the pre-ship checklist, a `hostPrompt()` guard for host callbacks, and `syncTabCounts()` so label counts are computed from data rather than typed.
-- 2026-08-23 (latest): Fixed the reporting window per page — Monthly is month-to-date, Weekly is the last 7 days, Daily is the last completed day, and Creatives defaults to MTD with a toggle to last 30 days. Windows are now named in every page header.
+- 2026-08-23: Fixed the reporting window per page — Monthly is month-to-date, Weekly is the last 7 days, Daily is the last completed day, and Creatives defaults to MTD with a toggle to last 30 days. Windows are now named in every page header.
+- 2026-08-23 (latest): Brought the Changelog up to this spec — perf strip now carries Spend/CTR/conversion rate, ad IDs are shown, Test Setup survives into Evaluated, Duplicate writes real versioned ad IDs, Archive archives instead of deleting, the board persists to localStorage, drag has visual feedback, and the platform change-log panels actually render entries.
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
 
@@ -73,11 +74,13 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 **Changelog (fixed, richer spec — canonical over hearth-HTML's simpler version):**
 - Header with "Archive Done" button
 - **4-column Kanban:** To Test → Testing → Evaluated → Completed. Drag-and-drop.
-- **Card fields:** Note (always) · Hypothesis (always, styled distinctly) · Variable Being Tested (always) · Test Setup (visible once Testing/Completed) · Control vs Test perf strip — Spend/CTR/Submit% (visible once duplicated) · Ad IDs, control+test (visible once duplicated) · Verdict (visible once Evaluated/Completed)
-- **Card actions:** Duplicate (calls MCP to clone top ad in the ad set with version suffix V2/V3…, auto-increments, logs old/new ad IDs, moves card to Testing — confirm before executing, it creates a live ad) · Complete (→ Completed) · Delete
-- Adding a card: the pencil button on a Monthly/Weekly row, or a row click on Daily, Creatives or Optimization → note modal
-- **Opening a card: click it.** The card reuses the note modal in edit mode, pre-filled with note, hypothesis, variable, test setup, verdict, priority and column, saving back to the same card rather than creating a new one. Card buttons (Duplicate / Complete / Delete) must stop propagation so they don't also open the editor, and a drag must not count as a click. → priority (High/Med/Low) + starting column
-- Below board: one collapsible "Platform Changelog" panel per channel — sync button pulls last ~30 activity log entries via MCP; empty-state if not connected
+- **Card fields:** Note (always) · Hypothesis (always, styled distinctly) · Variable Being Tested (always) · Test Setup (visible on anything past To Test — a card that has been evaluated still needs to show how it was set up) · Control vs Test perf strip, three rows: Spend, CTR and the motion's conversion rate (`PERF_RATE_LABEL` — Submit% / ATC% / Signup%), visible once duplicated · Ad IDs, control and test, visible once duplicated · Verdict (visible once Evaluated/Completed)
+- **Card actions:** Duplicate (clones the top ad in the unit as `<controlAdId>_V<n>`, auto-incrementing the version, writing both ad IDs onto the card and moving it to Testing — confirm before executing, it creates a live ad) · Complete (→ Completed) · Delete (permanent)
+- **Archive Done archives, it does not delete.** Completed cards get an `archived` flag, leave the board and stay in `NOTES`, with a restore link beside the button. A button labelled Archive that silently deletes is the kind of thing people only discover once.
+- **The board persists.** It is the one part of the dashboard a person authors by hand, so it is saved to `localStorage` on every change and restored on load — a data refresh replaces the metrics, never the test log. Wrap every storage access in try/catch: private windows and blocked-storage browsers throw on access, and an unguarded read takes the whole page down. Credentials still never go near storage.
+- Adding a card: the pencil button on a Monthly/Weekly row, or a row click on Daily, Creatives or Optimization → note modal, which sets note, hypothesis, variable, test setup, verdict, priority (High/Med/Low) and starting column
+- **Opening a card: click it.** The card reuses the note modal in edit mode, pre-filled with note, hypothesis, variable, test setup, verdict, priority and column, saving back to the same card rather than creating a new one. Card buttons (Duplicate / Complete / Delete) must stop propagation so they don't also open the editor, and a drag must not count as a click.
+- Below board: one collapsible "Platform Changelog" panel per channel, each with an addressable body (`cl-body-<channel>`) rendered from a `PLATFORM_LOG` map — entries carry when / who / what / detail plus a `kind` (budget, status, creative, targeting, bid) that picks the icon and tint. Sync pulls the last ~30 activity entries via MCP and re-renders. A channel with no entries shows the empty state.
 - **Pause button** (every row, always visible): live MCP call to pause by name. **Unpause: symmetric live MCP call to resume** — both need confirm-before-execute.
 - Settings modal (gear icon): API key + account ID for live actions. Never store credentials in browser storage.
 
@@ -210,7 +213,8 @@ Every item here came from a real bug. Run it as a test pass, not a self-assessme
 - Spot-check one aggregate against its line items — creative spend should roll up to the channel's spend, and the funnel footer should equal the sum of the period table. Grouping by a leading ID inside a compound string is where rows quietly vanish or double-count.
 
 **Interactions — click every clickable thing**
-- Anything with a pointer or grab cursor has a working handler; anything with a handler looks clickable.
+- Anything with a pointer or grab cursor has a working handler; anything with a handler looks clickable. Draggable things use `grab`/`grabbing`, not `pointer`.
+- Grep the stylesheet for classes it styles but nothing ever applies. An orphaned rule is usually a feature that was specified, styled and never wired — that is how the platform change-log panels sat empty behind six unused styles.
 - Every modal exists on every page it belongs on, not just the one it was first wired to.
 - Buttons that claim to scope ("View creatives" from an ad set) actually filter to that thing rather than navigating to a generic page.
 - Every callback into the host (`sendPrompt()` and friends) is wrapped in a guard. Those functions do not exist when the file is opened standalone, and an unguarded call throws and silently kills the rest of the handler. Use the `hostPrompt()` wrapper.
