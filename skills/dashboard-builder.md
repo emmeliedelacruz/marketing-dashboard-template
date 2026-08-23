@@ -19,7 +19,8 @@
 - 2026-08-23: Duplicate now actually creates the ad — MCP through the host, else an operator-run relay, else a deep link into the native ads manager. Always PAUSED, always confirmed, and the card reports requested / created / failed.
 - 2026-08-23: The Changelog board is shareable. On a local file it stays in `localStorage` — one board per browser, per device — and the docs now say so plainly. Published as an artifact with `capabilities: {artifact: {}}`, the page reads and writes one team board at `data/board.json` behind an explicit "Save to shared board" button.
 - 2026-08-23: The Google Sheet is the database. Specified the three legs — MCP populates the sheet on a schedule, the sheet holds every dataset plus the human-authored fields, and the HTML is baked from it rather than fetching at load. Records the write constraint that shapes the whole thing: the Drive connector can create a sheet but cannot update one, so the refresh job needs Sheets API v4 or an Apps Script endpoint.
-- 2026-08-23 (latest): The board stays editable, always. A sheet-sourced test log would mean a read-only board — a page cannot write cells to Sheets — so that option is struck and the choice is now only whether the board is *also* mirrored out to the `test_log` tab. The mirror is one-way, which has to be said out loud or someone types into the copy and loses it.
+- 2026-08-23 (latest): Added the deployment choice — a file, a Claude link, their own web address, or a server with a database — with what each one can and cannot do, and the two questions that decide it (how many people edit at once, and whether the dashboard should act on ads or only report). This is a template for marketers in very different situations; the skill offers the options rather than assuming one.
+- 2026-08-23: The board stays editable, always. A sheet-sourced test log would mean a read-only board — a page cannot write cells to Sheets — so that option is struck and the choice is now only whether the board is *also* mirrored out to the `test_log` tab. The mirror is one-way, which has to be said out loud or someone types into the copy and loses it.
 - 2026-08-23: One sheet per build, provisioned at onboarding. This is a template repo, so no sheet ID is ever committed and no build reuses another's data. Split provisioning (a one-time `create_file`, which the Drive connector handles fine) from the recurring refresh write (which it cannot do at all). `sheet-template/` pins only `test_log` and `platform_log` — the tabs a human edits; metric columns are derived per build. The examples get no sheet: demo data, nothing to refresh, nothing to persist.
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
@@ -109,18 +110,41 @@ The sheet is the audit layer *and* the human-editable one. A corrected spend fig
 
 ### Leg 3 — Sheet → HTML
 
-**Bake at refresh time. Do not fetch at page load.** The refresh job reads the sheet, regenerates the data arrays, republishes. Reasons, in order of how hard they are to work around:
+**This follows the deployment choice above.** Default to baking — the refresh job reads the sheet, regenerates the data arrays, republishes:
 
-1. A published artifact's CSP blocks *every* external host but Google Fonts. `fetch()` to `docs.google.com` does not fail gracefully there — it does not run at all.
+1. On a Claude link it is the only option: a published artifact's CSP blocks *every* external host but Google Fonts, so `fetch()` to `docs.google.com` does not fail gracefully — it does not run at all.
 2. "Publish to web" makes the sheet readable by anyone holding the URL. That is a spend-and-CAC table on an unauthenticated endpoint.
 3. Nothing on any page is intraday. Every window is MTD, last-7, or last-completed-day, so a live read buys nothing a daily bake doesn't already give.
 
-Two fetch routes exist and are worth knowing, for self-hosted copies and for the one case that genuinely wants live data:
+On **their own web address** or **a server**, fetching is available and reason (1) drops away — but (3) still holds, so fetch because it removes a rebuild step, not because it makes anything fresher. A server should read its own database rather than the sheet.
+
+Two fetch routes, for those deployments and for the one case that genuinely wants live data:
 
 - **Published CSV / `gviz`** — `.../pub?output=csv` or `/gviz/tq?tqx=out:json`. Both send CORS headers, so a plain `fetch()` works from a local file or your own host. Blocked in artifacts. Costs you (2) above.
 - **The artifact `mcp` capability** — declare `capabilities: {mcp: {servers: [{server: 'Google Drive', tools: ['search_files','read_file_content']}]}}` and read through `watchTool`. Runs on the *viewer's* credentials, so no key in the page and no CSP problem. Costs: every viewer needs the Drive connector and access to the sheet, and a page declaring `mcp` cannot be shared publicly.
 
 **A caveat that decides the route where cells matter:** `read_file_content` on a Sheet returns a *markdown table*, not structured cells — it escapes characters, and its own tool docs say the representation will change over time. An agent parsing that at build time is fine, because it re-reads and adapts. A *page* regex-parsing it at runtime is building on a format with no contract. Where you need real cells, use the CSV export, not the natural-language read.
+
+### Where the dashboard lives — ask, don't assume
+
+Every marketer using this template is in a different situation: a solo consultant, a two-person growth team, an in-house team of ten who live in the thing daily. **Ask where it will run before building**, because it decides what the dashboard can do — and present it in these terms, not as hosting jargon.
+
+| | Cost | Shared board | Reads the sheet live | Can act on ads | Setup |
+|---|---|---|---|---|---|
+| **A file they open** | free | No — one board per person, per device | Yes | Opens the ads manager for them | None |
+| **A Claude link** | free | **Yes** — one board, Save button | No — baked at refresh | Hands the job to the agent, or opens the ads manager | Publish it |
+| **Their own web address** | ~free | No — one board per person | Yes | Needs an endpoint they run | A deploy |
+| **A server with a database** | monthly bill | **Yes** — live, no Save button | Yes | Yes, directly | A real build |
+
+**A file they open** — email it, open it from disk. Simplest thing that works, and right for one person or a client deliverable.
+
+**A Claude link** — the only option that gives a genuinely shared board with no infrastructure and no cost. The trade is that a published page cannot reach outside itself, so the numbers are baked in at each refresh rather than read live, and two people saving at once means the last Save wins. Right for a small team.
+
+**Their own web address** (Netlify, Vercel, GitHub Pages) — a normal static site. It can read the sheet live, but there is nothing to write to, so the board is per-person again. Choose it when they want their own URL and the log is one person's job.
+
+**A server with a database** (Railway, Render, Fly) — everything works properly: several people editing the board at once with no Save button and no conflicts, credentials held server-side so ad actions run for real, and the refresh job on a schedule beside it. **This is beyond what the template ships** — the repo has no server or database code, so choosing it means building that part. Right for a team that lives in the dashboard daily, or one that wants the dashboard to *do* things rather than recommend them.
+
+Steer by two questions, not by preference: **how many people edit the board at once**, and **should the dashboard act on ads or just report on them**. A handful of people who mostly read → a Claude link. A daily-driver tool for a team → a server. Anything where a wrong click spends money → a server, so the credentials are never in the page.
 
 ### Where the Changelog board lives — ask, don't assume
 
@@ -192,10 +216,11 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 1. Motion type: Sales-led, Ecommerce, or Product-led? *(Determines relevant KPIs — template stays identical, only metric set changes.)*
 2. Channels to track? *(Two or three. Beyond three the tab rows and funnel grid stop being readable — push back and suggest folding the smallest channel into a combined view.)*
 3. The sheet: create a new one for this company, or point at an existing sheet? *(Every build gets its own — never reuse another company's, and never hardcode a sheet ID into the template. If creating, provision it from `sheet-template/` and report the new file ID back. Then ask how the refresh job will write to it: service account, Apps Script endpoint, or manual for now.)*
-4. Should the test log be mirrored to the sheet, or live only in the dashboard? *(The board is editable either way — see **Where the Changelog board lives** below. Default to mirroring when there is a sheet and a refresh job. Either way, declare `capabilities: {artifact: {}}` at publish and verify the shared-board state line.)*
-5. Per channel — data access: Google Sheet / Direct MCP / Both?
-6. Per channel — action layer: Read-only, or read-only + specific actions (name + which MCP)?
-7. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. *(Do not ask about date ranges — the windows are fixed above.)* Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
+4. Where will this run — a file they open, a Claude link, their own web address, or a server with a database? *(See **Where the dashboard lives** below. It decides whether the board can be shared, whether the numbers can be read live, and whether ad actions can run for real. Ask it before building, not after.)*
+5. Should the test log be mirrored to the sheet, or live only in the dashboard? *(The board is editable either way — see **Where the Changelog board lives** below. Default to mirroring when there is a sheet and a refresh job. Either way, declare `capabilities: {artifact: {}}` at publish and verify the shared-board state line.)*
+6. Per channel — data access: Google Sheet / Direct MCP / Both?
+7. Per channel — action layer: Read-only, or read-only + specific actions (name + which MCP)?
+8. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. *(Do not ask about date ranges — the windows are fixed above.)* Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
 
 ## Motion-type default metrics
 

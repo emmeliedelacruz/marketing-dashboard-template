@@ -134,6 +134,27 @@ Every new ad is requested **PAUSED**, and every route confirms first. The card t
 
 The ads-manager URLs in `AD_PLATFORM` are starting points. **Verify them against your own accounts** — account-ID parameters differ per platform and the URL shapes change.
 
+## Where to run it
+
+Every situation is different — a solo consultant, a two-person growth team, ten people who live in it daily — so pick the one that matches yours. This decides what the dashboard can do more than anything else you choose.
+
+| | Cost | Shared board | Reads the sheet live | Can act on ads | Setup |
+|---|---|---|---|---|---|
+| **A file you open** | free | No — one board per person, per device | Yes | Opens the ads manager for you | None |
+| **A Claude link** | free | **Yes** — one board, Save button | No — baked in at each refresh | Hands the job to Claude, or opens the ads manager | Publish it |
+| **Your own web address** | ~free | No — one board per person | Yes | Needs an endpoint you run | A deploy |
+| **A server with a database** | monthly bill | **Yes** — live, no Save button | Yes | Yes, directly | A real build |
+
+**A file you open** — email it, open it from your desktop. Right for one person, or as a deliverable for a client.
+
+**A Claude link** — the only option that gives a genuinely shared board with no infrastructure and no cost. The trade: a published page can't reach outside itself, so the numbers are baked in at each refresh rather than read live, and if two people save at once the last one wins. Right for a small team.
+
+**Your own web address** (Netlify, Vercel, GitHub Pages) — a normal static site. It can read your sheet live, but there's nothing to write to, so the board goes back to one-per-person. Choose it if you want your own URL and the test log is one person's job.
+
+**A server with a database** (Railway, Render, Fly) — everything works properly: several people editing the board at once with no Save button and no conflicts, credentials held on the server so ad actions run for real, and the refresh job on a schedule beside it. **This repo doesn't ship that** — there's no server or database code here, so this route means building that part. Right for a team that lives in the dashboard daily, or one that wants it to *do* things rather than recommend them.
+
+Two questions settle it: **how many people edit the board at once**, and **should the dashboard act on ads or just report on them**. A handful of people who mostly read → a Claude link. A daily-driver for a team → a server. Anything where a wrong click spends money → a server, so credentials are never sitting in the page.
+
 ## Sharing the board
 
 The Changelog is the one part of the dashboard people write to, so the board stays editable in the dashboard — drag-and-drop, click-to-edit. The only choice is whether it is *also* copied out to your sheet.
