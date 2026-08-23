@@ -1056,6 +1056,8 @@ function duplicateCard(id,e){
   renderKanban();
 }
 
+// Archives rather than deletes — the log is the point, so completed tests come
+// off the board but stay in NOTES and can be restored.
 function clearDoneCards(){
   var n=NOTES.filter(function(x){return x.status==='completed'&&!x.archived;}).length;
   if(!n){alert('No completed cards to archive.');return;}
