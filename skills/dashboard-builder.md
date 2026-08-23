@@ -17,7 +17,8 @@
 - 2026-08-23: Specified where the perf strip's numbers come from — live lookup of each ad ID against the creative data's MTD rows, with the card's stored values as a labelled fallback. Creative rows carry `ad_id`, and a duplicated ad is a real row sharing its parent ad set's spend.
 - 2026-08-23: The perf strip auto-populates from the unit's ads once a card is past To Test, so a card moved into Testing by hand is never blank. Explicit ad IDs from Duplicate still take precedence.
 - 2026-08-23: Duplicate now actually creates the ad — MCP through the host, else an operator-run relay, else a deep link into the native ads manager. Always PAUSED, always confirmed, and the card reports requested / created / failed.
-- 2026-08-23 (latest): The Changelog board is shareable. On a local file it stays in `localStorage` — one board per browser, per device — and the docs now say so plainly. Published as an artifact with `capabilities: {artifact: {}}`, the page reads and writes one team board at `data/board.json` behind an explicit "Save to shared board" button.
+- 2026-08-23: The Changelog board is shareable. On a local file it stays in `localStorage` — one board per browser, per device — and the docs now say so plainly. Published as an artifact with `capabilities: {artifact: {}}`, the page reads and writes one team board at `data/board.json` behind an explicit "Save to shared board" button.
+- 2026-08-23 (latest): The Google Sheet is the database. Specified the three legs — MCP populates the sheet on a schedule, the sheet holds every dataset plus the human-authored fields, and the HTML is baked from it rather than fetching at load. Records the write constraint that shapes the whole thing: the Drive connector can create a sheet but cannot update one, so the refresh job needs Sheets API v4 or an Apps Script endpoint.
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
 
@@ -58,6 +59,58 @@ Two rules that follow from this:
 - **Never compare across windows.** Creative spend rolls up to channel spend *within the same window*. When the Creatives page is on L30 and Monthly is on MTD they will not tie, and that is correct — do not "fix" it by scaling one to the other.
 
 **The Creatives toggle:** each window is its own dataset (`CR1` / `CR1_L30`, and so on), registered on the table's config as `windows:{mtd:…, l30:…}` and swapped by `setCrWindow()`. Never derive one window by scaling the other — a modelled number that looks like a measured one is worse than no number. The toggle governs every channel tab on the page at once, and any active drill-down filter survives it.
+
+## Data pipeline — the Google Sheet is the database
+
+The dashboard is a **rendered view of a sheet**, never a place data lives. Three legs, and the middle one is where the available connectors run out — so it is specified here rather than assumed.
+
+### Leg 1 — MCP → Sheet (the refresh job)
+
+Runs on a schedule in an agent session, never in the page. Pull each channel from its ad-platform MCP server, normalise to the tab schema below, write the sheet.
+
+**Writing is the constrained leg.** The Google Drive connector can *create* a spreadsheet — `create_file` with `textContent` as CSV and `contentMimeType: 'text/csv'`, which Drive converts to a native Sheet — but it **cannot update cells in an existing one**. `update_file` changes title and parent folder only, and there is no Google Sheets connector in the directory. Pick a write path explicitly and record which one this build uses:
+
+| Path | Trade |
+|---|---|
+| **Sheets API v4 `spreadsheets.values.update`, service-account credential held by the refresh job** *(default)* | Stable file ID, true in-place update, credential stays server-side and never enters the page |
+| **Apps Script web app deployed on the sheet, POSTed by the job** | No service account to provision; you own and maintain the endpoint |
+| **`create_file` per refresh** | Needs nothing but the Drive connector, but yields a *new file ID every run* — fine for a one-off, never for a sheet anything links to |
+
+### Leg 2 — the Sheet
+
+One tab per dataset, header row = field names, one row per entity. Suggested tabs:
+
+| Tab | Grain | Key columns |
+|---|---|---|
+| `monthly_<channel>` | Ad set / ad group, MTD | `unit, campaign, status, spend, impressions, clicks, ctr, <motion metrics>` |
+| `weekly_<channel>` | Ad set / ad group, last 7d | same |
+| `daily_<channel>` | Campaign, last completed day | same + `date` |
+| `creatives_<channel>_mtd` / `_l30` | Ad | `ad_id, name, ad_set, spend, impressions, clicks, ctr, <motion metrics>` |
+| `test_log` | Changelog card | `id, column, unit, context, priority, hypothesis, variable, setup, verdict, control_ad_id, test_ad_id, archived` |
+| `platform_log` | Platform change | `channel, when, who, what, detail, kind` |
+
+**Every creative row needs `ad_id`** — that is the join the Changelog perf strip depends on.
+
+The sheet is the audit layer *and* the human-editable one. A corrected spend figure, a re-labelled ad set, a hypothesis someone typed on their phone — all live here and survive every rebuild. **Anything a person authors belongs in the sheet, not in the HTML.** That is the actual argument for this architecture, more than freshness.
+
+### Leg 3 — Sheet → HTML
+
+**Bake at refresh time. Do not fetch at page load.** The refresh job reads the sheet, regenerates the data arrays, republishes. Reasons, in order of how hard they are to work around:
+
+1. A published artifact's CSP blocks *every* external host but Google Fonts. `fetch()` to `docs.google.com` does not fail gracefully there — it does not run at all.
+2. "Publish to web" makes the sheet readable by anyone holding the URL. That is a spend-and-CAC table on an unauthenticated endpoint.
+3. Nothing on any page is intraday. Every window is MTD, last-7, or last-completed-day, so a live read buys nothing a daily bake doesn't already give.
+
+Two fetch routes exist and are worth knowing, for self-hosted copies and for the one case that genuinely wants live data:
+
+- **Published CSV / `gviz`** — `.../pub?output=csv` or `/gviz/tq?tqx=out:json`. Both send CORS headers, so a plain `fetch()` works from a local file or your own host. Blocked in artifacts. Costs you (2) above.
+- **The artifact `mcp` capability** — declare `capabilities: {mcp: {servers: [{server: 'Google Drive', tools: ['search_files','read_file_content']}]}}` and read through `watchTool`. Runs on the *viewer's* credentials, so no key in the page and no CSP problem. Costs: every viewer needs the Drive connector and access to the sheet, and a page declaring `mcp` cannot be shared publicly.
+
+**A caveat that decides the route where cells matter:** `read_file_content` on a Sheet returns a *markdown table*, not structured cells — it escapes characters, and its own tool docs say the representation will change over time. An agent parsing that at build time is fine, because it re-reads and adapts. A *page* regex-parsing it at runtime is building on a format with no contract. Where you need real cells, use the CSV export, not the natural-language read.
+
+### What this replaces
+
+The `test_log` tab supersedes `data/board.json` as the shared Changelog store when a sheet is configured. It is strictly better: editable outside the dashboard, survives republishing, and readable by people who never open the dashboard. Keep the `board.json` path as the fallback for builds with no sheet.
 
 ## Fixed page specs
 
@@ -162,7 +215,7 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 
 ## Steps
 1. Run onboarding (above).
-2. Pull data — Sheet: `Google Drive:read_file_content`/`search_files`. Direct MCP: call connector at build time, never client-side. Both: sheet = manual/strategic fields, MCP = live numbers.
+2. Pull data — see **Data pipeline** above. The sheet is the database; MCP populates it on a schedule; the HTML is baked from it. Never call a connector client-side except through the artifact `mcp` capability.
 3. Refresh cadence — fixed: auto daily, to support Daily/Weekly/MTD views. No hardcoded snapshot arrays.
 4. Design — follow `frontend-design` skill; see design spec below.
 
@@ -225,6 +278,8 @@ Every item here came from a real bug. Run it as a test pass, not a self-assessme
 - Every period row resolves to at least one creative. If it cannot, the drill-down shows an empty state and the creative data is incomplete.
 
 **Data sourcing**
+- The sheet, not the HTML, is the source of truth. Grep the build for any number that exists only in the file — if a person could want to correct it and there is no sheet cell behind it, it is in the wrong place.
+- Confirm the refresh job can actually *write* the sheet it reads. `create_file` returns a new file ID; if the build assumed in-place updates, every refresh silently orphans the sheet the dashboard was built from.
 - If two sources exist for one metric (platform-reported results vs. analytics conversions), confirm which is the source of truth and apply it to *every* table, not just the one that was mentioned.
 - Any channel or connector unavailable this session is flagged in the UI, never silently zeroed or omitted.
 - Spot-check one aggregate against its line items — creative spend should roll up to the channel's spend, and the funnel footer should equal the sum of the period table. Grouping by a leading ID inside a compound string is where rows quietly vanish or double-count.

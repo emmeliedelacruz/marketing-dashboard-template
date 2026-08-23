@@ -63,9 +63,13 @@ No build step, no backend required — it's one HTML file you open in a browser.
 
 ## Data sources
 
-The template ships with hardcoded JS arrays (a snapshot). For live data, wire it up to:
-- A **Google Sheet** (read via API, paste in, or use Claude + Google Drive MCP), or
-- **Direct API/MCP pulls** (Amplitude, Meta Ads, Google Ads, Stripe, etc.) — see the skill file for guidance on how Claude fetches this at build/refresh time.
+The template ships with hardcoded JS arrays (a snapshot). The intended architecture is **a Google Sheet as the database**, in three legs:
+
+1. **MCP → Sheet.** A scheduled agent session pulls each channel (Meta Ads, Google Ads, TikTok, LinkedIn, Amplitude, Stripe) and writes the sheet.
+2. **The Sheet.** One tab per dataset, plus a `test_log` tab for the Changelog and a `platform_log` tab for platform changes. Everything a *person* authors — a corrected figure, a hypothesis, a re-labelled ad set — lives here and survives every rebuild.
+3. **Sheet → HTML.** The refresh job regenerates the data arrays and republishes. It bakes rather than fetches, because a published artifact's CSP blocks external hosts outright, "publish to web" would put spend data on an unauthenticated URL, and no page on this dashboard shows an intraday number anyway.
+
+One constraint worth knowing before you build the refresh job: the Google Drive connector can **create** a spreadsheet but **cannot update cells** in an existing one (`update_file` changes title and parent folder only, and there is no Sheets connector). In-place writes need the Sheets API v4 with a service account held by the job, or an Apps Script web app you deploy on the sheet. `skills/dashboard-builder.md` has the tab schemas and the trade-offs.
 
 ## Fixed structure — what doesn't change per company
 
