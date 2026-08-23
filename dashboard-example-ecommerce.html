@@ -808,6 +808,7 @@ document.addEventListener('DOMContentLoaded', function() {
   renderHm('c1-hm', V1);
   renderHm('c2-hm', V2);
   renderHm('c3-hm', V3);
+  SEED_FP=seedFingerprint();
   var saved=loadNotes();if(saved)NOTES=saved;
   renderKanban();
   renderAllPlatformLogs();
@@ -1092,11 +1093,35 @@ function adRowById(id){
 // replace the metrics, never the test log. Wrapped because private-mode and
 // blocked-storage browsers throw on access.
 var NOTES_KEY='dashboard-changelog-v1';
-function saveNotes(){try{localStorage.setItem(NOTES_KEY,JSON.stringify(NOTES));}catch(err){}}
+var SEED_FP='';
+// Fingerprint of the seeded board shipped in this file. A saved board is only
+// restored wholesale when it came from the same seed; otherwise the file has
+// been rebuilt since that board was saved and its copy of the seeded cards is
+// stale. Without this, anyone who opened an earlier build keeps seeing it
+// forever and never picks up corrections to the seeded cards.
+function seedFingerprint(){
+  try{
+    var s=JSON.stringify(NOTES),h=0;
+    for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0;}
+    return 'f'+(h>>>0).toString(36);
+  }catch(err){return 'f0';}
+}
+function saveNotes(){
+  try{localStorage.setItem(NOTES_KEY,JSON.stringify({v:SEED_FP,notes:NOTES}));}catch(err){}
+}
 function loadNotes(){
   try{
-    var raw=localStorage.getItem(NOTES_KEY);
-    if(raw){var parsed=JSON.parse(raw);if(Array.isArray(parsed))return parsed;}
+    var raw=localStorage.getItem(NOTES_KEY);if(!raw)return null;
+    var parsed=JSON.parse(raw);
+    // Older builds stored a bare array with no version.
+    var saved=Array.isArray(parsed)?parsed:(parsed&&Array.isArray(parsed.notes)?parsed.notes:null);
+    var ver=Array.isArray(parsed)?null:(parsed?parsed.v:null);
+    if(!saved)return null;
+    if(ver===SEED_FP)return saved;
+    // Seeded cards changed since this board was saved: take the current seed and
+    // carry over only the cards this viewer added themselves.
+    var seedIds={};NOTES.forEach(function(n){seedIds[n.id]=true;});
+    return NOTES.concat(saved.filter(function(n){return !seedIds[n.id];}));
   }catch(err){}
   return null;
 }
