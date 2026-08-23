@@ -96,6 +96,41 @@ Browser work in the Railway account. Verify each step with `/healthz`.
 
 ---
 
+## Creating the ad for real
+
+On an AI link, Duplicate can only open Ads Manager. On a server the token lives server-side, so the server can make the copy. This is the one capability worth adding beyond the AI-link build.
+
+`POST /api/meta/duplicate-ad`, **editor role required**, only when `META_ACCESS_TOKEN` is set:
+
+1. `GET /{adId}?fields=id,name,adset_id,status` — the source ad, for its name and ad set
+2. `GET /{adsetId}/ads?fields=id,name` — existing names decide the next `V<n>`
+3. `POST /{adId}/copies` with `adset_id`, `status_option`, `rename_options`
+4. `GET /{newId}` — read the copy back; confirm it landed in the ad set asked for
+5. If the name did not take, `POST /{newId}` with `name`, then re-read
+
+Return Meta's real ad id. The page writes it onto the card as `test_ad_id`.
+
+### Non-negotiables
+
+| Rule | Why |
+|---|---|
+| Token on the server, never in the browser | The page must never hold a credential that can create an ad |
+| Editor role required | A read-only session gets 403. Assert exactly **one** write call reaches the platform across anonymous / viewer / editor attempts |
+| Copies created **PAUSED** by default | Clicking a button in a dashboard must not start delivery. An env var opts into ACTIVE, and the confirm states which before you commit |
+| **No automatic retry** | A network failure mid-POST may or may not have created the ad. Report it as ambiguous and say "check Ads Manager" rather than risking two |
+| No token = feature off, and the page says so | Never offer a button that fails. Expose availability from the session endpoint so the confirm describes what will actually happen |
+| Version number comes from the platform | Listing the ad set's existing ads means a page reload cannot produce a second "V2". A counter in one browser tab can |
+| `adset_id` passed explicitly, then verified | "Same ad set" is stated, not assumed. Return a `sameAdSet` flag and warn when false |
+| Read the created object back | Never report an id without confirming it exists |
+
+### Testing it without touching the ad account
+
+Do not create real ads to prove the code works.
+
+- **Point the API base at a stub** via `META_GRAPH_BASE` and mimic only the calls made. Cover: happy path, rename ignored, platform rejection, no token, malformed id, the copy landing in the wrong ad set, ACTIVE passthrough, and the auth gate.
+- **Drive the real buttons in a browser** for the rest. The checks that matter most are the negative ones: the control ad's spend unchanged, no row added to the creative table, no id invented while waiting for the real one.
+- The platform's domain is usually unreachable from a sandbox, so assert **the URL the page requested**, not the page that loaded.
+
 ## Part 3 — When it won't connect
 
 Read `dbConfigured` first. It halves the problem.

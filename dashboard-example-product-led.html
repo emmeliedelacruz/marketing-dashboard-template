@@ -210,6 +210,9 @@ input::placeholder,textarea::placeholder{color:#9CA3AF;opacity:1;}
 .kb-card-ids .pend{color:#A16207;font-weight:700;}
 .kb-card-ids .fail{color:#B91C1C;font-weight:700;}
 .kb-share{display:flex;align-items:center;gap:8px;}
+.idmsg{font-size:11px;min-height:14px;margin-bottom:6px;color:#6B7280;}
+.idmsg.ok{color:#15803D;}
+.idmsg.bad{color:#B91C1C;}
 .kb-share-state{font-size:11px;color:#9CA3AF;}
 .kb-share-state.dirty{color:#A16207;font-weight:700;}
 .kb-share-state.shared{color:#15803D;font-weight:700;}
@@ -417,6 +420,12 @@ input::placeholder,textarea::placeholder{color:#9CA3AF;opacity:1;}
   <input id="nm-var" placeholder="e.g. headline, creative format, LP" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#111827;margin-bottom:10px;">
   <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Test setup</label>
   <input id="nm-setup" placeholder="e.g. duplicated ad set, 50/50 split, 14-day read" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#111827;margin-bottom:10px;">
+  <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Control ad ID <span style="font-weight:400;color:#9CA3AF;">(ID or an Ads Manager link)</span></label>
+  <input id="nm-ctl-id" placeholder="238601233" oninput="normalizeAdIdField('nm-ctl-id')" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:monospace;outline:none;color:#111827;background:#fff;margin-bottom:4px;">
+  <div id="nm-ctl-id-msg" class="idmsg"></div>
+  <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Test ad ID <span style="font-weight:400;color:#9CA3AF;">(paste it after you make the copy)</span></label>
+  <input id="nm-test-id" placeholder="238601274" oninput="normalizeAdIdField('nm-test-id')" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:monospace;outline:none;color:#111827;background:#fff;margin-bottom:4px;">
+  <div id="nm-test-id-msg" class="idmsg"></div>
   <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Verdict</label>
   <textarea id="nm-verdict" placeholder="What did the test show, and what are you doing about it?" style="width:100%;height:44px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;outline:none;color:#111827;margin-bottom:12px;"></textarea>
   <div style="display:flex;gap:8px;align-items:center;">
@@ -447,8 +456,6 @@ input::placeholder,textarea::placeholder{color:#9CA3AF;opacity:1;}
   <div style="font-size:12px;color:#9CA3AF;margin-bottom:16px;">Configure MCP access for live pause/resume/duplicate actions</div>
   <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">API Key</label>
   <input id="cfg-api-key" type="password" placeholder="sk-..." style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;font-family:monospace;margin-bottom:12px;outline:none;color:#111827;">
-  <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Duplication relay URL <span style="font-weight:400;color:#9CA3AF;">(optional — your own endpoint, never a platform URL)</span></label>
-  <input id="cfg-relay-url" placeholder="https://your-service.example.com/ads/duplicate" oninput="DUP_RELAY=this.value.trim()" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#111827;margin-bottom:12px;">
   <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Ad Account ID</label>
   <input id="cfg-account-id" type="text" placeholder="123456789" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;font-family:monospace;margin-bottom:16px;outline:none;color:#111827;">
   <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:6px;padding:10px 12px;font-size:11px;color:#92400E;margin-bottom:16px;">
@@ -524,20 +531,20 @@ var CR1_L30=[
 ];
 var CR2=[
   {name:"Migration_Static_Control",ad_id:"238933602",ad_set:"ICP_Eng_Leaders",fmt:"Single Image",copy:"Static control",impr:286000,clicks:1180,ctr:0.41,signup_rate:3.1,activation_rate:44.0,pql_rate:12.0,signup_cost:96,churn_rate:18.0,spend:5800},
-  {name:"Migration_Guide_Doc",ad_id:"238933602_V2",ad_set:"ICP_Eng_Leaders",fmt:"Document Ad",copy:"Migration",impr:412000,clicks:3100,ctr:0.75,signup_rate:5.4,activation_rate:57.1,pql_rate:24.4,signup_cost:74,churn_rate:9.1,spend:6600},
+  {name:"Migration_Guide_Doc",ad_id:"238933643",ad_set:"ICP_Eng_Leaders",fmt:"Document Ad",copy:"Migration",impr:412000,clicks:3100,ctr:0.75,signup_rate:5.4,activation_rate:57.1,pql_rate:24.4,signup_cost:74,churn_rate:9.1,spend:6600},
   {name:"Benchmark_Report_Static",ad_id:"238604118",ad_set:"Lookalike_DevTools",fmt:"Single Image",copy:"Benchmark Data",impr:680000,clicks:4900,ctr:0.72,signup_rate:4.4,activation_rate:41.1,pql_rate:12.1,signup_cost:40,churn_rate:27.3,spend:5400},
-  {name:"Benchmark_Report_Static_V2",ad_id:"238604118_V2",ad_set:"Lookalike_DevTools",fmt:"Single Image",copy:"Activated-user seed",impr:298000,clicks:2060,ctr:0.69,signup_rate:4.1,activation_rate:52.0,pql_rate:17.5,signup_cost:44,churn_rate:14.0,spend:3200},
+  {name:"Benchmark_Report_Static_V2",ad_id:"238604159",ad_set:"Lookalike_DevTools",fmt:"Single Image",copy:"Activated-user seed",impr:298000,clicks:2060,ctr:0.69,signup_rate:4.1,activation_rate:52.0,pql_rate:17.5,signup_cost:44,churn_rate:14.0,spend:3200},
   {name:"DocsRetarget_Carousel",ad_id:"238820735",ad_set:"Retarget_Docs_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:96000,clicks:1840,ctr:1.92,signup_rate:7.2,activation_rate:63.6,pql_rate:28.8,signup_cost:22,churn_rate:4.2,spend:1000},
-  {name:"DocsRetarget_Carousel_V2",ad_id:"238820735_V2",ad_set:"Retarget_Docs_Visitors",fmt:"Carousel",copy:"Pricing readers",impr:148000,clicks:2780,ctr:1.88,signup_rate:7.0,activation_rate:64.0,pql_rate:29.1,signup_cost:22,churn_rate:3.8,spend:1900},
+  {name:"DocsRetarget_Carousel_V2",ad_id:"238820776",ad_set:"Retarget_Docs_Visitors",fmt:"Carousel",copy:"Pricing readers",impr:148000,clicks:2780,ctr:1.88,signup_rate:7.0,activation_rate:64.0,pql_rate:29.1,signup_cost:22,churn_rate:3.8,spend:1900},
   {name:"Founder_Talking_Head",ad_id:"238605500",ad_set:"Thought_Leadership_Video",fmt:"Video",copy:"Founder POV",impr:540000,clicks:2200,ctr:0.41,signup_rate:4.4,activation_rate:32.3,pql_rate:8.3,signup_cost:66,churn_rate:33.3,spend:6300}
 ];
 var CR2_L30=[
   {name:"Migration_Static_Control",ad_id:"238933602",ad_set:"ICP_Eng_Leaders",fmt:"Single Image",copy:"Static control",impr:383240,clicks:1581,ctr:0.40,signup_rate:3.0,activation_rate:42.5,pql_rate:11.6,signup_cost:100,churn_rate:17.4,spend:7772},
-  {name:"Migration_Guide_Doc",ad_id:"238933602_V2",ad_set:"ICP_Eng_Leaders",fmt:"Document Ad",copy:"Migration",impr:527360,clicks:3968,ctr:0.77,signup_rate:5.5,activation_rate:58.5,pql_rate:25.0,signup_cost:72,churn_rate:9.3,spend:8448},
+  {name:"Migration_Guide_Doc",ad_id:"238933643",ad_set:"ICP_Eng_Leaders",fmt:"Document Ad",copy:"Migration",impr:527360,clicks:3968,ctr:0.77,signup_rate:5.5,activation_rate:58.5,pql_rate:25.0,signup_cost:72,churn_rate:9.3,spend:8448},
   {name:"Benchmark_Report_Static",ad_id:"238604118",ad_set:"Lookalike_DevTools",fmt:"Single Image",copy:"Benchmark Data",impr:890800,clicks:6419,ctr:0.71,signup_rate:4.3,activation_rate:40.5,pql_rate:11.9,signup_cost:41,churn_rate:26.9,spend:7074},
-  {name:"Benchmark_Report_Static_V2",ad_id:"238604118_V2",ad_set:"Lookalike_DevTools",fmt:"Single Image",copy:"Activated-user seed",impr:375480,clicks:2596,ctr:0.72,signup_rate:4.3,activation_rate:54.1,pql_rate:18.2,signup_cost:42,churn_rate:14.6,spend:4032},
+  {name:"Benchmark_Report_Static_V2",ad_id:"238604159",ad_set:"Lookalike_DevTools",fmt:"Single Image",copy:"Activated-user seed",impr:375480,clicks:2596,ctr:0.72,signup_rate:4.3,activation_rate:54.1,pql_rate:18.2,signup_cost:42,churn_rate:14.6,spend:4032},
   {name:"DocsRetarget_Carousel",ad_id:"238820735",ad_set:"Retarget_Docs_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:130560,clicks:2502,ctr:1.88,signup_rate:7.1,activation_rate:62.3,pql_rate:28.2,signup_cost:23,churn_rate:4.1,spend:1360},
-  {name:"DocsRetarget_Carousel_V2",ad_id:"238820735_V2",ad_set:"Retarget_Docs_Visitors",fmt:"Carousel",copy:"Pricing readers",impr:190920,clicks:3586,ctr:1.94,signup_rate:7.2,activation_rate:65.9,pql_rate:30.0,signup_cost:22,churn_rate:3.9,spend:2451},
+  {name:"DocsRetarget_Carousel_V2",ad_id:"238820776",ad_set:"Retarget_Docs_Visitors",fmt:"Carousel",copy:"Pricing readers",impr:190920,clicks:3586,ctr:1.94,signup_rate:7.2,activation_rate:65.9,pql_rate:30.0,signup_cost:22,churn_rate:3.9,spend:2451},
   {name:"Founder_Talking_Head",ad_id:"238605500",ad_set:"Thought_Leadership_Video",fmt:"Video",copy:"Founder POV",impr:718200,clicks:2926,ctr:0.39,signup_rate:4.2,activation_rate:31.0,pql_rate:8.0,signup_cost:69,churn_rate:32.0,spend:8379}
 ];
 var CR3=[
@@ -603,7 +610,7 @@ var PLATFORM_LOG={
   ]
 };
 var AD_PLATFORM={
-  c1:{name:'Meta',manager:'https://adsmanager.facebook.com/adsmanager/manage/ads?act={account}'},
+  c1:{name:'Meta',manager:'https://adsmanager.facebook.com/adsmanager/manage/ads?act={account}',verifiedAdFilter:true},
   c2:{name:'LinkedIn',manager:'https://www.linkedin.com/campaignmanager/accounts/{account}/campaigns'},
   c3:{name:'Google Ads',manager:'https://ads.google.com/aw/ads'}
 };
@@ -853,24 +860,24 @@ var NOTES=[
    note:"Activation-event lookalike running against the signup lookalike.",
    hyp:"Seeding the lookalike on activated users instead of all signups will pull activation from 41% toward the 57% ICP benchmark.",
    variable:"Lookalike seed event",testSetup:"Duplicated ad set on the activated-user seed, 50/50 split, 21-day read",
-   version:2,controlAdId:'238604118',testAdId:'238604118_V2',controlSpend:5400,testSpend:3200,controlCtr:0.72,testCtr:0.69,controlRate:4.4,testRate:4.1},
+   controlAdId:'238604118',testAdId:'238604159',controlSpend:5400,testSpend:3200,controlCtr:0.72,testCtr:0.69,controlRate:4.4,testRate:4.1},
   {id:5,unit:"NB_Competitor_Alt",ctx:"M3",date:"Aug 15",status:"doing",priority:"medium",
    note:"Landing page test \u2014 docs sandbox versus demo form.",
    hyp:"Competitor-alternative traffic is bottom-of-funnel; sending it to a live docs sandbox instead of a demo form should lift signup CVR above 3.5%.",
    variable:"Landing page destination",testSetup:"50/50 ad-group split, 14-day read",
-   version:2,controlAdId:'238711947',testAdId:'238711947_V2',controlSpend:7400,testSpend:2600,controlCtr:1.95,testCtr:2.08,controlRate:2.5,testRate:3.6},
+   controlAdId:'238711947',testAdId:'238711988',controlSpend:7400,testSpend:2600,controlCtr:1.95,testCtr:2.08,controlRate:2.5,testRate:3.6},
   {id:6,unit:"Retarget_Docs_Visitors",ctx:"M2",date:"Aug 5",status:"done",priority:"medium",
    note:"Widened docs retargeting to changelog and pricing readers.",
    hyp:"Pricing-page readers convert at least as well as docs readers, so widening the pool will hold cost per signup under $30.",
    variable:"Retargeting source pages",testSetup:"New audience, 18-day read",
    verdict:"Confirmed \u2014 $22 per signup at 64% activation, best unit on the account. Budget doubled.",
-   version:2,controlAdId:'238820735',testAdId:'238820735_V2',controlSpend:1000,testSpend:1900,controlCtr:1.92,testCtr:1.88,controlRate:7.2,testRate:7.0},
+   controlAdId:'238820735',testAdId:'238820776',controlSpend:1000,testSpend:1900,controlCtr:1.92,testCtr:1.88,controlRate:7.2,testRate:7.0},
   {id:7,unit:"ICP_Eng_Leaders",ctx:"M2",date:"Jul 28",status:"completed",priority:"low",
    note:"Document ad versus single image for the migration offer.",
    hyp:"A document ad will pre-qualify readers and lift PQL% above 20% even at a higher cost per click.",
    variable:"Ad format",testSetup:"Parallel creative in the same ad set, 28-day read",
    verdict:"Confirmed \u2014 24% PQL versus 12% on the static, at $74 per signup. Static retired.",
-   version:2,controlAdId:'238933602',testAdId:'238933602_V2',controlSpend:5800,testSpend:6600,controlCtr:0.41,testCtr:0.75,controlRate:3.1,testRate:5.4}
+   controlAdId:'238933602',testAdId:'238933643',controlSpend:5800,testSpend:6600,controlCtr:0.41,testCtr:0.75,controlRate:3.1,testRate:5.4}
 ];
 var _pendingNote={};
 var _dragId=null;
@@ -920,9 +927,7 @@ function cardHtml(n){
     var note='';
     if(auto){note=' &middot; matched from ad set';}
     else if(n.testAdId&&!tst){
-      if(n.dupState==='failed'){note=' &middot; <span class="fail">create failed, finish in '+platformFor(n).name+'</span>';}
-      else if(n.dupState==='created'){note=' &middot; <span class="pend">created, awaiting next data refresh</span>';}
-      else if(n.dupVia){note=' &middot; <span class="pend">requested in '+platformFor(n).name+'</span>';}
+      if(n.dupState==='awaiting_id'){note=' &middot; <span class="pend">paste the new ad\u2019s ID onto this card</span>';}
       else{note=' &middot; snapshot, ad not in this window';}
     }
     ids='<div class="kb-card-ids">control '+(cId||'\u2014')+' &middot; test '+(tId||'\u2014')+note+'</div>';
@@ -973,7 +978,19 @@ function completeCard(id,e){e.stopPropagation();var n=NOTES.find(function(x){ret
 //
 // Whatever the route, the card records the intended ad ID and shows the request
 // as pending until an ad with that ID actually turns up in the creative data.
-var DUP_RELAY='';
+// -- ADS MANAGER DEEP LINKS -------------------------------------------------
+// This dashboard never changes an ad account. Pause and Duplicate both open the
+// native editor with the right row selected and log what happened; nothing here
+// creates, pauses or renames anything on a platform. A server build can create
+// the ad for real (see docs/railway-setup.md) with the token held server-side -
+// a page holding a credential that can spend money is not a trade worth making.
+//
+// The Meta ad-level filter below was READ OFF a real Ads Manager URL, not
+// inferred. Two things a guess gets wrong: \u001E is an ASCII record separator
+// delimiting field / operator / value, not '&' with bracketed indices; and
+// ADGROUP is Meta's legacy name for an AD, not an ad set. An invalid filter_set
+// is accepted silently and filters nothing, so tests assert this byte-for-byte.
+var META_AD_FILTER='SEARCH_BY_ADGROUP_ID-STRING\u001EEQUAL\u001E"{id}"';
 
 function channelForCtx(ctx){
   var c=String(ctx||'');
@@ -987,77 +1004,91 @@ function platformFor(n){
   var p=(typeof AD_PLATFORM!=='undefined'&&AD_PLATFORM[key])?AD_PLATFORM[key]:null;
   return p||{name:'the ad platform',manager:''};
 }
-function adManagerUrl(n){
-  var p=platformFor(n);
-  if(!p.manager)return'';
-  var acct=(document.getElementById('cfg-account-id')||{}).value||'';
+function accountId(){return(((document.getElementById('cfg-account-id')||{}).value)||'').trim();}
+
+// Which platform level a table reports at, so a link selects the right object.
+function levelForTable(t){
+  var k=String(t||'').replace('tbl-','');
+  if(/^g?cr/.test(k))return'ad';
+  if(/^[mg]?d\d*$/.test(k))return'campaign';
+  return'adset';
+}
+// Ad rows carry ad_id. Ad set and campaign rows only deep-link to one entity
+// when the data carries the platform's id for them; without it we open the
+// account and say so, rather than producing a link that lands on an unfiltered
+// table while looking like it filtered.
+function rowPlatformId(row,level){
+  if(!row)return'';
+  return String((level==='ad'?row.ad_id:row.id)||'');
+}
+function rowByName(tableId,name){
+  var cfg=(typeof CONFIGS!=='undefined')?CONFIGS[tableId]:null;
+  var rows=(cfg&&cfg.data)||[];
+  for(var i=0;i<rows.length;i++)if(rows[i].name===name)return rows[i];
+  return null;
+}
+function levelLabel(l){return{ad:'ad',adset:'ad set',campaign:'campaign'}[l]||String(l);}
+function todayLabel(){return new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+
+// level: 'ad' | 'adset' | 'campaign'. Only Meta's ad filter has been verified
+// against a real URL; every other level and platform selects the row inside the
+// full list instead, because a working select beats an unverified filter.
+function adsManagerUrl(chKey,level,id){
+  var p=(typeof AD_PLATFORM!=='undefined'&&AD_PLATFORM[chKey])?AD_PLATFORM[chKey]:null;
+  if(!p||!p.manager)return'';
+  var acct=accountId();
   var url=p.manager.replace('{account}',encodeURIComponent(acct));
   // Drop an account parameter we have no value for rather than sending an empty one.
   if(!acct)url=url.replace(/[?&][a-z_]+=(?=$|&)/i,'').replace(/\?$/,'');
-  return url;
+  if(!id)return url;
+  var sep=url.indexOf('?')<0?'?':'&';
+  if(p.verifiedAdFilter&&level==='ad')
+    return url+sep+'filter_set='+encodeURIComponent(META_AD_FILTER.replace('{id}',id));
+  var key={ad:'selected_ad_ids',adset:'selected_adset_ids',campaign:'selected_campaign_ids'}[level];
+  return key?url+sep+key+'='+encodeURIComponent(id):url;
+}
+function adManagerUrl(n){return adsManagerUrl(channelForCtx(n.ctx),'ad',n.controlAdId||'');}
+
+// window.open must be called synchronously from the click - a call after an
+// await is blocked. A blocked popup returns null: show the URL rather than
+// leaving someone waiting for a tab that never arrives.
+function openPlatform(url,what){
+  if(!url){alert('No ads manager URL is set for this channel.\n\nAdd one to AD_PLATFORM.');return false;}
+  var w=window.open(url,'_blank','noopener');
+  if(!w){alert('Your browser blocked the new tab.\n\nOpen '+(what||'the ads manager')+' here:\n\n'+url);return false;}
+  return true;
 }
 
-function duplicateRequest(n,newId){
-  return{action:'duplicate_ad',platform:platformFor(n).name,
-    ad_account:(document.getElementById('cfg-account-id')||{}).value||null,
-    unit:n.unit,control_ad_id:n.controlAdId||null,new_ad_id:newId,
-    new_ad_name:n.unit+'_'+newId,variable:n.variable||null,hypothesis:n.hyp||null,
-    status:'PAUSED'};
-}
-
-function relayDuplicate(req,n){
-  fetch(DUP_RELAY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req)})
-    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
-    .then(function(d){
-      if(d&&d.ad_id)n.testAdId=d.ad_id;
-      n.dupState='created';renderKanban();
-    })
-    .catch(function(err){
-      n.dupState='failed';n.dupError=String((err&&err.message)||err);
-      renderKanban();
-      alert('The relay could not create the ad.\n\n'+n.dupError
-        +'\n\nFinish it in '+platformFor(n).name+' Ads Manager using the link on the card.');
-    });
-}
-
+// Duplicate creates nothing. It opens the native editor filtered to the source
+// ad so a person makes the copy, writes the control id onto the card, and waits
+// for the real new id to be pasted back.
+//
+// It must never mint an id. An earlier version appended _V2 to the control's id
+// - an id no platform ever issued, so the card could never be matched against a
+// real pull - and split the control ad's real spend and conversions in half to
+// populate a synthetic creative row, altering a real ad's figures in a
+// dashboard leadership reads. A duplicated ad has no performance yet: it starts
+// empty and shows real numbers on the next pull.
 function duplicateCard(id,e){
   if(e)e.stopPropagation();
   var n=null;NOTES.forEach(function(x){if(x.id===id)n=x;});
   if(!n)return;
   var plat=platformFor(n);
-  var next=(n.version||1)+1;
-  var base=n.controlAdId||(function(){
-    var found=resolveUnitAds(n.unit);
-    return found.control?found.control.ad_id:('238'+String(Math.abs(n.id)).slice(-6));
-  })();
-  var newId=base+'_V'+next;
-  var via=(typeof sendPrompt==='function')?'mcp':(DUP_RELAY?'relay':'manual');
-  var how={mcp:'via the connected '+plat.name+' MCP tool',
-           relay:'via your configured relay endpoint',
-           manual:'by opening '+plat.name+' Ads Manager for you to finish'}[via];
-  if(!confirm('This creates a live ad in '+plat.name+'.\n\nDuplicate the top ad in "'
-    +n.unit+'" as '+newId+', paused, '+how+'?'))return;
-
-  n.controlAdId=base;n.version=next;n.testAdId=newId;n.status='doing';
-  n.dupVia=via;n.dupState='requested';delete n.dupError;
-  var req=duplicateRequest(n,newId);
-
-  if(via==='mcp'){
-    hostPrompt('Duplicate the top ad in '+plat.name+' ad set "'+n.unit+'" for account '
-      +(req.ad_account||'(account not set in Settings)')+'. Clone '+base+' as '+newId
-      +', name it '+req.new_ad_name+', create it PAUSED, then reply with the real ad ID '
-      +'the platform returned plus its spend, CTR and conversion rate so the card can be updated.');
-  }else if(via==='relay'){
-    relayDuplicate(req,n);
-  }else{
-    var url=adManagerUrl(n);
-    alert('No MCP host or relay is configured, so this has not been created yet.\n\n'
-      +'Open '+plat.name+' Ads Manager from the link on the card and duplicate:\n\n'
-      +JSON.stringify(req,null,2)
-      +(url?'\n\n'+url:''));
-  }
+  var ch=channelForCtx(n.ctx);
+  var found=(typeof resolveUnitAds==='function')?resolveUnitAds(n.unit):null;
+  var ctl=n.controlAdId||(found&&found.control?found.control.ad_id:'');
+  if(!confirm('Open '+plat.name+' Ads Manager to duplicate an ad in "'+n.unit+'"?\n\n'
+    +'This dashboard will not create anything. Copy the ad there, leave the copy PAUSED, '
+    +'then paste the new ad’s ID onto this card.'
+    +(ctl?'':'\n\nNo control ad ID was found for this unit, so the link opens the account.')))return;
+  if(!openPlatform(adsManagerUrl(ch,'ad',ctl),plat.name+' Ads Manager'))return;
+  if(ctl)n.controlAdId=ctl;
+  n.status='doing';
+  n.dupState='awaiting_id';
+  delete n.dupError;
   renderKanban();
 }
+
 
 // Archives rather than deletes — the log is the point, so completed tests come
 // off the board but stay in NOTES and can be restored.
@@ -1081,6 +1112,11 @@ function fillModal(v){
   document.getElementById('nm-var').value=v.variable||'';
   document.getElementById('nm-setup').value=v.testSetup||'';
   document.getElementById('nm-verdict').value=v.verdict||'';
+  document.getElementById('nm-ctl-id').value=v.controlAdId||'';
+  document.getElementById('nm-test-id').value=v.testAdId||'';
+  ['nm-ctl-id','nm-test-id'].forEach(function(f){
+    var m=document.getElementById(f+'-msg');if(m){m.textContent='';m.className='idmsg';}
+  });
   document.getElementById('nm-priority').value=v.priority||'medium';
   document.getElementById('nm-status').value=v.status||'todo';
 }
@@ -1114,6 +1150,57 @@ function openCard(id,e){
   document.getElementById('note-modal').style.display='block';
 }
 function closeNoteModal(){_editingId=null;document.getElementById('note-overlay').style.display='none';document.getElementById('note-modal').style.display='none';}
+// -- AD ID INPUT ------------------------------------------------------------
+// Every route to an ad id goes through a URL containing it, so accept either an
+// id or the Ads Manager link and collapse the field to the id. Show what was
+// read rather than silently rewriting what someone typed.
+//
+// Two things are refused outright:
+//   * a link naming an ad SET or CAMPAIGN, because that id can never match an
+//     ad, and taking the number anyway puts an id on the card that looks
+//     comparable and is not;
+//   * a legacy "<id>_V2", which an earlier version of this dashboard minted
+//     locally. No platform ever issued one, so it can never match a real pull.
+function parseAdIdInput(raw){
+  var s=String(raw||'').trim();
+  if(!s)return{id:'',msg:'',ok:true};
+  if(/_V\d+\s*$/i.test(s))
+    return{id:'',ok:false,
+      msg:'That is a locally invented ID, not one Meta issued. Paste the real ad ID from Ads Manager.'};
+  if(/^\d{6,}$/.test(s))return{id:s,ok:true,msg:''};
+  if(/^https?:\/\//i.test(s)){
+    var wrong=s.match(/[?&](selected_(adset|campaign)_ids)=(\d+)/i);
+    if(wrong)
+      return{id:'',ok:false,
+        msg:'That link points at '+(/adset/i.test(wrong[1])?'an ad set':'a campaign')+', not an ad. Open the ad itself and copy that link.'};
+    var m=s.match(/[?&]selected_ad_ids=(\d+)/i)
+       || s.match(/SEARCH_BY_ADGROUP_ID[^"]*?%22(\d+)%22/i)
+       || s.match(/SEARCH_BY_ADGROUP_ID[^"]*?"(\d+)"/);
+    if(m)return{id:m[1],ok:true,msg:'Read ad ID '+m[1]+' from the link.'};
+    return{id:'',ok:false,msg:'No ad ID found in that link. Paste the ID itself instead.'};
+  }
+  var loose=s.match(/(\d{6,})/);
+  if(loose)return{id:loose[1],ok:true,msg:'Read ad ID '+loose[1]+'.'};
+  return{id:'',ok:false,msg:'That does not look like an ad ID or an Ads Manager link.'};
+}
+function normalizeAdIdField(fieldId){
+  var el=document.getElementById(fieldId);if(!el)return'';
+  var msgEl=document.getElementById(fieldId+'-msg');
+  var r=parseAdIdInput(el.value);
+  // Only collapse the field once there is something to collapse to, so typing
+  // a long link is not fought character by character.
+  var collapsed=false;
+  if(r.ok&&r.id&&r.id!==el.value&&!/^\d+$/.test(el.value)){el.value=r.id;collapsed=true;el.dataset.readFrom=r.id;}
+  // Collapsing fires another input event whose value is now a bare id, with no
+  // message of its own. Keep the confirmation until the field actually changes,
+  // or "read ad ID X from the link" flashes and disappears.
+  var keep=(!collapsed&&!r.msg&&r.ok&&el.dataset.readFrom&&el.dataset.readFrom===el.value);
+  if(keep)return r.id;
+  if(!keep&&el.dataset.readFrom&&el.dataset.readFrom!==el.value)delete el.dataset.readFrom;
+  if(msgEl){msgEl.textContent=r.msg||'';msgEl.className='idmsg'+(r.msg?(r.ok?' ok':' bad'):'');}
+  return r.ok?r.id:'';
+}
+
 function saveNote(){
   var v={note:document.getElementById('nm-text').value,
     hyp:document.getElementById('nm-hyp').value,
@@ -1121,13 +1208,30 @@ function saveNote(){
     testSetup:document.getElementById('nm-setup').value,
     verdict:document.getElementById('nm-verdict').value,
     priority:document.getElementById('nm-priority').value,
-    status:document.getElementById('nm-status').value};
+    status:document.getElementById('nm-status').value,
+    // Normalize at save time too: a link can be pasted and Save clicked
+    // without the field ever losing focus.
+    controlAdId:normalizeAdIdField('nm-ctl-id'),
+    testAdId:normalizeAdIdField('nm-test-id')};
+  // A field holding something invalid blocks the save. Dropping it silently
+  // would leave whatever was there before while looking like it saved.
+  var badField=['nm-ctl-id','nm-test-id'].filter(function(f){
+    var el=document.getElementById(f);
+    return el&&el.value.trim()&&!parseAdIdInput(el.value).ok;});
+  if(badField.length){
+    alert('Fix the ad ID before saving.\n\n'
+      +badField.map(function(f){return (document.getElementById(f+'-msg')||{}).textContent||'';}).join('\n'));
+    return;
+  }
+  if(!v.controlAdId)delete v.controlAdId;
+  if(!v.testAdId)delete v.testAdId;
   if(_editingId){
     NOTES.forEach(function(n){if(n.id===_editingId){for(var k in v)n[k]=v[k];}});
   }else{
     NOTES.push({id:Date.now(),unit:_pendingNote.unit,ctx:_pendingNote.ctx,
       note:v.note,hyp:v.hyp,variable:v.variable,testSetup:v.testSetup,verdict:v.verdict,
       priority:v.priority,status:v.status,
+      controlAdId:v.controlAdId,testAdId:v.testAdId,
       date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})});
   }
   closeNoteModal();renderKanban();
@@ -1442,7 +1546,6 @@ function clearCreativeFilter(){
 }
 
 // ── PAUSE / RESUME (both fire live MCP calls in a real deployment) ─────────
-var PAUSED=[];
 function wirePauseAndClick(){
   var _origRerender=rerender;
   rerender=function(id){
@@ -1458,13 +1561,11 @@ function wirePauseAndClick(){
       var unit=row.name||nc.textContent.trim().split('\n')[0].trim();
       var ctx=id.replace('tbl-','').toUpperCase();
       var esc=unit.replace(/'/g,"\\'");
-      var isPaused=PAUSED.indexOf(unit)>=0;
-      tr.classList.toggle('is-paused',isPaused);
       var oldAct=tr.querySelector('td.act-td');if(oldAct)oldAct.remove();
       var td=document.createElement('td');td.className='act-td pause-col';
       // Monthly/Weekly rows drill into creatives, so logging a note moves to its own button.
       var noteBtn=canDrill?'<button class="note-btn" onclick="openNoteModal(\''+id+'\',\''+esc+'\',\''+ctx+'\',event)" title="Log a note">&#9998;</button>':'';
-      td.innerHTML=noteBtn+'<button class="pause-btn'+(isPaused?' is-paused':'')+'" onclick="togglePause(\''+esc+'\',\''+id+'\',event)" title="'+(isPaused?'Resume':'Pause')+'">'+(isPaused?'&#9654;':'&#9646;&#9646;')+'</button>';
+      td.innerHTML=noteBtn+'<button class="pause-btn" onclick="togglePause(\''+esc+'\',\''+id+'\',event)" title="Pause in Ads Manager">&#9646;&#9646;</button>';
       tr.appendChild(td);
       tr.onclick=function(e){
         if(e.target.tagName==='A'||e.target.closest('.act-td'))return;
@@ -1473,23 +1574,36 @@ function wirePauseAndClick(){
     });
   };
 }
+// The dashboard does not pause anything - pausing happens in the native editor.
+// The click is worth having for the two things around it: the trip to the
+// platform with the right row selected, and the log entry that otherwise gets
+// written later or not at all. No local "paused" flag is set, because the page
+// cannot know whether the pause actually happened; the real status arrives with
+// the next data refresh.
 function togglePause(unit,tableId,e){
-  e.stopPropagation();
-  var idx=PAUSED.indexOf(unit);
-  var willPause=idx<0;
-  if(!confirm((willPause?'Pause':'Resume')+' "'+unit+'" on the live ad account?'))return;
-  // Both branches fire a real host call through the guard — pause and resume are
-  // symmetric, and neither is dashboard-only state.
-  hostPrompt((willPause?'Pause':'Resume')+' the unit named "'+unit+'" on the connected ad platform, then confirm its new status.');
-  if(idx>=0){PAUSED.splice(idx,1);}
-  else{
-    PAUSED.push(unit);
-    NOTES.push({id:Date.now(),unit:unit,ctx:tableId.replace('tbl-','').toUpperCase(),
-      note:'Flagged for pausing',priority:'high',status:'todo',
-      date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})});
+  if(e)e.stopPropagation();
+  var ctx=tableId.replace('tbl-','').toUpperCase();
+  var ch=channelForCtx(ctx);
+  var plat=(typeof AD_PLATFORM!=='undefined'&&AD_PLATFORM[ch])||{name:'the ad platform',manager:''};
+  var level=levelForTable(tableId);
+  var lbl=levelLabel(level);
+  var pid=rowPlatformId(rowByName(tableId,unit),level);
+  if(!confirm('Open '+plat.name+' Ads Manager to pause the '+lbl+' "'+unit+'"?\n\n'
+    +'This dashboard will not pause it - you do that in Ads Manager. A note goes on the board either way.'
+    +(pid?'':'\n\nThe data has no platform ID for this row, so the link opens the account rather than this '+lbl+'.')))return;
+  if(!openPlatform(adsManagerUrl(ch,level,pid),plat.name+' Ads Manager'))return;
+  var when=todayLabel();
+  // Pausing, unpausing and pausing again in one sitting must not stack
+  // identical cards, so dedupe on entity + action + date.
+  var dupe=NOTES.some(function(x){return x.unit===unit&&x.action==='pause'&&x.date===when&&!x.archived;});
+  if(!dupe){
+    NOTES.push({id:Date.now(),unit:unit,ctx:ctx,date:when,status:'completed',priority:'medium',
+      action:'pause',
+      note:'Paused on '+when+'. '+plat.name+' '+lbl+(pid?' ID '+pid:' "'+unit+'" (no platform ID in the data)')+'.'});
+    renderKanban();
   }
-  rerender(tableId);renderKanban();
 }
+
 
 function openSettings(){document.getElementById('settings-overlay').style.display='block';document.getElementById('settings-modal').style.display='block';}
 function closeSettings(){document.getElementById('settings-overlay').style.display='none';document.getElementById('settings-modal').style.display='none';}

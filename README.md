@@ -106,12 +106,12 @@ The Creatives toggle swaps a genuine second dataset (`CR1` / `CR1_L30`), not a s
 - **Changelog card click** opens the card in the same modal for editing — note, hypothesis, variable, test setup, verdict, priority and column — and saves back to that card.
 - **The Changelog board persists, and where depends on how you run it** — a shared board on a published AI link, a database on a server, and otherwise this browser only. Full comparison in [Sharing the board](#sharing-the-board). In every case a data refresh replaces the metrics, not the test log, and "Archive Done" archives completed cards with a restore link rather than deleting them.
 - **A rebuild doesn't wipe your cards.** The saved board is stamped with a fingerprint of the seeded cards it came from, so rebuilding with different seeds keeps the cards you added yourself and drops the stale seeded ones.
-- **Duplicate** writes versioned ad IDs (`<control>_V2`) onto the card and moves it to Testing, and the card then shows a Control vs Test strip with spend, CTR and the motion's conversion rate.
+- **Duplicate** opens the platform's editor, writes the control ad's ID onto the card and moves it to Testing; once you paste the new ad's ID back, the card shows a Control vs Test strip with spend, CTR and the motion's conversion rate.
 - **That strip auto-populates.** Move a card into Testing and it finds the unit's ads in the creative data by itself — no ad IDs to type. Explicit IDs written by Duplicate take precedence; where no test ad exists yet the test column shows an em dash.
 - It **reads the live ad rows**, looked up by `ad_id`, always on the MTD window so a card's numbers don't shift when the Creatives page is toggled to L30. The values stored on the card are a fallback for ad IDs that don't resolve — a campaign-level channel, a deleted ad — and the card labels itself "snapshot" when it uses them.
-- Duplicated ads are **real creative rows** sharing their parent ad set's spend, so creative spend still rolls up to the channel total.
+- A duplicated ad that has run is a **real creative row** with the platform's own ID and its own spend, so creative spend still rolls up to the channel total.
 - **Platform change-log panels** under the board render from a `PLATFORM_LOG` map, one per channel, and fall back to an empty state for channels with no entries.
-- **Pause** buttons appear on every table row, and dragging cards between Changelog columns works as expected.
+- **Pause** buttons appear on every table row — they open the platform's editor and log the change. Dragging cards between Changelog columns works as expected.
 
 ## Adding a third channel
 
@@ -123,17 +123,23 @@ The blank template ships with two channels. Both three-channel examples show wha
 
 Use the "ad group" renderers (`renderGMW` / `renderGDaily`, which add Campaign and Status columns) for whichever channel is search-like, and the plain ones for the rest. In the ecommerce example that is Google Shopping (`c2`); in the product-led example it is Google (`c3`).
 
-## Duplicate: creating the ad for real
+## Pause and Duplicate: the dashboard opens the editor
 
-A single HTML file cannot call Meta, Google, TikTok or LinkedIn directly — those APIs send no CORS headers, and an access token in the page would be a leaked credential. So Duplicate takes the best route available:
+Neither button changes your ad account. That is deliberate: a page that holds a credential able to spend money is a page one mis-click away from spending it.
 
-1. **MCP** — if the dashboard is open inside a host (Claude, or the Visualizer widget), it hands the job to the agent, which calls the connected ad-platform MCP server and reports the real ad ID back.
-2. **Relay** — if you set a *Duplication relay URL* in Settings, it POSTs the request there. That endpoint is yours and holds the platform credentials server-side. A published artifact's CSP blocks outbound fetches, so this route works from a standalone file or your own host.
-3. **Deep link** — always works, no credentials: it opens the native ads manager for that channel (from `AD_PLATFORM`, with your ad account ID substituted) and shows the exact payload to replicate.
+**Pause** confirms, opens Ads Manager for that exact ad, ad set or campaign, and writes a Changelog card in Completed — `Paused on Aug 23. Meta ad set ID 12345.` You do the pausing in Ads Manager. The value is the trip to the right screen plus the log entry that otherwise gets written later or never. Pausing the same thing twice in a day logs one card, not two.
 
-Every new ad is requested **PAUSED**, and every route confirms first. The card then shows whether the test ad is `requested`, `created` or `failed`, and says "awaiting next data refresh" until an ad with that ID actually appears in the creative data — so a requested ad never reads as a measured one.
+**Duplicate** confirms, opens Ads Manager filtered to the source ad, writes the **control** ad's ID onto the card, and moves it to Testing marked *awaiting an ID*. You copy the ad there, leave the copy paused, and paste the new ad's real ID back into the card. Then the Control vs Test strip fills in from the next data refresh.
 
-The ads-manager URLs in `AD_PLATFORM` are starting points. **Verify them against your own accounts** — account-ID parameters differ per platform and the URL shapes change.
+**Why you paste the ID rather than the dashboard guessing it.** An earlier version invented one by adding `_V2` to the control's ID — an ID no platform ever issued, so it could never be matched against real data — and split the control ad's real spend and conversions in half to fill the new row. That changed a real ad's real numbers in a dashboard people make decisions from. A duplicated ad has no performance yet; it starts empty and shows real figures on the next pull.
+
+The ad ID fields accept **either the ID or an Ads Manager link** and pull the ID out of the link for you, showing what it read. A link pointing at an ad set or campaign is refused, because that ID can never match an ad.
+
+**Deep links.** Meta's ad-level filter is verified against a real Ads Manager URL and asserted byte-for-byte in the tests. Other levels and platforms select the row inside the full list instead of filtering, because an unverified filter is accepted silently and narrows nothing. To upgrade one: filter by that ID in the platform's own manager, copy the URL, and read the key off it.
+
+For ad set and campaign rows to deep-link to one entity, the data needs an `id` column alongside `name`. Without it the link opens the account, and the dashboard says so rather than pretending it filtered.
+
+On a **server build** the token lives server-side and the server can create the ad for real — see [`docs/railway-setup.md`](docs/railway-setup.md).
 
 ## Where to run it
 
@@ -198,9 +204,11 @@ The state line beside the button says which path is in effect:
 
 Two caveats worth knowing before you rely on it. Saves are last-writer-wins per save, not per card: two people editing at once, both pressing Save, means the second overwrites the first — the conflict state catches the common case but the window is a real one, so treat the board like a shared doc, not a live-sync app. And a published artifact is only shared with the people you share it with; the board inherits exactly those permissions, no more.
 
-## Live actions (pause/resume/duplicate ads)
+## Settings
 
-The Settings modal (gear icon, top right) accepts an API key, an ad account ID, and an optional duplication relay URL. **Never commit real API keys to this repo or any fork of it**, and note that nothing typed into Settings is persisted — not to `localStorage`, not anywhere. It lives in the page for that session only, which is verified by a test that types a sentinel into both credential fields, saves, and asserts it never reaches storage.
+The Settings modal (gear icon, top right) accepts an API key and an ad account ID. **Never commit real API keys to this repo or any fork of it**, and note that nothing typed into Settings is persisted — not to `localStorage`, not anywhere. It lives in the page for that session only, which a test verifies by typing a sentinel into the credential field, saving, and asserting it never reaches storage.
+
+The account ID is used to build the ads-manager links. Nothing in the page can spend money with it.
 
 ## Testing a build
 
