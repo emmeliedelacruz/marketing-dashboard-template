@@ -64,6 +64,13 @@ What *does* vary per company: channel names, which KPIs populate the tables, and
 
 Both three-channel examples also carry one **paused** ad group that still spent during the month, to show the Monthly/Weekly rule: period tables include everything that delivered in the window, not just what is live now. Filtering those rows out silently drops their spend and flatters every remaining row.
 
+## Interactions worth knowing
+
+- **Monthly / Weekly row click** drills into Creatives — it switches to that unit's channel tab and filters the ad table to that ad set or ad group, with a Clear filter button. Names are matched loosely, and the row's campaign is matched too, so search channels reporting creatives at campaign level still resolve.
+- **Pencil button** on those rows logs a Changelog note (the row click is taken by the drill-down). On Daily, Creatives and Optimization the row click still opens the note modal.
+- **Changelog card click** opens the card in the same modal for editing — note, hypothesis, variable, test setup, verdict, priority and column — and saves back to that card.
+- **Pause** buttons appear on every table row, and dragging cards between Changelog columns works as expected.
+
 ## Adding a third channel
 
 The blank template ships with two channels. Both three-channel examples show what changes — nothing about the page structure, only how many of each thing there are:

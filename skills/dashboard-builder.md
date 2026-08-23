@@ -9,7 +9,8 @@
 - 2026-08-23: Added Product-led metric definitions (parallel to Sales-led set) so the motion-type onboarding question has concrete defaults for both paths.
 - 2026-08-23: Added Ecommerce as a third motion type with its own metric definitions and funnel-stage analog. Worked examples now ship for all three motions (`dashboard-example-filled.html` sales-led, `dashboard-example-ecommerce.html`, `dashboard-example-product-led.html`).
 - 2026-08-23: Channel count is two **or three** — the funnel and heatmap grids reflow, and every per-channel surface (tabs, panes, platform-changelog panels) repeats per channel. Both three-channel examples use index-based array names (M1/M2/M3 …) rather than channel initials.
-- 2026-08-23 (latest): Fixed the Monthly/Weekly row-inclusion rule — period tables show every unit that was active at any point in the window, including paused and deleted ones, scoped by delivery rather than current status.
+- 2026-08-23: Fixed the Monthly/Weekly row-inclusion rule — period tables show every unit that was active at any point in the window, including paused and deleted ones, scoped by delivery rather than current status.
+- 2026-08-23 (latest): Specified the two navigation behaviours — Monthly/Weekly row click drills into that unit's creatives, and clicking a Changelog card opens it for editing. Note logging moves to a per-row pencil button on Monthly/Weekly.
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
 
@@ -37,7 +38,7 @@ KPIs/metrics shown at each level vary by company and motion type (per onboarding
 
 **Funnel:** reflowing grid (`repeat(auto-fit,minmax(340px,1fr))`), one funnel card per channel — two or three across (Impressions→Clicks→Submits→SAL→SQL→ICP→BTC→DPC→Sold for sales-led; see Product-led analog below). Below: 2-col heatmap grid, one table per channel, verticals/segments as rows.
 
-**Monthly / Weekly:** Channel tabs. Per channel: single sortable table — Name, $/Sold, Won $, RoS, Sold, Spend, $/SAL, SAL, ICP%, BTC%, DPC%, Stuck%, Net EV (+pause column; Google adds Status + Campaign). Weekly row-click opens 2-button modal (View Creatives / Log Optimization).
+**Monthly / Weekly:** Channel tabs. Per channel: single sortable table — Name, $/Sold, Won $, RoS, Sold, Spend, $/SAL, SAL, ICP%, BTC%, DPC%, Stuck%, Net EV (+pause column; Google adds Status + Campaign). Row click on either page **drills into Creatives**: switch to the Creatives page, select that unit's channel tab, and filter the ad table to the ads belonging to that ad set / ad group, with a "Showing ads in X" bar carrying a Clear filter button. Match names loosely (lowercase, strip punctuation) — ad set, ad group and campaign names rarely agree on underscores versus spaces — and match on the row's campaign as well as its own name, since search channels report creatives at campaign level. Show a real empty state when nothing matches, never an empty table. Because the row itself is now a link, logging a note moves to a pencil button in the actions column beside Pause.
 
 **Row inclusion — Monthly / Weekly (fixed):** show every ad set / ad group that was **active at any point during the period**, not just the ones live right now. A unit that spent for three weeks and was paused on the 22nd still owns that spend for the month; filtering by current status silently drops its cost, understates blended CAC and overstates efficiency for everything left in the table. Include paused, ended, budget-exhausted and deleted units as long as they delivered in the window, and render them with the Paused chip and 40% opacity rather than hiding them. Scope rows by *delivery during the window*, never by *current state*. Daily is the exception: it reports the most recent day, so only units that delivered that day appear.
 
@@ -54,7 +55,8 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 - **4-column Kanban:** To Test → Testing → Evaluated → Completed. Drag-and-drop.
 - **Card fields:** Note (always) · Hypothesis (always, styled distinctly) · Variable Being Tested (always) · Test Setup (visible once Testing/Completed) · Control vs Test perf strip — Spend/CTR/Submit% (visible once duplicated) · Ad IDs, control+test (visible once duplicated) · Verdict (visible once Evaluated/Completed)
 - **Card actions:** Duplicate (calls MCP to clone top ad in the ad set with version suffix V2/V3…, auto-increments, logs old/new ad IDs, moves card to Testing — confirm before executing, it creates a live ad) · Complete (→ Completed) · Delete
-- Adding a card: click any table row → note modal → priority (High/Med/Low) + starting column
+- Adding a card: the pencil button on a Monthly/Weekly row, or a row click on Daily, Creatives or Optimization → note modal
+- **Opening a card: click it.** The card reuses the note modal in edit mode, pre-filled with note, hypothesis, variable, test setup, verdict, priority and column, saving back to the same card rather than creating a new one. Card buttons (Duplicate / Complete / Delete) must stop propagation so they don't also open the editor, and a drag must not count as a click. → priority (High/Med/Low) + starting column
 - Below board: one collapsible "Platform Changelog" panel per channel — sync button pulls last ~30 activity log entries via MCP; empty-state if not connected
 - **Pause button** (every row, always visible): live MCP call to pause by name. **Unpause: symmetric live MCP call to resume** — both need confirm-before-execute.
 - Settings modal (gear icon): API key + account ID for live actions. Never store credentials in browser storage.
@@ -166,6 +168,7 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 - Changing a metric means editing three things in step: the `*_LABELS` array (header), the matching `render*` function (the cell), and the chip helper that colors it. Retune the chip thresholds to the client's economics — the defaults are per-motion, not universal.
 - "CRM Sync%" is a generic label — rename per company's actual CRM stack, but the underlying check (lead-submit-to-CRM sync health) stays fixed as a Daily-page metric.
 - Cap KPI strip at 6-8 metrics per timeframe or it becomes noise.
+- Anything that looks clickable must do something, and anything that does something must look clickable. A Kanban card that ignores a click, or a table row that only sorts, reads as broken — wire the drill-down and the card editor before adding new metrics.
 - Never scope Monthly/Weekly rows to currently-active units. Period tables report what happened in the period, so anything that delivered in the window belongs in the table even if it is paused or deleted now — otherwise spend goes missing and the totals stop reconciling with the ad platform.
 - Channel count drives repetition, not structure: adding a third channel means one more funnel card, heatmap card, tab, pane, `CONFIGS` entry and changelog panel — never a new page or a different layout. Use the ad-group renderers (`renderGMW`/`renderGDaily`, which add Campaign and Status) for the search-like channel and the plain ones for the rest.
 

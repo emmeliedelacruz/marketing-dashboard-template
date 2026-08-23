@@ -157,6 +157,16 @@ tbody tr{cursor:pointer;}
 .ad-filters{display:flex;gap:6px;align-items:center;margin-bottom:12px;}
 .adfbtn{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #E5E7EB;background:#fff;color:#6B7280;}
 .adfbtn.on{border-color:#111827;background:#111827;color:#fff;}
+.pause-col{width:64px;text-align:center;}
+.act-td{white-space:nowrap;}
+.note-btn{background:#fff;border:1px solid #E5E7EB;cursor:pointer;font-size:11px;padding:3px 6px;border-radius:4px;color:#9CA3AF;transition:all 0.15s;margin-right:3px;}
+.note-btn:hover{border-color:#BFDBFE;color:#1D4ED8;background:#EFF6FF;}
+.cr-filter{display:none;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;}
+.cr-filter .lbl{font-size:12px;color:#1D4ED8;font-weight:600;}
+.cr-filter .unit{font-size:12px;color:#1E3A8A;font-weight:700;font-family:'SF Mono',monospace;}
+.cr-filter button{margin-left:auto;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #BFDBFE;background:#fff;color:#1D4ED8;}
+.kb-card{cursor:pointer;}
+.tbl-empty{text-align:center;color:#9CA3AF;padding:18px;font-size:12px;}
 </style>
 </head>
 <body>
@@ -194,7 +204,7 @@ tbody tr{cursor:pointer;}
 
 <!-- MONTHLY -->
 <div class="page" id="pg-monthly">
-  <div class="ph"><h2>Monthly</h2><span class="ph-sub">Ad set / ad group level &middot; Click column header to sort</span></div>
+  <div class="ph"><h2>Monthly</h2><span class="ph-sub">Ad set / ad group level &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('monthly','c1',this)">Meta <span class="ct">3 ad sets</span></button>
     <button class="ch-tab" onclick="showCh('monthly','c2',this)">LinkedIn <span class="ct">4 ad sets</span></button>
@@ -207,7 +217,7 @@ tbody tr{cursor:pointer;}
 
 <!-- WEEKLY -->
 <div class="page" id="pg-weekly">
-  <div class="ph"><h2>Weekly</h2><span class="ph-sub">Ad set / ad group level &middot; Click column header to sort</span></div>
+  <div class="ph"><h2>Weekly</h2><span class="ph-sub">Ad set / ad group level &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('weekly','c1',this)">Meta <span class="ct">1 ad set</span></button>
     <button class="ch-tab" onclick="showCh('weekly','c2',this)">LinkedIn <span class="ct">2 ad sets</span></button>
@@ -239,6 +249,10 @@ tbody tr{cursor:pointer;}
     <button class="ch-tab" onclick="showCh('creatives','c2',this)">LinkedIn Ads <span class="ct">4 ads</span></button>
     <button class="ch-tab" onclick="showCh('creatives','c3',this)">Google Campaigns <span class="ct">4 campaigns</span></button>
     <button class="ch-tab" onclick="showCh('creatives','adlib',this)">Ad Library <span class="ct">3 live ads</span></button>
+  </div>
+  <div class="cr-filter" id="cr-filter">
+    <span class="lbl">Showing ads in</span><span class="unit" id="cr-filter-unit"></span>
+    <button onclick="clearCreativeFilter()">Clear filter</button>
   </div>
   <div id="ch-creatives-c1">
     <div class="sort-bar">
@@ -287,7 +301,7 @@ tbody tr{cursor:pointer;}
 <!-- CHANGELOG -->
 <div class="page" id="pg-kanban">
   <div class="ph" style="justify-content:space-between;flex-wrap:wrap;gap:10px;">
-    <div><h2>Changelog</h2><span class="ph-sub">Click any row to log a note &middot; Drag cards between columns</span></div>
+    <div><h2>Changelog</h2><span class="ph-sub">Click a card to open it &middot; Drag cards between columns</span></div>
     <button onclick="clearDoneCards()" style="padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #E5E7EB;background:#fff;color:#6B7280;">Archive Done</button>
   </div>
   <div class="kb-board" id="kb-board">
@@ -340,14 +354,18 @@ tbody tr{cursor:pointer;}
 <!-- Note Modal -->
 <div id="note-overlay" onclick="closeNoteModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:100;"></div>
 <div id="note-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:12px;padding:24px;width:440px;max-width:calc(100vw - 32px);z-index:101;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
-  <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:4px;">Log Optimization Note</div>
+  <div id="nm-title" style="font-size:15px;font-weight:700;color:#111827;margin-bottom:4px;">Log Optimization Note</div>
   <div style="font-size:12px;color:#9CA3AF;margin-bottom:16px;" id="nm-context"></div>
   <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Note</label>
   <textarea id="nm-text" placeholder="What did you observe?" style="width:100%;height:60px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;outline:none;color:#111827;margin-bottom:10px;"></textarea>
   <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Hypothesis</label>
   <textarea id="nm-hyp" placeholder="If we do X, we expect Y because Z" style="width:100%;height:44px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;outline:none;color:#111827;margin-bottom:10px;"></textarea>
   <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Variable being tested</label>
-  <input id="nm-var" placeholder="e.g. headline, creative format, LP" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#111827;margin-bottom:12px;">
+  <input id="nm-var" placeholder="e.g. headline, creative format, LP" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#111827;margin-bottom:10px;">
+  <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Test setup</label>
+  <input id="nm-setup" placeholder="e.g. duplicated ad set, 50/50 split, 14-day read" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#111827;margin-bottom:10px;">
+  <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Verdict</label>
+  <textarea id="nm-verdict" placeholder="What did the test show, and what are you doing about it?" style="width:100%;height:44px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;outline:none;color:#111827;margin-bottom:12px;"></textarea>
   <div style="display:flex;gap:8px;align-items:center;">
     <span style="font-size:12px;color:#6B7280;font-weight:600;">Priority:</span>
     <select id="nm-priority" style="padding:5px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:12px;background:#fff;color:#111827;cursor:pointer;">
@@ -364,7 +382,7 @@ tbody tr{cursor:pointer;}
     </select>
   </div>
   <div style="display:flex;gap:8px;margin-top:16px;">
-    <button onclick="saveNote()" style="flex:1;padding:10px;background:#111827;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Add to Board</button>
+    <button id="nm-save" onclick="saveNote()" style="flex:1;padding:10px;background:#111827;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Add to Board</button>
     <button onclick="closeNoteModal()" style="padding:10px 16px;background:#F3F4F6;color:#6B7280;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
   </div>
 </div>
@@ -490,6 +508,10 @@ var ADS=[
   {id:"demo3",type:"video",body:"Two minutes on why event schemas drift, and the one naming convention that stops it before it reaches your warehouse.",title:"Why Your Event Schema Breaks",cta:"Watch the walkthrough",link:"#",img:"",vid:""}
 ];
 var REC_AD_LINK={};
+var DRILL={'tbl-m1':{ch:'c1',cr:'tbl-cr1'},'tbl-w1':{ch:'c1',cr:'tbl-cr1'},
+           'tbl-m2':{ch:'c2',cr:'tbl-cr2'},'tbl-w2':{ch:'c2',cr:'tbl-cr2'},
+           'tbl-m3':{ch:'c3',cr:'tbl-cr3'},'tbl-w3':{ch:'c3',cr:'tbl-cr3'}};
+
 
 var CONFIGS={},SORT={},adFilter="all";
 
@@ -550,7 +572,8 @@ function clickSort(id,col){
 function rerender(id){
   var cfg=CONFIGS[id];if(!cfg)return;
   var s=SORT[id]||{col:cfg.def,dir:cfg.dd||'desc'};
-  var sorted=cfg.data.slice().sort(function(a,b){
+  var rows=cfg.filter?cfg.data.filter(cfg.filter):cfg.data;
+  var sorted=rows.slice().sort(function(a,b){
     var av=typeof a[s.col]==='number'&&a[s.col]!==0?a[s.col]:(s.dir==='asc'?Infinity:-Infinity);
     var bv=typeof b[s.col]==='number'&&b[s.col]!==0?b[s.col]:(s.dir==='asc'?Infinity:-Infinity);
     return s.dir==='asc'?av-bv:bv-av;
@@ -561,7 +584,10 @@ function rerender(id){
     var ra=cfg.rights&&cfg.rights[i]?' style="text-align:right"':'';
     return'<th class="'+(isSorted?'sorted':'')+'"'+ra+' onclick="clickSort(\''+id+'\',\''+k+'\')">'+lbl+ar+'</th>';
   }).join('')+'</tr></thead>';
-  var body='<tbody>'+sorted.map(function(r){return'<tr>'+cfg.render(r)+'</tr>';}).join('')+'</tbody>';
+  cfg.lastSorted=sorted;
+  var body=sorted.length
+    ?'<tbody>'+sorted.map(function(r){return'<tr>'+cfg.render(r)+'</tr>';}).join('')+'</tbody>'
+    :'<tbody><tr><td class="tbl-empty" colspan="'+cfg.labels.length+'">Nothing matches this filter.</td></tr></tbody>';
   document.getElementById(id).innerHTML=head+body;
 }
 
@@ -741,6 +767,7 @@ var NOTES=[
 ];
 var _pendingNote={};
 var _dragId=null;
+var _dragging=false;
 
 function renderKanban(){
   ['todo','doing','done','completed'].forEach(function(col){
@@ -753,7 +780,7 @@ function cardHtml(n){
   var perf=(n.testAdId)?'<div class="kb-card-perf"><div>Control: '+fs(n.controlSpend||0)+'</div><div>Test: '+fs(n.testSpend||0)+'</div></div>':'';
   var verdict=n.verdict?'<div class="kb-card-verdict">Verdict: '+n.verdict+'</div>':'';
   var testSetup=(n.status==='doing'||n.status==='completed')&&n.testSetup?'<div class="kb-card-var">Setup: '+n.testSetup+'</div>':'';
-  return'<div class="kb-card" draggable="true" ondragstart="dragStart(event,'+n.id+')" data-id="'+n.id+'">'
+  return'<div class="kb-card" draggable="true" ondragstart="dragStart(event,'+n.id+')" ondragend="_dragging=false" onclick="openCard('+n.id+',event)" title="Click to open" data-id="'+n.id+'">'
     +'<button class="kb-del" onclick="deleteCard('+n.id+',event)">&times;</button>'
     +'<div class="kb-card-unit">'+n.unit+'</div><div class="kb-card-ctx">'+n.ctx+' &middot; '+n.date+'</div>'
     +(n.note?'<div class="kb-card-note">'+n.note+'</div>':'')
@@ -764,7 +791,7 @@ function cardHtml(n){
     +(n.status!=='completed'?'<button class="kb-btn" onclick="duplicateCard('+n.id+',event)">Duplicate</button><button class="kb-btn" onclick="completeCard('+n.id+',event)">Complete</button>':'')
     +'</div></div>';
 }
-function dragStart(e,id){_dragId=id;e.dataTransfer.effectAllowed='move';}
+function dragStart(e,id){_dragId=id;_dragging=true;e.dataTransfer.effectAllowed='move';}
 function dropCard(e,col){
   e.preventDefault();e.currentTarget.classList.remove('drag-over');
   var n=NOTES.find(function(x){return x.id===_dragId;});
@@ -786,25 +813,104 @@ function duplicateCard(id,e){
 }
 function clearDoneCards(){NOTES=NOTES.filter(function(n){return n.status!=='completed';});renderKanban();}
 
-function openNoteModal(tableId,unit,ctx){
+var _editingId=null;
+function fillModal(v){
+  document.getElementById('nm-text').value=v.note||'';
+  document.getElementById('nm-hyp').value=v.hyp||'';
+  document.getElementById('nm-var').value=v.variable||'';
+  document.getElementById('nm-setup').value=v.testSetup||'';
+  document.getElementById('nm-verdict').value=v.verdict||'';
+  document.getElementById('nm-priority').value=v.priority||'medium';
+  document.getElementById('nm-status').value=v.status||'todo';
+}
+function openNoteModal(tableId,unit,ctx,e){
+  if(e)e.stopPropagation();
+  _editingId=null;
   _pendingNote={unit:unit,ctx:ctx};
+  document.getElementById('nm-title').textContent='Log Optimization Note';
+  document.getElementById('nm-save').textContent='Add to Board';
   document.getElementById('nm-context').textContent=ctx+' \u00b7 '+unit;
-  document.getElementById('nm-text').value='';
-  document.getElementById('nm-hyp').value='';
-  document.getElementById('nm-var').value='';
-  document.getElementById('nm-priority').value='medium';
-  document.getElementById('nm-status').value='todo';
+  fillModal({});
   document.getElementById('note-overlay').style.display='block';
   document.getElementById('note-modal').style.display='block';
 }
-function closeNoteModal(){document.getElementById('note-overlay').style.display='none';document.getElementById('note-modal').style.display='none';}
+// Opening an existing Changelog card reuses the same modal in edit mode.
+function openCard(id,e){
+  if(e){
+    if(e.target.closest('.kb-btn')||e.target.closest('.kb-del'))return;
+    e.stopPropagation();
+  }
+  if(_dragging){_dragging=false;return;}
+  var n=null;NOTES.forEach(function(x){if(x.id===id)n=x;});
+  if(!n)return;
+  _editingId=id;
+  _pendingNote={unit:n.unit,ctx:n.ctx};
+  document.getElementById('nm-title').textContent='Edit Note';
+  document.getElementById('nm-save').textContent='Save Changes';
+  document.getElementById('nm-context').textContent=n.ctx+' \u00b7 '+n.unit;
+  fillModal(n);
+  document.getElementById('note-overlay').style.display='block';
+  document.getElementById('note-modal').style.display='block';
+}
+function closeNoteModal(){_editingId=null;document.getElementById('note-overlay').style.display='none';document.getElementById('note-modal').style.display='none';}
 function saveNote(){
-  NOTES.push({id:Date.now(),unit:_pendingNote.unit,ctx:_pendingNote.ctx,
-    note:document.getElementById('nm-text').value,hyp:document.getElementById('nm-hyp').value,
+  var v={note:document.getElementById('nm-text').value,
+    hyp:document.getElementById('nm-hyp').value,
     variable:document.getElementById('nm-var').value,
-    priority:document.getElementById('nm-priority').value,status:document.getElementById('nm-status').value,
-    date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})});
+    testSetup:document.getElementById('nm-setup').value,
+    verdict:document.getElementById('nm-verdict').value,
+    priority:document.getElementById('nm-priority').value,
+    status:document.getElementById('nm-status').value};
+  if(_editingId){
+    NOTES.forEach(function(n){if(n.id===_editingId){for(var k in v)n[k]=v[k];}});
+  }else{
+    NOTES.push({id:Date.now(),unit:_pendingNote.unit,ctx:_pendingNote.ctx,
+      note:v.note,hyp:v.hyp,variable:v.variable,testSetup:v.testSetup,verdict:v.verdict,
+      priority:v.priority,status:v.status,
+      date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})});
+  }
   closeNoteModal();renderKanban();
+}
+
+// ── DRILL-DOWN: Monthly/Weekly row → that unit's ads on the Creatives page ──
+// Names are matched loosely (case and punctuation are ignored) because ad set,
+// ad group and campaign names rarely agree on underscores versus spaces.
+function normKey(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+function drillToCreatives(tableId,row){
+  var d=DRILL[tableId];if(!d)return;
+  var unitKey=normKey(row.name),campKey=normKey(row.campaign);
+  var crCfg=CONFIGS[d.cr];
+  if(crCfg){
+    crCfg.filter=function(c){
+      if(unitKey&&normKey(c.ad_set)===unitKey)return true;
+      if(unitKey&&normKey(c.name)===unitKey)return true;
+      if(campKey&&normKey(c.campaign)===campKey)return true;
+      if(campKey&&normKey(c.name)===campKey)return true;
+      return false;
+    };
+    rerender(d.cr);
+  }
+  var navLink=null;
+  document.querySelectorAll('nav a').forEach(function(a){
+    if((a.getAttribute('onclick')||'').indexOf("showPage('creatives'")>=0)navLink=a;
+  });
+  if(navLink)showPage('creatives',navLink);
+  var tabs=document.querySelectorAll('#pg-creatives .ch-tab');
+  for(var i=0;i<tabs.length;i++){
+    if((tabs[i].getAttribute('onclick')||'').indexOf("'"+d.ch+"'")>=0){showCh('creatives',d.ch,tabs[i]);break;}
+  }
+  var bar=document.getElementById('cr-filter');
+  if(bar){
+    bar.style.display='flex';
+    bar.setAttribute('data-table',d.cr);
+    document.getElementById('cr-filter-unit').textContent=row.name+(row.campaign?' \u00b7 '+row.campaign:'');
+  }
+}
+function clearCreativeFilter(){
+  var bar=document.getElementById('cr-filter');if(!bar)return;
+  var t=bar.getAttribute('data-table');
+  if(t&&CONFIGS[t]){CONFIGS[t].filter=null;rerender(t);}
+  bar.style.display='none';
 }
 
 // ── PAUSE / RESUME (both fire live MCP calls in a real deployment) ─────────
@@ -816,17 +922,26 @@ function wirePauseAndClick(){
     var tbl=document.getElementById(id);if(!tbl)return;
     var hdr=tbl.querySelector('thead tr');
     if(hdr&&!hdr.querySelector('th.pause-col')){var th=document.createElement('th');th.className='pause-col';hdr.appendChild(th);}
-    tbl.querySelectorAll('tbody tr').forEach(function(tr){
+    var sorted=(CONFIGS[id]||{}).lastSorted||[];
+    var canDrill=!!DRILL[id];
+    tbl.querySelectorAll('tbody tr').forEach(function(tr,i){
       var nc=tr.querySelector('td.nm');if(!nc)return;
-      var unit=nc.textContent.trim().split('\n')[0].trim();
+      var row=sorted[i]||{};
+      var unit=row.name||nc.textContent.trim().split('\n')[0].trim();
       var ctx=id.replace('tbl-','').toUpperCase();
+      var esc=unit.replace(/'/g,"\\'");
       var isPaused=PAUSED.indexOf(unit)>=0;
       tr.classList.toggle('is-paused',isPaused);
       var oldAct=tr.querySelector('td.act-td');if(oldAct)oldAct.remove();
       var td=document.createElement('td');td.className='act-td pause-col';
-      td.innerHTML='<button class="pause-btn'+(isPaused?' is-paused':'')+'" onclick="togglePause(\''+unit.replace(/'/g,"\\'")+'\',\''+id+'\',event)" title="'+(isPaused?'Resume':'Pause')+'">'+(isPaused?'&#9654;':'&#9646;&#9646;')+'</button>';
+      // Monthly/Weekly rows drill into creatives, so logging a note moves to its own button.
+      var noteBtn=canDrill?'<button class="note-btn" onclick="openNoteModal(\''+id+'\',\''+esc+'\',\''+ctx+'\',event)" title="Log a note">&#9998;</button>':'';
+      td.innerHTML=noteBtn+'<button class="pause-btn'+(isPaused?' is-paused':'')+'" onclick="togglePause(\''+esc+'\',\''+id+'\',event)" title="'+(isPaused?'Resume':'Pause')+'">'+(isPaused?'&#9654;':'&#9646;&#9646;')+'</button>';
       tr.appendChild(td);
-      tr.onclick=function(e){if(e.target.tagName==='A'||e.target.closest('.act-td'))return;openNoteModal(id,unit,ctx);};
+      tr.onclick=function(e){
+        if(e.target.tagName==='A'||e.target.closest('.act-td'))return;
+        if(canDrill)drillToCreatives(id,row);else openNoteModal(id,unit,ctx);
+      };
     });
   };
 }
