@@ -18,7 +18,8 @@
 - 2026-08-23: The perf strip auto-populates from the unit's ads once a card is past To Test, so a card moved into Testing by hand is never blank. Explicit ad IDs from Duplicate still take precedence.
 - 2026-08-23: Duplicate now actually creates the ad — MCP through the host, else an operator-run relay, else a deep link into the native ads manager. Always PAUSED, always confirmed, and the card reports requested / created / failed.
 - 2026-08-23: The Changelog board is shareable. On a local file it stays in `localStorage` — one board per browser, per device — and the docs now say so plainly. Published as an artifact with `capabilities: {artifact: {}}`, the page reads and writes one team board at `data/board.json` behind an explicit "Save to shared board" button.
-- 2026-08-23 (latest): The Google Sheet is the database. Specified the three legs — MCP populates the sheet on a schedule, the sheet holds every dataset plus the human-authored fields, and the HTML is baked from it rather than fetching at load. Records the write constraint that shapes the whole thing: the Drive connector can create a sheet but cannot update one, so the refresh job needs Sheets API v4 or an Apps Script endpoint.
+- 2026-08-23: The Google Sheet is the database. Specified the three legs — MCP populates the sheet on a schedule, the sheet holds every dataset plus the human-authored fields, and the HTML is baked from it rather than fetching at load. Records the write constraint that shapes the whole thing: the Drive connector can create a sheet but cannot update one, so the refresh job needs Sheets API v4 or an Apps Script endpoint.
+- 2026-08-23 (latest): One sheet per build, provisioned at onboarding from `sheet-template/`. This is a template repo, so no sheet ID is ever committed and no build reuses another's data. Split provisioning (a one-time `create_file`, which the Drive connector handles fine) from the recurring refresh write (which it cannot do at all).
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
 
@@ -64,21 +65,29 @@ Two rules that follow from this:
 
 The dashboard is a **rendered view of a sheet**, never a place data lives. Three legs, and the middle one is where the available connectors run out — so it is specified here rather than assumed.
 
+**One sheet per build.** Every company gets its own, provisioned at onboarding. Never reuse another build's sheet, never commit a sheet ID to this repo, and never let the template ship pointing at anyone's real data — the file ID belongs in the generated dashboard's config and the refresh job, nowhere else.
+
+### Leg 0 — provisioning the sheet (once, per build)
+
+`sheet-template/` holds the header CSVs. Create the sheet with the Drive connector — `create_file` with `textContent` as CSV and `contentMimeType: 'text/csv'`, which Drive converts to a native Sheet — one call per tab, appending the motion's metric columns from `sheet-template/README.md`. This is the one place `create_file` is exactly the right tool: it is a one-time create, so the new-file-ID problem below does not apply. Report the file ID back to the person and hand them the tab list.
+
+If they already have a sheet, read it and reconcile against the schema before building — a missing `ad_id` column is the failure that shows up much later as a Changelog card with no stats.
+
 ### Leg 1 — MCP → Sheet (the refresh job)
 
-Runs on a schedule in an agent session, never in the page. Pull each channel from its ad-platform MCP server, normalise to the tab schema below, write the sheet.
+Runs on a schedule in an agent session, never in the page. Pull each channel from its ad-platform MCP server, normalise to the tab schema, write the sheet.
 
-**Writing is the constrained leg.** The Google Drive connector can *create* a spreadsheet — `create_file` with `textContent` as CSV and `contentMimeType: 'text/csv'`, which Drive converts to a native Sheet — but it **cannot update cells in an existing one**. `update_file` changes title and parent folder only, and there is no Google Sheets connector in the directory. Pick a write path explicitly and record which one this build uses:
+**The recurring write is the constrained leg.** The Google Drive connector can *create* a spreadsheet — `create_file` with `textContent` as CSV and `contentMimeType: 'text/csv'`, which Drive converts to a native Sheet — but it **cannot update cells in an existing one**. `update_file` changes title and parent folder only, and there is no Google Sheets connector in the directory. Pick a write path explicitly and record which one this build uses:
 
 | Path | Trade |
 |---|---|
 | **Sheets API v4 `spreadsheets.values.update`, service-account credential held by the refresh job** *(default)* | Stable file ID, true in-place update, credential stays server-side and never enters the page |
 | **Apps Script web app deployed on the sheet, POSTed by the job** | No service account to provision; you own and maintain the endpoint |
-| **`create_file` per refresh** | Needs nothing but the Drive connector, but yields a *new file ID every run* — fine for a one-off, never for a sheet anything links to |
+| **`create_file` per refresh** | Needs nothing but the Drive connector, but yields a *new file ID every run*, orphaning the sheet the dashboard was built from. Fine for Leg 0, never for a refresh |
 
 ### Leg 2 — the Sheet
 
-One tab per dataset, header row = field names, one row per entity. Suggested tabs:
+One tab per dataset, header row = field names, one row per entity. Full schema and the per-motion column lists live in `sheet-template/README.md`; the tabs are:
 
 | Tab | Grain | Key columns |
 |---|---|---|
@@ -108,9 +117,13 @@ Two fetch routes exist and are worth knowing, for self-hosted copies and for the
 
 **A caveat that decides the route where cells matter:** `read_file_content` on a Sheet returns a *markdown table*, not structured cells — it escapes characters, and its own tool docs say the representation will change over time. An agent parsing that at build time is fine, because it re-reads and adapts. A *page* regex-parsing it at runtime is building on a format with no contract. Where you need real cells, use the CSV export, not the natural-language read.
 
-### What this replaces
+### Where the Changelog board lives
 
-The `test_log` tab supersedes `data/board.json` as the shared Changelog store when a sheet is configured. It is strictly better: editable outside the dashboard, survives republishing, and readable by people who never open the dashboard. Keep the `board.json` path as the fallback for builds with no sheet.
+Three stores, in preference order. A build uses the first one available to it:
+
+1. **The build's own `test_log` tab** — editable outside the dashboard, survives republishing, readable by people who never open the dashboard, and backed up with the rest of the sheet. Preferred whenever a sheet is configured.
+2. **`data/board.json` in the published artifact** — for builds with no sheet. Shared with everyone who has edit access on the artifact, written behind the explicit Save button.
+3. **`localStorage`** — the fallback when neither exists. One board per browser, per device, shared with nobody. Say so plainly rather than calling it "persistent".
 
 ## Fixed page specs
 
@@ -155,9 +168,10 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 ## Onboarding — ask one question at a time, wait for each answer
 1. Motion type: Sales-led, Ecommerce, or Product-led? *(Determines relevant KPIs — template stays identical, only metric set changes.)*
 2. Channels to track? *(Two or three. Beyond three the tab rows and funnel grid stop being readable — push back and suggest folding the smallest channel into a combined view.)*
-3. Per channel — data access: Google Sheet / Direct MCP / Both?
-4. Per channel — action layer: Read-only, or read-only + specific actions (name + which MCP)?
-5. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. *(Do not ask about date ranges — the windows are fixed above.)* Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
+3. The sheet: create a new one for this company, or point at an existing sheet? *(Every build gets its own — never reuse another company's, and never hardcode a sheet ID into the template. If creating, provision it from `sheet-template/` and report the new file ID back. Then ask how the refresh job will write to it: service account, Apps Script endpoint, or manual for now.)*
+4. Per channel — data access: Google Sheet / Direct MCP / Both?
+5. Per channel — action layer: Read-only, or read-only + specific actions (name + which MCP)?
+6. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. *(Do not ask about date ranges — the windows are fixed above.)* Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
 
 ## Motion-type default metrics
 
@@ -251,6 +265,7 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 
 ## Gotchas & learnings
 - The reference file hardcodes data in JS arrays — that was a snapshot; this skill requires live daily refresh instead.
+- One sheet per build, always. A template that ships pointing at a real sheet leaks one company's spend data to everyone who clones it — and the leak is silent, because the dashboard renders perfectly.
 - Never store an API key in browser storage. (Artifacts *can* use `localStorage` — each is served from its own origin — which is exactly why the rule has to be stated rather than assumed away.)
 - Duplicate, Pause, and Unpause all fire live MCP calls that create/change real state — confirm with the user before executing each, never wire buttons straight to the call.
 - Don't let dimensions-per-timeframe, granularity-per-page or the reporting windows be re-litigated — fixed for consistency across every build. The one exception is the Creatives MTD/L30 toggle, which is part of the spec rather than a per-company option.
@@ -278,6 +293,7 @@ Every item here came from a real bug. Run it as a test pass, not a self-assessme
 - Every period row resolves to at least one creative. If it cannot, the drill-down shows an empty state and the creative data is incomplete.
 
 **Data sourcing**
+- No sheet ID, file ID or account ID from a real build appears anywhere in the template repo. Grep for them before every commit.
 - The sheet, not the HTML, is the source of truth. Grep the build for any number that exists only in the file — if a person could want to correct it and there is no sheet cell behind it, it is in the wrong place.
 - Confirm the refresh job can actually *write* the sheet it reads. `create_file` returns a new file ID; if the build assumed in-place updates, every refresh silently orphans the sheet the dashboard was built from.
 - If two sources exist for one metric (platform-reported results vs. analytics conversions), confirm which is the source of truth and apply it to *every* table, not just the one that was mentioned.

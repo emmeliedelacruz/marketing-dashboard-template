@@ -12,6 +12,7 @@ No build step, no backend required — it's one HTML file you open in a browser.
 | `dashboard-example-filled.html` | **Sales-led** example, 2 channels — a fictional roofing supplier ("Acme Roofing") on Meta + Google, tracking SAL/SQL/ICP/BTC/DPC. |
 | `dashboard-example-ecommerce.html` | **Ecommerce** example, 3 channels — a fictional DTC home-goods retailer ("Harborline Goods") on Meta + Google Shopping + TikTok, tracking add-to-cart, checkout, orders, ROAS and refunds. |
 | `dashboard-example-product-led.html` | **Product-led** example, 3 channels — a fictional PLG SaaS ("Loomstack") on Meta + LinkedIn + Google, tracking signups, activation, PQL, trial-to-paid and churn. |
+| `sheet-template/` | Header CSVs and the schema for the Google Sheet that backs a build. **Create your own** — nothing here points at anyone's data. |
 | `skills/dashboard-builder.md` | A Claude "skill" file — paste this into a Claude project and Claude will walk you through building your own version, onboarding you on your channels, metrics, and motion type. |
 | `LICENSE` | MIT |
 
@@ -65,11 +66,12 @@ No build step, no backend required — it's one HTML file you open in a browser.
 
 The template ships with hardcoded JS arrays (a snapshot). The intended architecture is **a Google Sheet as the database**, in three legs:
 
+0. **Your own sheet.** Every build gets one, created from `sheet-template/`. No sheet ID is committed to this repo and no build reuses another's — a template shipping with someone's real spend data would leak it silently, because the dashboard renders perfectly either way.
 1. **MCP → Sheet.** A scheduled agent session pulls each channel (Meta Ads, Google Ads, TikTok, LinkedIn, Amplitude, Stripe) and writes the sheet.
 2. **The Sheet.** One tab per dataset, plus a `test_log` tab for the Changelog and a `platform_log` tab for platform changes. Everything a *person* authors — a corrected figure, a hypothesis, a re-labelled ad set — lives here and survives every rebuild.
 3. **Sheet → HTML.** The refresh job regenerates the data arrays and republishes. It bakes rather than fetches, because a published artifact's CSP blocks external hosts outright, "publish to web" would put spend data on an unauthenticated URL, and no page on this dashboard shows an intraday number anyway.
 
-One constraint worth knowing before you build the refresh job: the Google Drive connector can **create** a spreadsheet but **cannot update cells** in an existing one (`update_file` changes title and parent folder only, and there is no Sheets connector). In-place writes need the Sheets API v4 with a service account held by the job, or an Apps Script web app you deploy on the sheet. `skills/dashboard-builder.md` has the tab schemas and the trade-offs.
+One constraint worth knowing before you build the refresh job: the Google Drive connector can **create** a spreadsheet but **cannot update cells** in an existing one (`update_file` changes title and parent folder only, and there is no Sheets connector). So it is fine for step 0 — a one-time create — and unusable for step 1. Recurring writes need the Sheets API v4 with a service account held by the job, or an Apps Script web app you deploy on the sheet. `sheet-template/README.md` has the tab schemas; `skills/dashboard-builder.md` has the trade-offs.
 
 ## Fixed structure — what doesn't change per company
 
@@ -134,7 +136,7 @@ The ads-manager URLs in `AD_PLATFORM` are starting points. **Verify them against
 
 ## Sharing the board
 
-The Changelog is the one part of the dashboard people write to, so it is the one part that has to be shared deliberately. There are two storage paths and the page picks between them at load:
+The Changelog is the one part of the dashboard people write to, so it is the one part that has to be shared deliberately. Three stores, in preference order — **the `test_log` tab of your own sheet** is the best of them, because it is editable outside the dashboard, survives republishing, gets backed up with everything else, and is readable by people who never open the dashboard. The two below are what a build falls back to when no sheet is configured:
 
 **Local file — `localStorage`, one board per browser.** Open the HTML from disk, a static host, or a `file://` path and each viewer gets their own board. Nothing is transmitted. Two people looking at the same URL do not see each other's cards, and the same person on a laptop and a phone has two boards. That is a property of `localStorage` (per-origin, per-browser, per-device), not a bug — but it means a local file is not a team board.
 
