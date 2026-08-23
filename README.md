@@ -136,15 +136,15 @@ The ads-manager URLs in `AD_PLATFORM` are starting points. **Verify them against
 
 ## Sharing the board
 
-The Changelog is the one part of the dashboard people write to, so where it saves is a real choice — made once, per build, at onboarding. Two options:
+The Changelog is the one part of the dashboard people write to, so the board stays editable in the dashboard — drag-and-drop, click-to-edit. The only choice is whether it is *also* copied out to your sheet.
 
-**The sheet's `test_log` tab.** Cards live in Google Sheets. Anyone can edit the log without opening the dashboard, it's backed up and searchable with the rest of the sheet, and people who never open the dashboard can still read it. Everyone editing needs sheet access, and edits appear on the board at the next refresh rather than instantly.
+**Board only.** Cards live in the published dashboard. Everyone with edit access on the link sees the same cards, nobody needs a Google account, and the last person to press Save wins if two people edit at once. Nothing outside the dashboard can read the log.
 
-**The shared board in the published dashboard.** Cards live in the published page itself. Drag-and-drop editing right on the board, everyone with edit access on the link sees the same cards, and nobody needs a Google account. It only works on the published version — a downloaded copy falls back to local-only — and the last person to press Save wins if two people edit at once.
+**Board, mirrored to the sheet.** Same editing, plus the refresh job copies the board into the `test_log` tab each run — so you get a searchable, backed-up history that people can read without opening the dashboard. The mirror is **one-way**: the sheet is a copy, and anything typed into it is overwritten on the next run.
 
-Pick one, not both: two places to write the same log is how the two quietly disagree. If you pick the shared board, it needs `capabilities: {artifact: {}}` declared at publish time — without it the Save button never appears and the board silently falls back to local-only, which looks identical to the feature not existing.
+Mirroring is the better default when you have a sheet and a refresh job. Either way the board needs `capabilities: {artifact: {}}` declared at publish time — without it the Save button never appears and the board silently falls back to local-only, which looks identical to the feature not existing.
 
-Everything below describes the shared-board option and the local fallback:
+Why not make the sheet the source and skip the board? Because a web page cannot write cells into a Google Sheet — the Drive connector only changes a file's title and folder, and a published page is blocked from calling the Sheets API directly. A sheet-sourced log means a **read-only** board: every change made in Sheets, no dragging. That trades away the reason a board exists.
 
 **Local file — `localStorage`, one board per browser.** Open the HTML from disk, a static host, or a `file://` path and each viewer gets their own board. Nothing is transmitted. Two people looking at the same URL do not see each other's cards, and the same person on a laptop and a phone has two boards. That is a property of `localStorage` (per-origin, per-browser, per-device), not a bug — but it means a local file is not a team board.
 
