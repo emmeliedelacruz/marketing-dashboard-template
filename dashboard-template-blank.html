@@ -442,6 +442,7 @@ var ADS=[];  // Ad Library gallery
 var GCR=[];
 var GCR_L30=[];
 var PERF_RATE_LABEL='Submit%';
+var PERF_RATE_KEY='submit_pct';
 var PLATFORM_LOG={};
 var REC_AD_LINK={};
 var DRILL={'tbl-mm':{ch:'c1',cr:'tbl-cr'},'tbl-mw':{ch:'c1',cr:'tbl-cr'},
@@ -672,17 +673,22 @@ function cardHtml(n){
   // Perf strip and ad IDs appear once the ad has actually been duplicated.
   var perf='',ids='';
   if(n.testAdId){
+    // Live MTD rows where the ad IDs resolve; the card's stored values otherwise
+    // (a campaign-level channel, a deleted ad, or an ad that did not run this month).
+    var ctl=adRowById(n.controlAdId),tst=adRowById(n.testAdId);
+    function pick(row,key,fb){return(row&&row[key]!==undefined&&row[key]!==null)?row[key]:fb;}
     function cell(v,suffix,places){return(v===null||v===undefined)?'\u2014':v.toFixed(places)+suffix;}
-    var rows=[['Spend',fs(n.controlSpend||0),fs(n.testSpend||0)],
-              ['CTR',cell(n.controlCtr,'%',2),cell(n.testCtr,'%',2)],
-              [PERF_RATE_LABEL,cell(n.controlRate,'%',1),cell(n.testRate,'%',1)]];
+    var rows=[['Spend',fs(pick(ctl,'spend',n.controlSpend)||0),fs(pick(tst,'spend',n.testSpend)||0)],
+              ['CTR',cell(pick(ctl,'ctr',n.controlCtr),'%',2),cell(pick(tst,'ctr',n.testCtr),'%',2)],
+              [PERF_RATE_LABEL,cell(pick(ctl,PERF_RATE_KEY,n.controlRate),'%',1),cell(pick(tst,PERF_RATE_KEY,n.testRate),'%',1)]];
     perf='<div class="kb-card-perf"><table style="width:100%;border-collapse:collapse;font-size:10px;">'
-      +'<tr><td></td><td style="text-align:right;color:#9CA3AF;font-weight:600;">Control</td><td style="text-align:right;color:#9CA3AF;font-weight:600;">Test</td></tr>'
+      +'<tr><td style="color:#9CA3AF;font-weight:600;">MTD</td><td style="text-align:right;color:#9CA3AF;font-weight:600;">Control</td><td style="text-align:right;color:#9CA3AF;font-weight:600;">Test</td></tr>'
       +rows.map(function(r){return'<tr><td style="color:#6B7280;">'+r[0]+'</td>'
         +'<td style="text-align:right;font-weight:600;">'+r[1]+'</td>'
         +'<td style="text-align:right;font-weight:600;">'+r[2]+'</td></tr>';}).join('')
       +'</table></div>';
-    ids='<div class="kb-card-ids">control '+(n.controlAdId||'\u2014')+' &middot; test '+n.testAdId+'</div>';
+    ids='<div class="kb-card-ids">control '+(n.controlAdId||'\u2014')+' &middot; test '+n.testAdId
+      +((ctl||tst)?'':' &middot; snapshot, ads not in this window')+'</div>';
   }
   var verdict=n.verdict?'<div class="kb-card-verdict">Verdict: '+n.verdict+'</div>':'';
   // Setup stays visible once a test is running, through Evaluated and Completed.
@@ -865,6 +871,22 @@ function setCrWindow(w,el){
     el.classList.add('on');
   }
   syncTabCounts();
+}
+
+// ── AD LOOKUP BY ID ────────────────────────────────────────────────────────
+// The Control vs Test strip reads each ad's live row rather than a snapshot
+// written when the card was authored. It always reads the MTD window, whatever
+// the Creatives page is toggled to, so a card's numbers do not change meaning
+// when someone switches that page to L30.
+function adRowById(id){
+  if(!id)return null;
+  var found=null;
+  Object.keys(CONFIGS).forEach(function(k){
+    var cfg=CONFIGS[k];
+    if(found||!cfg.windows||!cfg.windows.mtd)return;
+    cfg.windows.mtd.forEach(function(r){if(!found&&r.ad_id===id)found=r;});
+  });
+  return found;
 }
 
 // ── CHANGELOG PERSISTENCE ──────────────────────────────────────────────────

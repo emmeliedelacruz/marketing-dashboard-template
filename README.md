@@ -84,6 +84,8 @@ The Creatives toggle swaps a genuine second dataset (`CR1` / `CR1_L30`), not a s
 - **Changelog card click** opens the card in the same modal for editing — note, hypothesis, variable, test setup, verdict, priority and column — and saves back to that card.
 - **The Changelog board persists** to `localStorage`, so cards you add or move survive a reload. A data refresh replaces the metrics, not the test log. "Archive Done" archives completed cards (with a restore link) rather than deleting them.
 - **Duplicate** writes versioned ad IDs (`<control>_V2`) onto the card and moves it to Testing, and the card then shows a Control vs Test strip with spend, CTR and the motion's conversion rate.
+- **That strip reads the live ad rows**, looked up by `ad_id` in the creative data, always on the MTD window so a card's numbers don't shift when the Creatives page is toggled to L30. The values stored on the card are a fallback for ad IDs that don't resolve — a campaign-level channel, a deleted ad — and the card labels itself "snapshot" when it uses them.
+- Duplicated ads are **real creative rows** sharing their parent ad set's spend, so creative spend still rolls up to the channel total.
 - **Platform change-log panels** under the board render from a `PLATFORM_LOG` map, one per channel, and fall back to an empty state for channels with no entries.
 - **Pause** buttons appear on every table row, and dragging cards between Changelog columns works as expected.
 
