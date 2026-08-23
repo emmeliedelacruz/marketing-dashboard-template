@@ -209,6 +209,12 @@ input::placeholder,textarea::placeholder{color:#9CA3AF;opacity:1;}
 .kb-mgr:hover{background:#DBEAFE;}
 .kb-card-ids .pend{color:#A16207;font-weight:700;}
 .kb-card-ids .fail{color:#B91C1C;font-weight:700;}
+.kb-share{display:flex;align-items:center;gap:8px;}
+.kb-share-state{font-size:11px;color:#9CA3AF;}
+.kb-share-state.dirty{color:#A16207;font-weight:700;}
+.kb-share-state.shared{color:#15803D;font-weight:700;}
+.kb-save{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #111827;background:#111827;color:#fff;}
+.kb-save[disabled]{opacity:0.45;cursor:default;}
 </style>
 </head>
 <body>
@@ -337,7 +343,7 @@ input::placeholder,textarea::placeholder{color:#9CA3AF;opacity:1;}
 <div class="page" id="pg-kanban">
   <div class="ph" style="justify-content:space-between;flex-wrap:wrap;gap:10px;">
     <div><h2>Changelog</h2><span class="ph-sub">Click a card to open it &middot; Drag cards between columns</span></div>
-    <span id="kb-archived" style="font-size:11px;color:#9CA3AF;align-self:center;margin-right:8px;"></span><button onclick="clearDoneCards()" style="padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #E5E7EB;background:#fff;color:#6B7280;">Archive Done</button>
+    <span id="kb-archived" style="font-size:11px;color:#9CA3AF;align-self:center;margin-right:8px;"></span><span class="kb-share"><span class="kb-share-state" id="kb-share-state">local to this browser</span><button class="kb-save" id="kb-save" style="display:none" onclick="saveSharedBoard()">Save to shared board</button></span><button style="margin-left:8px" onclick="clearDoneCards()" style="padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #E5E7EB;background:#fff;color:#6B7280;">Archive Done</button>
   </div>
   <div class="kb-board" id="kb-board">
     <div class="kb-col" data-col="todo" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropCard(event,'todo')">
@@ -668,6 +674,7 @@ document.addEventListener('DOMContentLoaded', function() {
   renderKanban();
   renderAllPlatformLogs();
   syncTabCounts();
+  initSharedBoard();
 });
 
 // ── KANBAN (4-column: To Test / Testing / Evaluated / Completed) ───────────
@@ -686,6 +693,7 @@ function renderKanban(){
   var lbl=document.getElementById('kb-archived');
   if(lbl)lbl.innerHTML=arch?(arch+' archived &middot; <a href="#" onclick="unarchiveAll(event)" style="color:#6B7280;">restore</a>'):'';
   saveNotes();
+  refreshDirty();
 }
 function cardHtml(n){
   // Perf strip and ad IDs appear once the ad has actually been duplicated.
@@ -1029,6 +1037,97 @@ function adRowById(id){
     cfg.windows.mtd.forEach(function(r){if(!found&&r.ad_id===id)found=r;});
   });
   return found;
+}
+
+// ── SHARED BOARD (published artifact only) ─────────────────────────────────
+// localStorage keeps a board for one person on one device. To let a team share
+// one board, a published artifact writes it back to the artifact itself.
+//
+// This uses the FILES form of artifact.publish: it names only data/board.json,
+// so the page itself is carried over untouched and THIS view keeps running
+// (the html form would demand a full reconstructed document and reload us).
+// Saving is an explicit button, never automatic — every call mints a version,
+// and a viewer dragging a card should not silently publish for everyone.
+//
+// Outside a published artifact none of this exists and the page behaves exactly
+// as before: local storage only.
+var BOARD_FILE='data/board.json';
+var SHARED=null,SHARED_DIRTY=false,SHARED_OK=false,SHARED_MSG='';
+
+function sharedStateEl(){return document.getElementById('kb-share-state');}
+function sharedSaveBtn(){return document.getElementById('kb-save');}
+function renderShareBar(){
+  var st=sharedStateEl(),btn=sharedSaveBtn();
+  if(!st||!btn)return;
+  btn.style.display=SHARED_OK?'':'none';
+  btn.disabled=!SHARED_DIRTY;
+  st.className='kb-share-state'+(SHARED_OK?(SHARED_DIRTY?' dirty':' shared'):'');
+  st.textContent=SHARED_MSG||(SHARED_OK
+    ?(SHARED_DIRTY?'unsaved changes':'shared board \u00b7 up to date')
+    :'local to this browser');
+}
+// Dirty is derived, never asserted: compare the board's fingerprint against the
+// last state we know the artifact holds. Hooking this to renders instead marked
+// a viewer dirty the moment the page painted.
+var BOARD_FP='';
+function refreshDirty(){
+  SHARED_DIRTY=SHARED_OK&&seedFingerprint()!==BOARD_FP;
+  renderShareBar();
+}
+
+// Adopt the team's board as the base, then re-apply this viewer's unsaved work
+// on top using the same fingerprint rule the seeded board uses.
+function adoptSharedBoard(notes){
+  if(!Array.isArray(notes))return;
+  NOTES=notes;
+  SEED_FP=seedFingerprint();
+  BOARD_FP=SEED_FP;                 // what the artifact currently holds
+  var mine=loadNotes();
+  if(mine)NOTES=mine;               // this viewer's unsaved work on top
+  renderKanban();
+  refreshDirty();
+}
+
+function initSharedBoard(){
+  if(!(window.claude&&typeof window.claude.use==='function')){renderShareBar();return;}
+  window.claude.use('artifact').then(function(ns){
+    if(!ns){renderShareBar();return;}
+    SHARED=ns;SHARED_OK=true;
+    return fetch(BOARD_FILE,{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .catch(function(){return null;})
+      .then(function(doc){
+        if(doc&&Array.isArray(doc.notes))adoptSharedBoard(doc.notes);
+        renderShareBar();
+      });
+  }).catch(function(){renderShareBar();});
+}
+
+function saveSharedBoard(){
+  if(!SHARED){alert('This board is local to your browser. Sharing is only available on the published dashboard.');return;}
+  var btn=sharedSaveBtn();if(btn)btn.disabled=true;
+  SHARED_MSG='saving\u2026';renderShareBar();
+  var body=JSON.stringify({notes:NOTES,savedAt:new Date().toISOString()},null,2);
+  SHARED.publish({'data/board.json':{content:body,contentType:'application/json'}})
+    .then(function(){
+      BOARD_FP=seedFingerprint();SHARED_MSG='';refreshDirty();
+    })
+    .catch(function(err){
+      var code=(err&&err.code)||'upstream_error';
+      SHARED_MSG='';
+      if(code==='not_writer'||code==='not_granted'||code==='consent_required'){
+        SHARED_OK=false;SHARED_MSG='read-only \u2014 your board stays in this browser';
+      }else if(code==='capability_disabled'){
+        SHARED_OK=false;SHARED_MSG='sharing unavailable here \u2014 board kept in this browser';
+      }else if(code==='conflict'){
+        SHARED_MSG='someone else saved first \u2014 reload to see their board';
+      }else if(code==='rate_limited'){
+        SHARED_MSG='saving too often \u2014 try again in a moment';
+      }else{
+        SHARED_MSG='save failed ('+code+') \u2014 board kept in this browser';
+      }
+      renderShareBar();
+    });
 }
 
 // ── CHANGELOG PERSISTENCE ──────────────────────────────────────────────────

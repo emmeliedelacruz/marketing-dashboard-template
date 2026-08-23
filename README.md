@@ -98,6 +98,7 @@ The Creatives toggle swaps a genuine second dataset (`CR1` / `CR1_L30`), not a s
 - **Pencil button** on those rows logs a Changelog note (the row click is taken by the drill-down). On Daily, Creatives and Optimization the row click still opens the note modal.
 - **Changelog card click** opens the card in the same modal for editing — note, hypothesis, variable, test setup, verdict, priority and column — and saves back to that card.
 - **The Changelog board persists** to `localStorage`, so cards you add or move survive a reload. The saved copy is stamped with a fingerprint of the seeded cards it came from: rebuild the file with different seeds and the current seed wins, keeping only the cards you added yourself. A data refresh replaces the metrics, not the test log. "Archive Done" archives completed cards (with a restore link) rather than deleting them.
+- **The board can be shared.** `localStorage` is per-browser and per-device, so on a file you open locally the board is yours alone — two people, or the same person on a laptop and a phone, each see their own. Published as a Claude Artifact with the `artifact` capability declared, the page instead reads a shared board from `data/board.json` next to itself, and a **Save to shared board** button beside "Archive Done" writes it back for everyone with edit access. Details in [Sharing the board](#sharing-the-board).
 - **Duplicate** writes versioned ad IDs (`<control>_V2`) onto the card and moves it to Testing, and the card then shows a Control vs Test strip with spend, CTR and the motion's conversion rate.
 - **That strip auto-populates.** Move a card into Testing and it finds the unit's ads in the creative data by itself — no ad IDs to type. Explicit IDs written by Duplicate take precedence; where no test ad exists yet the test column shows an em dash.
 - It **reads the live ad rows**, looked up by `ad_id`, always on the MTD window so a card's numbers don't shift when the Creatives page is toggled to L30. The values stored on the card are a fallback for ad IDs that don't resolve — a campaign-level channel, a deleted ad — and the card labels itself "snapshot" when it uses them.
@@ -126,6 +127,38 @@ A single HTML file cannot call Meta, Google, TikTok or LinkedIn directly — tho
 Every new ad is requested **PAUSED**, and every route confirms first. The card then shows whether the test ad is `requested`, `created` or `failed`, and says "awaiting next data refresh" until an ad with that ID actually appears in the creative data — so a requested ad never reads as a measured one.
 
 The ads-manager URLs in `AD_PLATFORM` are starting points. **Verify them against your own accounts** — account-ID parameters differ per platform and the URL shapes change.
+
+## Sharing the board
+
+The Changelog is the one part of the dashboard people write to, so it is the one part that has to be shared deliberately. There are two storage paths and the page picks between them at load:
+
+**Local file — `localStorage`, one board per browser.** Open the HTML from disk, a static host, or a `file://` path and each viewer gets their own board. Nothing is transmitted. Two people looking at the same URL do not see each other's cards, and the same person on a laptop and a phone has two boards. That is a property of `localStorage` (per-origin, per-browser, per-device), not a bug — but it means a local file is not a team board.
+
+**Published Artifact — one board for everyone with edit access.** Publish the page as a Claude Artifact with the `artifact` capability declared:
+
+```
+capabilities: {artifact: {}}
+```
+
+On load the page calls `claude.use('artifact')`. If it resolves, it fetches `data/board.json` alongside itself and adopts the team's board; anything that viewer changed and hasn't saved is layered back on top so an in-progress edit is never lost to someone else's save. A **Save to shared board** button appears next to "Archive Done", enabled only when the local board differs from the published one, and writing goes through the *files* form of `publish`:
+
+```js
+artifact.publish({'data/board.json': {content: JSON.stringify(doc), contentType: 'application/json'}})
+```
+
+The files form names only that one path, so the page itself is carried over untouched and the saving view keeps running — the `html` form would rebuild and reload the whole document. Saving is **never automatic**: no publish per keystroke, per drag, or per edit. A person presses the button.
+
+The state line beside the button says which path is in effect:
+
+| Line | Meaning |
+| --- | --- |
+| `local to this browser` | No artifact host. Your board, your device. |
+| `shared board · up to date` | Reading and writing the team board; nothing unsaved. |
+| `unsaved changes` | Your edits aren't on the shared board yet. |
+| `read-only — your board stays in this browser` | You can view the artifact but not write to it (`not_granted` / `not_writer`). Edits still persist locally. |
+| `someone else saved first — reload to see their board` | A `conflict`. Reload, then reapply. |
+
+Two caveats worth knowing before you rely on it. Saves are last-writer-wins per save, not per card: two people editing at once, both pressing Save, means the second overwrites the first — the conflict state catches the common case but the window is a real one, so treat the board like a shared doc, not a live-sync app. And a published artifact is only shared with the people you share it with; the board inherits exactly those permissions, no more.
 
 ## Live actions (pause/resume/duplicate ads)
 
