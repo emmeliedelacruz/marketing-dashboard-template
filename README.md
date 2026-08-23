@@ -1,6 +1,6 @@
 # Marketing Performance Dashboard — Template
 
-A single-file HTML performance dashboard for paid acquisition teams. Built for sales-led *or* product-led motions, tracking any two channels (Meta/Google/TikTok/etc.) across Monthly, Weekly, Daily, Creative, Optimization, and Changelog views.
+A single-file HTML performance dashboard for paid acquisition teams. Built for sales-led, ecommerce, *or* product-led motions, tracking any two channels (Meta/Google/LinkedIn/TikTok/etc.) across Monthly, Weekly, Daily, Creative, Optimization, and Changelog views.
 
 No build step, no backend required — it's one HTML file you open in a browser.
 
@@ -9,14 +9,16 @@ No build step, no backend required — it's one HTML file you open in a browser.
 | File | What it is |
 |---|---|
 | `dashboard-template-blank.html` | Empty template — placeholder channel names, empty data arrays. Start here. |
-| `dashboard-example-filled.html` | Same template with **dummy data** for a fictional company ("Acme Roofing"), so you can see it working before you plug in your own numbers. |
+| `dashboard-example-filled.html` | **Sales-led** example — dummy data for a fictional roofing supplier ("Acme Roofing") on Meta + Google, tracking SAL/SQL/ICP/BTC/DPC. |
+| `dashboard-example-ecommerce.html` | **Ecommerce** example — a fictional DTC home-goods retailer ("Harborline Goods") on Meta + Google Shopping, tracking add-to-cart, checkout, orders, ROAS and refunds. |
+| `dashboard-example-product-led.html` | **Product-led** example — a fictional PLG SaaS ("Loomstack") on LinkedIn + Google, tracking signups, activation, PQL, trial-to-paid and churn. |
 | `skills/dashboard-builder.md` | A Claude "skill" file — paste this into a Claude project and Claude will walk you through building your own version, onboarding you on your channels, metrics, and motion type. |
 | `LICENSE` | MIT |
 
 ## Quick start (manual)
 
-1. Open `dashboard-example-filled.html` in a browser to see it working.
-2. Copy `dashboard-template-blank.html` to start your own.
+1. Open whichever example matches your motion — `dashboard-example-filled.html` (sales-led), `dashboard-example-ecommerce.html`, or `dashboard-example-product-led.html` — to see it working.
+2. Copy `dashboard-template-blank.html` to start your own, and keep the closest example open as a reference for row shapes and column definitions.
 3. Replace the placeholder names in the markup: `[Company Name]` (page title and logo), `[Reporting Period]`, and the `[Channel 1]` / `[Channel 2]` labels (nav tabs, section headers, table captions) with your own.
 4. Fill in the data arrays at the top of the `<script>` block — they all ship empty:
 
@@ -30,7 +32,7 @@ No build step, no backend required — it's one HTML file you open in a browser.
    | `VM` / `VG` | Funnel heatmap segments, per channel |
    | `ADS` | Ad Library gallery |
 
-   `dashboard-example-filled.html` has all of these populated — copy the row shapes from there.
+   All three examples have these populated — copy the row shapes from whichever one matches your motion. The ecommerce and product-led examples also populate `GCR` (the channel-2 campaign table on the Creatives page).
 5. Update the KPI labels if your metrics differ. Each table has a matching `*_LABELS` / `*_KEYS` / `*_RIGHTS` triple, all the same length: `PL_MW_*` and `GL_MW_*` (Monthly and Weekly), `PL_D_*` and `GL_D_*` (Daily), `REC_*` (Optimization), `CR_*` (Creatives). `LABELS` sets the header text, `KEYS` names the field sorting reads, `RIGHTS` right-aligns the column.
 
    Note that the table cells themselves are emitted by the `render*` functions (`renderMW`, `renderGMW`, `renderDaily`, `renderGDaily`, `renderRec`, `renderCr`), which reference row fields by name. To swap a metric end to end (e.g. product-led teams trading SAL/SQL/ICP for Signup/Activation/PQL — see the skill file for full definitions), edit the label array *and* the matching render function.
@@ -56,7 +58,7 @@ This template is intentionally opinionated about **layout**, not about **metrics
 - Reporting granularity is fixed: Monthly/Weekly = ad set/ad group level, Daily = campaign level, Creatives = ad level
 - Changelog is a 4-column Kanban (To Test → Testing → Evaluated → Completed) with hypothesis/verdict tracking and a live platform-changes feed
 
-What *does* vary per company: channel names, which KPIs populate the tables, and whether you're tracking a sales-led funnel (SAL/SQL/ICP/BTC/DPC) or a product-led one (Signup/Activation/PQL/Trial-to-Paid/Expansion). Both metric sets are documented in the skill file.
+What *does* vary per company: channel names, which KPIs populate the tables, and which motion you're tracking — sales-led (SAL/SQL/ICP/BTC/DPC), ecommerce (ATC/Checkout/Orders/ROAS/Refunds), or product-led (Signup/Activation/PQL/Trial-to-Paid/Expansion). All three metric sets are documented in the skill file, and each has a worked example in this repo.
 
 ## Live actions (pause/resume/duplicate ads)
 

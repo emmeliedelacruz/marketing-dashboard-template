@@ -6,7 +6,8 @@
 - 2026-08-23: Onboarding asked one question at a time, not as a batch table. Added motion-type question (Product-led vs Sales-led). Clarified: template (pages, tabs, views, layout) is identical across companies; only company name, channels, and KPIs/metrics vary.
 - 2026-08-23: Documented reporting granularity per page — Monthly/Weekly = ad set/ad group level, Daily = campaign level, Creatives = ad level. KPIs vary by company/motion type; only granularity level is fixed.
 - 2026-08-23: Adopted richer 4-column Kanban spec (Duplicate/Hypothesis/Verdict) as canonical, replacing the simpler 3-column hearth-HTML version. Pause and unpause both fire live MCP calls (symmetric).
-- 2026-08-23 (latest): Added Product-led metric definitions (parallel to Sales-led set) so the motion-type onboarding question has concrete defaults for both paths.
+- 2026-08-23: Added Product-led metric definitions (parallel to Sales-led set) so the motion-type onboarding question has concrete defaults for both paths.
+- 2026-08-23 (latest): Added Ecommerce as a third motion type with its own metric definitions and funnel-stage analog. Worked examples now ship for all three motions (`dashboard-example-filled.html` sales-led, `dashboard-example-ecommerce.html`, `dashboard-example-product-led.html`).
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
 
@@ -57,7 +58,7 @@ KPIs/metrics shown at each level vary by company and motion type (per onboarding
 2. Channels to track?
 3. Per channel — data access: Google Sheet / Direct MCP / Both?
 4. Per channel — action layer: Read-only, or read-only + specific actions (name + which MCP)?
-5. Motion type: Product-led or Sales-led? *(Determines relevant KPIs — template stays identical, only metric set changes.)*
+5. Motion type: Sales-led, Ecommerce, or Product-led? *(Determines relevant KPIs — template stays identical, only metric set changes.)*
 6. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
 
 ## Motion-type default metrics
@@ -93,7 +94,26 @@ KPIs/metrics shown at each level vary by company and motion type (per onboarding
 | Feature Adoption % | % of activated users reaching a deeper feature | Engagement depth, churn-risk proxy |
 | CAC Payback (PLG) | Months to recover CAC from converted user's revenue | Efficiency counterpart to RoS |
 
-**Funnel stage analog:** Sales-led = `Clicks→Submits→SAL→SQL→ICP→BTC→DPC→Sold`. Product-led = `Clicks→Signups→Activation→PQL→Trial-to-Paid→Expansion`. Same visual funnel component, different stage labels/thresholds — granularity table and page structure unchanged regardless of motion type.
+**Ecommerce:** ATC, Checkout, Orders, AOV, ROAS, Repeat Rate, Refund Rate, Feed Health%, Session CVR%, $/ATC, $/Order, Profit/Spend, Net Profit.
+| Metric | Definition | What it tells you |
+|---|---|---|
+| ATC | Add to cart | Mid-funnel intent volume from paid |
+| Checkout | Checkout started | How much cart intent survives to the payment step |
+| Orders | Completed purchases | Realized conversion volume |
+| AOV | Revenue ÷ Orders | Basket size — the lever that moves breakeven ROAS |
+| ROAS | Revenue ÷ Spend | Headline return; compare against the margin-derived breakeven, not against 1.0 |
+| Repeat Rate | Repeat orders ÷ Orders | Whether paid acquisition is buying one-time or returning customers |
+| Refund Rate | Refunds ÷ Orders | Quality of the demand a creative or term is buying (inverted — lower is better) |
+| Feed Health% | Approved SKUs ÷ submitted SKUs | Catalog/feed pipeline health (the ecommerce analog of CRM Sync%; fixed as a Daily metric) |
+| Session CVR% | Sessions reaching ATC ÷ Sessions | Landing page and PDP conversion quality |
+| $/ATC | Spend ÷ ATC | Mid-funnel efficiency, readable before purchases land |
+| $/Order | Spend ÷ Orders | Full-funnel CAC |
+| Profit/Spend | Contribution profit ÷ Spend | Margin-aware ROI; the scale/cut decision metric |
+| Net Profit | (Revenue × gross margin) − Spend | Absolute contribution after COGS and ad spend |
+
+*Breakeven ROAS is 1 ÷ gross margin — at a 55% margin that is 1.82×, so a 1.7× ad set is losing money even though it looks positive. Always set the ROAS chip thresholds off the client's real margin.*
+
+**Funnel stage analog:** Sales-led = `Clicks→Submits→SAL→SQL→ICP→BTC→DPC→Sold`. Ecommerce = `Clicks→Sessions→Product Views→Add to Cart→Checkouts→Purchases→Repeat Orders`. Product-led = `Clicks→Signups→Activation→PQL→Trial-to-Paid→Expansion`. Same visual funnel component, different stage labels/thresholds — granularity table and page structure unchanged regardless of motion type.
 
 ## Steps
 1. Run onboarding (above).
@@ -136,7 +156,8 @@ KPIs/metrics shown at each level vary by company and motion type (per onboarding
 - Never store an API key in browser storage (artifacts can't use localStorage anyway).
 - Duplicate, Pause, and Unpause all fire live MCP calls that create/change real state — confirm with the user before executing each, never wire buttons straight to the call.
 - Don't let dimensions-per-timeframe or granularity-per-page be re-litigated — fixed for consistency across every build.
-- Product-led vs sales-led changes *what* is measured (metrics, funnel stage labels), never *how* it's laid out — resist adding/removing pages or restructuring views per company.
+- Motion type (sales-led / ecommerce / product-led) changes *what* is measured (metrics, funnel stage labels, chip thresholds), never *how* it's laid out — resist adding/removing pages or restructuring views per company.
+- Changing a metric means editing three things in step: the `*_LABELS` array (header), the matching `render*` function (the cell), and the chip helper that colors it. Retune the chip thresholds to the client's economics — the defaults are per-motion, not universal.
 - "CRM Sync%" is a generic label — rename per company's actual CRM stack, but the underlying check (lead-submit-to-CRM sync health) stays fixed as a Daily-page metric.
 - Cap KPI strip at 6-8 metrics per timeframe or it becomes noise.
 
