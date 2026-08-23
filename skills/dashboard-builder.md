@@ -11,7 +11,8 @@
 - 2026-08-23: Channel count is two **or three** — the funnel and heatmap grids reflow, and every per-channel surface (tabs, panes, platform-changelog panels) repeats per channel. Both three-channel examples use index-based array names (M1/M2/M3 …) rather than channel initials.
 - 2026-08-23: Fixed the Monthly/Weekly row-inclusion rule — period tables show every unit that was active at any point in the window, including paused and deleted ones, scoped by delivery rather than current status.
 - 2026-08-23: Specified the two navigation behaviours — Monthly/Weekly row click drills into that unit's creatives, and clicking a Changelog card opens it for editing. Note logging moves to a per-row pencil button on Monthly/Weekly.
-- 2026-08-23 (latest): Added the pre-ship checklist, a `hostPrompt()` guard for host callbacks, and `syncTabCounts()` so label counts are computed from data rather than typed.
+- 2026-08-23: Added the pre-ship checklist, a `hostPrompt()` guard for host callbacks, and `syncTabCounts()` so label counts are computed from data rather than typed.
+- 2026-08-23 (latest): Fixed the reporting window per page — Monthly is month-to-date, Weekly is the last 7 days, Daily is the last completed day, and Creatives defaults to MTD with a toggle to last 30 days. Windows are now named in every page header.
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
 
@@ -33,7 +34,25 @@ Funnel → Monthly → Weekly → Daily → Creatives → Optimization → Chang
 | Daily | Campaign |
 | Creatives | Ad |
 
-KPIs/metrics shown at each level vary by company and motion type (per onboarding) — only the level of granularity is fixed across every dashboard built with this skill.
+KPIs/metrics shown at each level vary by company and motion type (per onboarding) — only the level of granularity, and the reporting window below, are fixed across every dashboard built with this skill.
+
+## Fixed reporting window per page (not user-configurable)
+| Page | Window | Notes |
+|---|---|---|
+| Funnel | Month to date | Matches Monthly, so the funnel and the monthly table reconcile |
+| Monthly | **Month to date** | Not a rolling 30 days, and not last calendar month — MTD, so it moves with the month you are in |
+| Weekly | **Last 7 days** | A rolling 7 days, not the current calendar week — a Tuesday check-in on a calendar week is reading two days of data |
+| Daily | **Last completed day** | The most recent *finished* day. Today is still filling up and reads as a collapse |
+| Creatives | **Month to date by default, toggleable to last 30 days** | MTD is the default so it lines up with Monthly; L30 exists because ad-level volume is thin and a 23-day month often cannot separate two creatives |
+| Optimization | Month to date | Same window as the tables its recommendations are drawn from |
+| Changelog | n/a | Cards carry their own dates |
+
+Two rules that follow from this:
+
+- **State the window on the page.** Every page header names its window ("Ad set / ad group level · Month to date"). A screenshot of a table with no window on it is unreadable a week later, and it is the fastest way for two people to argue about numbers that were never comparable.
+- **Never compare across windows.** Creative spend rolls up to channel spend *within the same window*. When the Creatives page is on L30 and Monthly is on MTD they will not tie, and that is correct — do not "fix" it by scaling one to the other.
+
+**The Creatives toggle:** each window is its own dataset (`CR1` / `CR1_L30`, and so on), registered on the table's config as `windows:{mtd:…, l30:…}` and swapped by `setCrWindow()`. Never derive one window by scaling the other — a modelled number that looks like a measured one is worse than no number. The toggle governs every channel tab on the page at once, and any active drill-down filter survives it.
 
 ## Fixed page specs
 
@@ -47,7 +66,7 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 
 **Daily:** Channel tabs (campaign-level). Table: Name, (Status if applicable), CRM Sync%, Submit%, SAL, $/SAL, ICP%, BTC%, DPC%, Stuck%, Net EV (+pause column). No Won$/Sold/RoS — attribution lag makes them misleading daily.
 
-**Creatives:** 3 tabs: channel-1 ads, channel-2 campaigns, Ad Library. Ad-level table: Ad Creative, Format, Copy Angle, Impr, CTR, %Submit, ICP%, DPC%, $/SAL, Stuck% + sort bar. Campaign-level tab: same funnel metrics, rank-by bar. Ad Library: filter buttons (All/Video/Image) + card grid (media, title, body, CTA, Ad Library link).
+**Creatives:** one tab per channel plus Ad Library, with a page-level window toggle (Month to date / Last 30 days) above the tabs, defaulting to MTD. Ad-level table: Ad Creative, Format, Copy Angle, Impr, CTR, %Submit, ICP%, DPC%, $/SAL, Stuck% + sort bar. Campaign-level tab: same funnel metrics, rank-by bar. Ad Library: filter buttons (All/Video/Image) + card grid (media, title, body, CTA, Ad Library link).
 
 **Optimization:** Net-row banner (Scale-Up Potential / Weekly Bleed to Stop / Net Weekly Opportunity + rule callout). Two tables: Scale Up, Pull Back — Unit, Platform, EV/Spend, $/SAL, Spend, SAL, Net EV $. Row click → Changelog note modal. Unit name link → ad preview modal + "Open in Ads Manager."
 
@@ -68,7 +87,7 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 3. Per channel — data access: Google Sheet / Direct MCP / Both?
 4. Per channel — action layer: Read-only, or read-only + specific actions (name + which MCP)?
 5. Motion type: Sales-led, Ecommerce, or Product-led? *(Determines relevant KPIs — template stays identical, only metric set changes.)*
-6. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
+6. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. *(Do not ask about date ranges — the windows are fixed above.)* Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
 
 ## Motion-type default metrics
 
@@ -164,7 +183,7 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 - The reference file hardcodes data in JS arrays — that was a snapshot; this skill requires live daily refresh instead.
 - Never store an API key in browser storage (artifacts can't use localStorage anyway).
 - Duplicate, Pause, and Unpause all fire live MCP calls that create/change real state — confirm with the user before executing each, never wire buttons straight to the call.
-- Don't let dimensions-per-timeframe or granularity-per-page be re-litigated — fixed for consistency across every build.
+- Don't let dimensions-per-timeframe, granularity-per-page or the reporting windows be re-litigated — fixed for consistency across every build. The one exception is the Creatives MTD/L30 toggle, which is part of the spec rather than a per-company option.
 - Motion type (sales-led / ecommerce / product-led) changes *what* is measured (metrics, funnel stage labels, chip thresholds), never *how* it's laid out — resist adding/removing pages or restructuring views per company.
 - Changing a metric means editing three things in step: the `*_LABELS` array (header), the matching `render*` function (the cell), and the chip helper that colors it. Retune the chip thresholds to the client's economics — the defaults are per-motion, not universal.
 - "CRM Sync%" is a generic label — rename per company's actual CRM stack, but the underlying check (lead-submit-to-CRM sync health) stays fixed as a Daily-page metric.
@@ -181,6 +200,8 @@ Every item here came from a real bug. Run it as a test pass, not a self-assessme
 - For any table filtered to specific creatives, confirm the underlying ad set / campaign actually has no more members than shown. Pull the full list filtered by `spend > 0`, not a fixed top-N, unless the person asked for a leaderboard.
 - Every metric implied by the page title is present. An "ad-level performance" page needs impressions, clicks, spend *and* a cost-per metric — not just a cost ratio.
 - Every entity active during the window appears, paused ones included (see the row-inclusion rule above).
+- Each page states its window in the header, and the data actually matches it — Monthly is MTD, Weekly is a rolling 7 days, Daily is the last *completed* day.
+- The Creatives window toggle swaps a real second dataset, and both windows are internally consistent. Roll-up checks compare like windows only.
 - Every period row resolves to at least one creative. If it cannot, the drill-down shows an empty state and the creative data is incomplete.
 
 **Data sourcing**

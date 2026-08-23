@@ -188,6 +188,11 @@ tbody tr.empty-row{cursor:default;}
   .logo{font-size:14px;margin-right:6px;}
   header{gap:2px;}
 }
+/* Creatives window toggle (MTD / L30) */
+.win-bar{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+.win-bar span{font-size:12px;color:#6B7280;font-weight:600;}
+.winbtn{padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #E5E7EB;background:#fff;color:#6B7280;}
+.winbtn.on{border-color:#111827;background:#111827;color:#fff;}
 </style>
 </head>
 <body>
@@ -223,7 +228,7 @@ tbody tr.empty-row{cursor:default;}
 
 <!-- MONTHLY -->
 <div class="page" id="pg-monthly">
-  <div class="ph"><h2>Monthly</h2><span class="ph-sub">Ad set / ad group level &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
+  <div class="ph"><h2>Monthly</h2><span class="ph-sub">Ad set / ad group level &middot; Month to date &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('monthly','c1',this)">[Channel 1] <span class="ct">0 ad sets</span></button>
     <button class="ch-tab" onclick="showCh('monthly','c2',this)">[Channel 2] <span class="ct">0 ad groups</span></button>
@@ -234,7 +239,7 @@ tbody tr.empty-row{cursor:default;}
 
 <!-- WEEKLY -->
 <div class="page" id="pg-weekly">
-  <div class="ph"><h2>Weekly</h2><span class="ph-sub">Ad set / ad group level &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
+  <div class="ph"><h2>Weekly</h2><span class="ph-sub">Ad set / ad group level &middot; Last 7 days &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('weekly','c1',this)">[Channel 1] <span class="ct">0 ad sets</span></button>
     <button class="ch-tab" onclick="showCh('weekly','c2',this)">[Channel 2] <span class="ct">0 ad groups</span></button>
@@ -245,7 +250,7 @@ tbody tr.empty-row{cursor:default;}
 
 <!-- DAILY -->
 <div class="page" id="pg-daily">
-  <div class="ph"><h2>Daily</h2><span class="ph-sub">Campaign level &middot; most recent day</span></div>
+  <div class="ph"><h2>Daily</h2><span class="ph-sub">Campaign level &middot; Last completed day</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('daily','c1',this)">[Channel 1] <span class="ct">0 campaigns</span></button>
     <button class="ch-tab" onclick="showCh('daily','c2',this)">[Channel 2] <span class="ct">0 campaigns</span></button>
@@ -257,6 +262,11 @@ tbody tr.empty-row{cursor:default;}
 <!-- CREATIVES -->
 <div class="page" id="pg-creatives">
   <div class="ph"><h2>Creatives</h2><span class="ph-sub">Ad-level performance</span></div>
+  <div class="win-bar">
+    <span>Window:</span>
+    <button class="winbtn on" onclick="setCrWindow('mtd',this)">Month to date</button>
+    <button class="winbtn" onclick="setCrWindow('l30',this)">Last 30 days</button>
+  </div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('creatives','c1',this)">[Channel 1] Ads <span class="ct">0 ads</span></button>
     <button class="ch-tab" onclick="showCh('creatives','c2',this)">[Channel 2] Campaigns <span class="ct">0 campaigns</span></button>
@@ -417,13 +427,15 @@ var MW=[];   // Weekly — Channel 1
 var GW=[];   // Weekly — Channel 2
 var MD=[];   // Daily — Channel 1 (campaign level)
 var GD=[];   // Daily — Channel 2 (campaign level)
-var CR=[];   // Creatives — Channel 1 (ad level)
+var CR=[];
+var CR_L30=[];   // Creatives — Channel 1 (ad level)
 var ADD=[];  // Optimization — Scale Up
 var CUT=[];  // Optimization — Pull Back
 var VM=[];   // Funnel heatmap — Channel 1 segments
 var VG=[];   // Funnel heatmap — Channel 2 segments
 var ADS=[];  // Ad Library gallery
 var GCR=[];
+var GCR_L30=[];
 var REC_AD_LINK={};
 var DRILL={'tbl-mm':{ch:'c1',cr:'tbl-cr'},'tbl-mw':{ch:'c1',cr:'tbl-cr'},
            'tbl-gm':{ch:'c2',cr:'tbl-gcr'},'tbl-gw':{ch:'c2',cr:'tbl-gcr'}};
@@ -615,10 +627,10 @@ document.addEventListener('DOMContentLoaded', function() {
     ['tbl-gd',GD,GL_D_LABELS,GL_D_KEYS,GL_D_RIGHTS,renderGDaily,'sal_cost','desc'],
     ['tbl-add',ADD,REC_LABELS,REC_KEYS,REC_RIGHTS,renderRec,'ev_x','desc'],
     ['tbl-cut',CUT,REC_LABELS,REC_KEYS,REC_RIGHTS,renderRec,'ev_x','desc'],
-    ['tbl-cr',CR,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
-    ['tbl-gcr',GCR,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
+    ['tbl-cr',CR,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc',{mtd:CR,l30:CR_L30}],
+    ['tbl-gcr',GCR,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc',{mtd:GCR,l30:GCR_L30}],
   ].forEach(function(x){
-    CONFIGS[x[0]]={data:x[1],labels:x[2],keys:x[3],rights:x[4],render:x[5],def:x[6],dd:x[7]||'desc'};
+    CONFIGS[x[0]]={data:x[1],labels:x[2],keys:x[3],rights:x[4],render:x[5],def:x[6],dd:x[7]||'desc',windows:x[8]||null};
     SORT[x[0]]={col:x[6],dir:x[7]||'desc'};
     rerender(x[0]);
   });
@@ -781,6 +793,25 @@ function syncTabCounts(){
     var e=document.getElementById(x[0]);
     if(e)e.innerHTML=e.innerHTML.replace(/\((\d+)\)/,'('+x[1]+')');
   });
+}
+
+// ── REPORTING WINDOW (Creatives only) ──────────────────────────────────────
+// Monthly is month-to-date, Weekly is the last 7 days and Daily is the last
+// completed day — all fixed. Creatives is the one page that toggles, defaulting
+// to MTD so it lines up with Monthly, with L30 available for a fuller read on
+// low-volume ads. Each window is its own dataset, never a scaled estimate.
+var CR_WINDOW='mtd';
+function setCrWindow(w,el){
+  CR_WINDOW=w;
+  Object.keys(CONFIGS).forEach(function(id){
+    var cfg=CONFIGS[id];
+    if(cfg.windows&&cfg.windows[w]){cfg.data=cfg.windows[w];rerender(id);}
+  });
+  if(el){
+    el.parentElement.querySelectorAll('.winbtn').forEach(function(b){b.classList.remove('on');});
+    el.classList.add('on');
+  }
+  syncTabCounts();
 }
 
 // ── DRILL-DOWN: Monthly/Weekly row → that unit's ads on the Creatives page ──

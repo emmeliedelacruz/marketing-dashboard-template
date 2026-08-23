@@ -64,6 +64,19 @@ What *does* vary per company: channel names, which KPIs populate the tables, and
 
 Both three-channel examples also carry one **paused** ad group that still spent during the month, to show the Monthly/Weekly rule: period tables include everything that delivered in the window, not just what is live now. Filtering those rows out silently drops their spend and flatters every remaining row.
 
+## Reporting windows
+
+Fixed per page, and named in each page header so a screenshot is unambiguous:
+
+| Page | Window |
+|---|---|
+| Funnel, Monthly, Optimization | Month to date |
+| Weekly | Last 7 days (rolling, not the calendar week) |
+| Daily | Last completed day |
+| Creatives | Month to date by default, toggleable to last 30 days |
+
+The Creatives toggle swaps a genuine second dataset (`CR1` / `CR1_L30`), not a scaled estimate, and drives every channel tab at once. Creative spend rolls up to channel spend within the same window — on L30 it will not tie to MTD Monthly, which is expected.
+
 ## Interactions worth knowing
 
 - **Monthly / Weekly row click** drills into Creatives — it switches to that unit's channel tab and filters the ad table to that ad set or ad group, with a Clear filter button. Names are matched loosely, and the row's campaign is matched too, so search channels reporting creatives at campaign level still resolve.

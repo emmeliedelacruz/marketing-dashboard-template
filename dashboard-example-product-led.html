@@ -188,6 +188,11 @@ tbody tr.empty-row{cursor:default;}
   .logo{font-size:14px;margin-right:6px;}
   header{gap:2px;}
 }
+/* Creatives window toggle (MTD / L30) */
+.win-bar{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+.win-bar span{font-size:12px;color:#6B7280;font-weight:600;}
+.winbtn{padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #E5E7EB;background:#fff;color:#6B7280;}
+.winbtn.on{border-color:#111827;background:#111827;color:#fff;}
 </style>
 </head>
 <body>
@@ -225,7 +230,7 @@ tbody tr.empty-row{cursor:default;}
 
 <!-- MONTHLY -->
 <div class="page" id="pg-monthly">
-  <div class="ph"><h2>Monthly</h2><span class="ph-sub">Ad set / ad group level &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
+  <div class="ph"><h2>Monthly</h2><span class="ph-sub">Ad set / ad group level &middot; Month to date &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('monthly','c1',this)">Meta <span class="ct">3 ad sets</span></button>
     <button class="ch-tab" onclick="showCh('monthly','c2',this)">LinkedIn <span class="ct">4 ad sets</span></button>
@@ -238,7 +243,7 @@ tbody tr.empty-row{cursor:default;}
 
 <!-- WEEKLY -->
 <div class="page" id="pg-weekly">
-  <div class="ph"><h2>Weekly</h2><span class="ph-sub">Ad set / ad group level &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
+  <div class="ph"><h2>Weekly</h2><span class="ph-sub">Ad set / ad group level &middot; Last 7 days &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('weekly','c1',this)">Meta <span class="ct">1 ad set</span></button>
     <button class="ch-tab" onclick="showCh('weekly','c2',this)">LinkedIn <span class="ct">2 ad sets</span></button>
@@ -251,7 +256,7 @@ tbody tr.empty-row{cursor:default;}
 
 <!-- DAILY -->
 <div class="page" id="pg-daily">
-  <div class="ph"><h2>Daily</h2><span class="ph-sub">Campaign level &middot; most recent day</span></div>
+  <div class="ph"><h2>Daily</h2><span class="ph-sub">Campaign level &middot; Last completed day</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('daily','c1',this)">Meta <span class="ct">2 campaigns</span></button>
     <button class="ch-tab" onclick="showCh('daily','c2',this)">LinkedIn <span class="ct">2 campaigns</span></button>
@@ -265,6 +270,11 @@ tbody tr.empty-row{cursor:default;}
 <!-- CREATIVES -->
 <div class="page" id="pg-creatives">
   <div class="ph"><h2>Creatives</h2><span class="ph-sub">Ad-level performance</span></div>
+  <div class="win-bar">
+    <span>Window:</span>
+    <button class="winbtn on" onclick="setCrWindow('mtd',this)">Month to date</button>
+    <button class="winbtn" onclick="setCrWindow('l30',this)">Last 30 days</button>
+  </div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('creatives','c1',this)">Meta Ads <span class="ct">3 ads</span></button>
     <button class="ch-tab" onclick="showCh('creatives','c2',this)">LinkedIn Ads <span class="ct">4 ads</span></button>
@@ -483,17 +493,34 @@ var CR1=[
   {name:"Dashboard_Demo_Video",ad_set:"Interest_DevTools_Broad",fmt:"Video",copy:"Product Demo",impr:2600000,clicks:28400,ctr:1.09,signup_rate:1.1,activation_rate:22.8,pql_rate:3.8,signup_cost:15,churn_rate:50.0,spend:4700},
   {name:"Site_Retarget_Carousel",ad_set:"Retarget_Site_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:310000,clicks:6100,ctr:1.97,signup_rate:1.6,activation_rate:53.1,pql_rate:17.7,signup_cost:22,churn_rate:11.1,spend:2100}
 ];
+var CR1_L30=[
+  {name:"Trial_Offer_Static",ad_set:"Lookalike_Trial_Starters",fmt:"Static",copy:"Free Trial",impr:2465600,clicks:29480,ctr:1.16,signup_rate:1.2,activation_rate:33.9,pql_rate:7.5,signup_cost:21,churn_rate:24.1,spend:7236},
+  {name:"Dashboard_Demo_Video",ad_set:"Interest_DevTools_Broad",fmt:"Video",copy:"Product Demo",impr:3328000,clicks:36352,ctr:1.12,signup_rate:1.1,activation_rate:23.4,pql_rate:3.9,signup_cost:15,churn_rate:51.2,spend:6016},
+  {name:"Site_Retarget_Carousel",ad_set:"Retarget_Site_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:406100,clicks:7991,ctr:1.94,signup_rate:1.6,activation_rate:52.3,pql_rate:17.4,signup_cost:22,churn_rate:10.9,spend:2751}
+];
 var CR2=[
   {name:"Migration_Guide_Doc",ad_set:"ICP_Eng_Leaders",fmt:"Document Ad",copy:"Migration",impr:412000,clicks:3100,ctr:0.75,signup_rate:5.4,activation_rate:57.1,pql_rate:24.4,signup_cost:74,churn_rate:9.1,spend:12400},
   {name:"Benchmark_Report_Static",ad_set:"Lookalike_DevTools",fmt:"Single Image",copy:"Benchmark Data",impr:680000,clicks:4900,ctr:0.72,signup_rate:4.4,activation_rate:41.1,pql_rate:12.1,signup_cost:40,churn_rate:27.3,spend:8600},
   {name:"DocsRetarget_Carousel",ad_set:"Retarget_Docs_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:96000,clicks:1840,ctr:1.92,signup_rate:7.2,activation_rate:63.6,pql_rate:28.8,signup_cost:22,churn_rate:4.2,spend:2900},
   {name:"Founder_Talking_Head",ad_set:"Thought_Leadership_Video",fmt:"Video",copy:"Founder POV",impr:540000,clicks:2200,ctr:0.41,signup_rate:4.4,activation_rate:32.3,pql_rate:8.3,signup_cost:66,churn_rate:33.3,spend:6300}
 ];
+var CR2_L30=[
+  {name:"Migration_Guide_Doc",ad_set:"ICP_Eng_Leaders",fmt:"Document Ad",copy:"Migration",impr:552080,clicks:4154,ctr:0.72,signup_rate:5.2,activation_rate:55.1,pql_rate:23.5,signup_cost:77,churn_rate:8.8,spend:16616},
+  {name:"Benchmark_Report_Static",ad_set:"Lookalike_DevTools",fmt:"Single Image",copy:"Benchmark Data",impr:870400,clicks:6272,ctr:0.74,signup_rate:4.5,activation_rate:42.1,pql_rate:12.4,signup_cost:39,churn_rate:28.0,spend:11008},
+  {name:"DocsRetarget_Carousel",ad_set:"Retarget_Docs_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:125760,clicks:2410,ctr:1.89,signup_rate:7.1,activation_rate:62.6,pql_rate:28.4,signup_cost:22,churn_rate:4.1,spend:3799},
+  {name:"Founder_Talking_Head",ad_set:"Thought_Leadership_Video",fmt:"Video",copy:"Founder POV",impr:680400,clicks:2772,ctr:0.43,signup_rate:4.6,activation_rate:33.6,pql_rate:8.6,signup_cost:63,churn_rate:34.6,spend:7938}
+];
 var CR3=[
   {name:"Branded_Search",fmt:"Search",copy:"Brand Terms",impr:74000,clicks:6200,ctr:8.38,signup_rate:3.0,activation_rate:71.0,pql_rate:38.2,signup_cost:17,churn_rate:4.2,spend:3100},
   {name:"NB_Competitor_Alt",fmt:"Search",copy:"Competitor Alt",impr:210000,clicks:4100,ctr:1.95,signup_rate:2.5,activation_rate:50.0,pql_rate:18.3,signup_cost:71,churn_rate:22.2,spend:7400},
   {name:"NB_Category_Broad",fmt:"Search",copy:"Category Terms",impr:386000,clicks:5600,ctr:1.45,signup_rate:2.5,activation_rate:40.8,pql_rate:11.3,signup_cost:41,churn_rate:50.0,spend:5800},
   {name:"NB_Integrations_Exact",fmt:"Search",copy:"Integration Terms",impr:118000,clicks:2100,ctr:1.78,signup_rate:1.8,activation_rate:36.8,pql_rate:7.9,signup_cost:63,churn_rate:0,spend:2400}
+];
+var CR3_L30=[
+  {name:"Branded_Search",fmt:"Search",copy:"Brand Terms",impr:99160,clicks:8308,ctr:8.09,signup_rate:2.9,activation_rate:68.5,pql_rate:36.9,signup_cost:18,churn_rate:4.1,spend:4154},
+  {name:"NB_Competitor_Alt",fmt:"Search",copy:"Competitor Alt",impr:268800,clicks:5248,ctr:2.00,signup_rate:2.6,activation_rate:51.2,pql_rate:18.8,signup_cost:69,churn_rate:22.8,spend:9472},
+  {name:"NB_Category_Broad",fmt:"Search",copy:"Category Terms",impr:505660,clicks:7336,ctr:1.43,signup_rate:2.5,activation_rate:40.2,pql_rate:11.1,signup_cost:42,churn_rate:49.2,spend:7598},
+  {name:"NB_Integrations_Exact",fmt:"Search",copy:"Integration Terms",impr:148680,clicks:2646,ctr:1.85,signup_rate:1.9,activation_rate:38.3,pql_rate:8.2,signup_cost:60,churn_rate:0,spend:3024}
 ];
 var ADD=[
   {name:"Brand_Exact",platform:"c3",spend:3100,ltv_cac:62.0,signup_cost:17,signups:186,net_mrr:9660},
@@ -734,11 +761,11 @@ document.addEventListener('DOMContentLoaded', function() {
     ['tbl-d3',D3,GL_D_LABELS,GL_D_KEYS,GL_D_RIGHTS,renderGDaily,'signup_cost','desc'],
     ['tbl-add',ADD,REC_LABELS,REC_KEYS,REC_RIGHTS,renderRec,'ltv_cac','desc'],
     ['tbl-cut',CUT,REC_LABELS,REC_KEYS,REC_RIGHTS,renderRec,'ltv_cac','desc'],
-    ['tbl-cr1',CR1,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
-    ['tbl-cr2',CR2,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
-    ['tbl-cr3',CR3,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
+    ['tbl-cr1',CR1,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc',{mtd:CR1,l30:CR1_L30}],
+    ['tbl-cr2',CR2,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc',{mtd:CR2,l30:CR2_L30}],
+    ['tbl-cr3',CR3,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc',{mtd:CR3,l30:CR3_L30}],
   ].forEach(function(x){
-    CONFIGS[x[0]]={data:x[1],labels:x[2],keys:x[3],rights:x[4],render:x[5],def:x[6],dd:x[7]||'desc'};
+    CONFIGS[x[0]]={data:x[1],labels:x[2],keys:x[3],rights:x[4],render:x[5],def:x[6],dd:x[7]||'desc',windows:x[8]||null};
     SORT[x[0]]={col:x[6],dir:x[7]||'desc'};
     rerender(x[0]);
   });
@@ -937,6 +964,25 @@ function syncTabCounts(){
     var e=document.getElementById(x[0]);
     if(e)e.innerHTML=e.innerHTML.replace(/\((\d+)\)/,'('+x[1]+')');
   });
+}
+
+// ── REPORTING WINDOW (Creatives only) ──────────────────────────────────────
+// Monthly is month-to-date, Weekly is the last 7 days and Daily is the last
+// completed day — all fixed. Creatives is the one page that toggles, defaulting
+// to MTD so it lines up with Monthly, with L30 available for a fuller read on
+// low-volume ads. Each window is its own dataset, never a scaled estimate.
+var CR_WINDOW='mtd';
+function setCrWindow(w,el){
+  CR_WINDOW=w;
+  Object.keys(CONFIGS).forEach(function(id){
+    var cfg=CONFIGS[id];
+    if(cfg.windows&&cfg.windows[w]){cfg.data=cfg.windows[w];rerender(id);}
+  });
+  if(el){
+    el.parentElement.querySelectorAll('.winbtn').forEach(function(b){b.classList.remove('on');});
+    el.classList.add('on');
+  }
+  syncTabCounts();
 }
 
 // ── DRILL-DOWN: Monthly/Weekly row → that unit's ads on the Creatives page ──

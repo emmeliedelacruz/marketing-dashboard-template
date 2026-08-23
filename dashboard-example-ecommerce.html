@@ -188,6 +188,11 @@ tbody tr.empty-row{cursor:default;}
   .logo{font-size:14px;margin-right:6px;}
   header{gap:2px;}
 }
+/* Creatives window toggle (MTD / L30) */
+.win-bar{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+.win-bar span{font-size:12px;color:#6B7280;font-weight:600;}
+.winbtn{padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #E5E7EB;background:#fff;color:#6B7280;}
+.winbtn.on{border-color:#111827;background:#111827;color:#fff;}
 </style>
 </head>
 <body>
@@ -225,7 +230,7 @@ tbody tr.empty-row{cursor:default;}
 
 <!-- MONTHLY -->
 <div class="page" id="pg-monthly">
-  <div class="ph"><h2>Monthly</h2><span class="ph-sub">Ad set / ad group level &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
+  <div class="ph"><h2>Monthly</h2><span class="ph-sub">Ad set / ad group level &middot; Month to date &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('monthly','c1',this)">Meta <span class="ct">4 ad sets</span></button>
     <button class="ch-tab" onclick="showCh('monthly','c2',this)">Google Shopping <span class="ct">4 ad groups</span></button>
@@ -238,7 +243,7 @@ tbody tr.empty-row{cursor:default;}
 
 <!-- WEEKLY -->
 <div class="page" id="pg-weekly">
-  <div class="ph"><h2>Weekly</h2><span class="ph-sub">Ad set / ad group level &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
+  <div class="ph"><h2>Weekly</h2><span class="ph-sub">Ad set / ad group level &middot; Last 7 days &middot; Click a row to see its ads &middot; &#9998; logs a note</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('weekly','c1',this)">Meta <span class="ct">2 ad sets</span></button>
     <button class="ch-tab" onclick="showCh('weekly','c2',this)">Google Shopping <span class="ct">1 ad group</span></button>
@@ -251,7 +256,7 @@ tbody tr.empty-row{cursor:default;}
 
 <!-- DAILY -->
 <div class="page" id="pg-daily">
-  <div class="ph"><h2>Daily</h2><span class="ph-sub">Campaign level &middot; most recent day</span></div>
+  <div class="ph"><h2>Daily</h2><span class="ph-sub">Campaign level &middot; Last completed day</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('daily','c1',this)">Meta <span class="ct">2 campaigns</span></button>
     <button class="ch-tab" onclick="showCh('daily','c2',this)">Google Shopping <span class="ct">2 campaigns</span></button>
@@ -265,6 +270,11 @@ tbody tr.empty-row{cursor:default;}
 <!-- CREATIVES -->
 <div class="page" id="pg-creatives">
   <div class="ph"><h2>Creatives</h2><span class="ph-sub">Ad-level performance</span></div>
+  <div class="win-bar">
+    <span>Window:</span>
+    <button class="winbtn on" onclick="setCrWindow('mtd',this)">Month to date</button>
+    <button class="winbtn" onclick="setCrWindow('l30',this)">Last 30 days</button>
+  </div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('creatives','c1',this)">Meta Ads <span class="ct">4 ads</span></button>
     <button class="ch-tab" onclick="showCh('creatives','c2',this)">Google Shopping <span class="ct">4 campaigns</span></button>
@@ -483,16 +493,33 @@ var CR1=[
   {name:"Cart_Reminder_Dynamic",ad_set:"Retarget_Cart_7D",fmt:"Dynamic Product",copy:"Urgency",impr:210000,clicks:4200,ctr:2.00,atc_pct:16.4,checkout_rate:58.3,purchase_rate:65.2,atc_cost:4.93,refund_rate:3.1,spend:3400},
   {name:"Outdoor_Lifestyle_Carousel",ad_set:"Outdoor_Advantage_Plus",fmt:"Carousel",copy:"Lifestyle",impr:640000,clicks:7100,ctr:1.11,atc_pct:10.5,checkout_rate:52.3,purchase_rate:55.2,atc_cost:11.99,refund_rate:5.1,spend:8900}
 ];
+var CR1_L30=[
+  {name:"Kitchen_Hero_Static",ad_set:"Kitchen_Broad_Prospect",fmt:"Static",copy:"Product Hero",impr:1661600,clicks:19832,ctr:1.15,atc_pct:7.7,checkout_rate:41.9,purchase_rate:50.5,atc_cost:12.51,refund_rate:7.5,spend:19028},
+  {name:"UGC_Unboxing_V2",ad_set:"Lighting_Video_UGC",fmt:"UGC Video",copy:"Social Proof",impr:1139200,clicks:12288,ctr:1.11,atc_pct:4.1,checkout_rate:46.5,purchase_rate:51.2,atc_cost:12.75,refund_rate:8.2,spend:6528},
+  {name:"Cart_Reminder_Dynamic",ad_set:"Retarget_Cart_7D",fmt:"Dynamic Product",copy:"Urgency",impr:275100,clicks:5502,ctr:1.97,atc_pct:16.2,checkout_rate:57.4,purchase_rate:64.2,atc_cost:5.03,refund_rate:3.1,spend:4454},
+  {name:"Outdoor_Lifestyle_Carousel",ad_set:"Outdoor_Advantage_Plus",fmt:"Carousel",copy:"Lifestyle",impr:806400,clicks:8946,ctr:1.15,atc_pct:10.9,checkout_rate:54.4,purchase_rate:57.4,atc_cost:11.39,refund_rate:5.3,spend:11214}
+];
 var CR2=[
   {name:"Branded_Shopping",fmt:"Shopping",copy:"Brand Terms",impr:148000,clicks:9200,ctr:6.22,atc_pct:8.8,checkout_rate:66.7,purchase_rate:74.4,atc_cost:5.68,refund_rate:2.2,spend:4600},
   {name:"PMax_Kitchen",fmt:"Performance Max",copy:"Auto Assets",impr:620000,clicks:11400,ctr:1.84,atc_pct:5.3,checkout_rate:53.3,purchase_rate:57.8,atc_cost:15.40,refund_rate:7.5,spend:9300},
   {name:"Shopping_Outdoor_NB",fmt:"Shopping",copy:"Category Terms",impr:310000,clicks:7800,ctr:2.52,atc_pct:6.6,checkout_rate:57.8,purchase_rate:60.1,atc_cost:12.11,refund_rate:4.5,spend:6200},
   {name:"Clearance_Bath",fmt:"Shopping",copy:"Clearance",impr:82000,clicks:1400,ctr:1.71,atc_pct:6.9,checkout_rate:39.6,purchase_rate:36.8,atc_cost:18.75,refund_rate:14.3,spend:1800}
 ];
+var CR2_L30=[
+  {name:"Branded_Shopping",fmt:"Shopping",copy:"Brand Terms",impr:198320,clicks:12328,ctr:6.00,atc_pct:8.5,checkout_rate:64.4,purchase_rate:71.8,atc_cost:5.91,refund_rate:2.1,spend:6164},
+  {name:"PMax_Kitchen",fmt:"Performance Max",copy:"Auto Assets",impr:793600,clicks:14592,ctr:1.89,atc_pct:5.4,checkout_rate:54.6,purchase_rate:59.2,atc_cost:14.94,refund_rate:7.7,spend:11904},
+  {name:"Shopping_Outdoor_NB",fmt:"Shopping",copy:"Category Terms",impr:406100,clicks:10218,ctr:2.48,atc_pct:6.5,checkout_rate:56.9,purchase_rate:59.2,atc_cost:12.35,refund_rate:4.4,spend:8122},
+  {name:"Clearance_Bath",fmt:"Shopping",copy:"Clearance",impr:103320,clicks:1764,ctr:1.78,atc_pct:7.2,checkout_rate:41.2,purchase_rate:38.3,atc_cost:17.81,refund_rate:14.9,spend:2268}
+];
 var CR3=[
   {name:"Spark_Kitchen_Creator1",ad_set:"Spark_UGC_Kitchen",fmt:"Spark Ad",copy:"Creator Demo",impr:2100000,clicks:31000,ctr:1.48,atc_pct:3.0,checkout_rate:34.6,purchase_rate:44.7,atc_cost:7.39,refund_rate:11.3,spend:6800},
   {name:"Outdoor_Setup_Tutorial",ad_set:"Creator_Outdoor_Q3",fmt:"In-Feed Video",copy:"Tutorial",impr:1180000,clicks:16800,ctr:1.42,atc_pct:2.9,checkout_rate:40.7,purchase_rate:48.5,atc_cost:8.64,refund_rate:9.4,spend:4200},
   {name:"Lighting_Trend_Audio",ad_set:"Trending_Lighting_Hook",fmt:"In-Feed Video",copy:"Trend Audio",impr:740000,clicks:8900,ctr:1.20,atc_pct:2.4,checkout_rate:34.6,purchase_rate:41.9,atc_cost:12.15,refund_rate:12.9,spend:2600}
+];
+var CR3_L30=[
+  {name:"Spark_Kitchen_Creator1",ad_set:"Spark_UGC_Kitchen",fmt:"Spark Ad",copy:"Creator Demo",impr:2814000,clicks:41540,ctr:1.43,atc_pct:2.9,checkout_rate:33.4,purchase_rate:43.1,atc_cost:7.69,refund_rate:10.9,spend:9112},
+  {name:"Outdoor_Setup_Tutorial",ad_set:"Creator_Outdoor_Q3",fmt:"In-Feed Video",copy:"Tutorial",impr:1510400,clicks:21504,ctr:1.46,atc_pct:3.0,checkout_rate:41.7,purchase_rate:49.7,atc_cost:8.38,refund_rate:9.6,spend:5376},
+  {name:"Lighting_Trend_Audio",ad_set:"Trending_Lighting_Hook",fmt:"In-Feed Video",copy:"Trend Audio",impr:969400,clicks:11659,ctr:1.18,atc_pct:2.4,checkout_rate:34.1,purchase_rate:41.3,atc_cost:12.39,refund_rate:12.7,spend:3406}
 ];
 var ADD=[
   {name:"Retarget_Cart_7D",platform:"c1",spend:3400,pv:2.21,order_cost:13,orders:262,profit:7530},
@@ -737,11 +764,11 @@ document.addEventListener('DOMContentLoaded', function() {
     ['tbl-d3',D3,EC_D_LABELS,EC_D_KEYS,EC_D_RIGHTS,renderDaily,'atc_cost','desc'],
     ['tbl-add',ADD,REC_LABELS,REC_KEYS,REC_RIGHTS,renderRec,'pv','desc'],
     ['tbl-cut',CUT,REC_LABELS,REC_KEYS,REC_RIGHTS,renderRec,'pv','desc'],
-    ['tbl-cr1',CR1,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
-    ['tbl-cr2',CR2,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
-    ['tbl-cr3',CR3,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
+    ['tbl-cr1',CR1,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc',{mtd:CR1,l30:CR1_L30}],
+    ['tbl-cr2',CR2,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc',{mtd:CR2,l30:CR2_L30}],
+    ['tbl-cr3',CR3,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc',{mtd:CR3,l30:CR3_L30}],
   ].forEach(function(x){
-    CONFIGS[x[0]]={data:x[1],labels:x[2],keys:x[3],rights:x[4],render:x[5],def:x[6],dd:x[7]||'desc'};
+    CONFIGS[x[0]]={data:x[1],labels:x[2],keys:x[3],rights:x[4],render:x[5],def:x[6],dd:x[7]||'desc',windows:x[8]||null};
     SORT[x[0]]={col:x[6],dir:x[7]||'desc'};
     rerender(x[0]);
   });
@@ -940,6 +967,25 @@ function syncTabCounts(){
     var e=document.getElementById(x[0]);
     if(e)e.innerHTML=e.innerHTML.replace(/\((\d+)\)/,'('+x[1]+')');
   });
+}
+
+// ── REPORTING WINDOW (Creatives only) ──────────────────────────────────────
+// Monthly is month-to-date, Weekly is the last 7 days and Daily is the last
+// completed day — all fixed. Creatives is the one page that toggles, defaulting
+// to MTD so it lines up with Monthly, with L30 available for a fuller read on
+// low-volume ads. Each window is its own dataset, never a scaled estimate.
+var CR_WINDOW='mtd';
+function setCrWindow(w,el){
+  CR_WINDOW=w;
+  Object.keys(CONFIGS).forEach(function(id){
+    var cfg=CONFIGS[id];
+    if(cfg.windows&&cfg.windows[w]){cfg.data=cfg.windows[w];rerender(id);}
+  });
+  if(el){
+    el.parentElement.querySelectorAll('.winbtn').forEach(function(b){b.classList.remove('on');});
+    el.classList.add('on');
+  }
+  syncTabCounts();
 }
 
 // ── DRILL-DOWN: Monthly/Weekly row → that unit's ads on the Creatives page ──
