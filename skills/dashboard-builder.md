@@ -19,7 +19,8 @@
 - 2026-08-23: Duplicate now actually creates the ad — MCP through the host, else an operator-run relay, else a deep link into the native ads manager. Always PAUSED, always confirmed, and the card reports requested / created / failed.
 - 2026-08-23: The Changelog board is shareable. On a local file it stays in `localStorage` — one board per browser, per device — and the docs now say so plainly. Published as an artifact with `capabilities: {artifact: {}}`, the page reads and writes one team board at `data/board.json` behind an explicit "Save to shared board" button.
 - 2026-08-23: The Google Sheet is the database. Specified the three legs — MCP populates the sheet on a schedule, the sheet holds every dataset plus the human-authored fields, and the HTML is baked from it rather than fetching at load. Records the write constraint that shapes the whole thing: the Drive connector can create a sheet but cannot update one, so the refresh job needs Sheets API v4 or an Apps Script endpoint.
-- 2026-08-23 (latest): One sheet per build, provisioned at onboarding. This is a template repo, so no sheet ID is ever committed and no build reuses another's data. Split provisioning (a one-time `create_file`, which the Drive connector handles fine) from the recurring refresh write (which it cannot do at all). `sheet-template/` pins only `test_log` and `platform_log` — the tabs a human edits; metric columns are derived per build. The examples get no sheet: demo data, nothing to refresh, nothing to persist.
+- 2026-08-23 (latest): Where the test log lives is now an onboarding question, not a ranking — the sheet's `test_log` tab or the shared board in the published dashboard, presented in terms of who edits it and how, never in terms of storage mechanics. One or the other, never both. Records that the shared board fails silently without `capabilities: {artifact: {}}`, which is indistinguishable from the feature not existing.
+- 2026-08-23: One sheet per build, provisioned at onboarding. This is a template repo, so no sheet ID is ever committed and no build reuses another's data. Split provisioning (a one-time `create_file`, which the Drive connector handles fine) from the recurring refresh write (which it cannot do at all). `sheet-template/` pins only `test_log` and `platform_log` — the tabs a human edits; metric columns are derived per build. The examples get no sheet: demo data, nothing to refresh, nothing to persist.
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
 
@@ -121,13 +122,30 @@ Two fetch routes exist and are worth knowing, for self-hosted copies and for the
 
 **A caveat that decides the route where cells matter:** `read_file_content` on a Sheet returns a *markdown table*, not structured cells — it escapes characters, and its own tool docs say the representation will change over time. An agent parsing that at build time is fine, because it re-reads and adapts. A *page* regex-parsing it at runtime is building on a format with no contract. Where you need real cells, use the CSV export, not the natural-language read.
 
-### Where the Changelog board lives
+### Where the Changelog board lives — ask, don't assume
 
-Three stores, in preference order. A build uses the first one available to it:
+The metrics always come from the sheet. The **test log is a separate choice**, because it is the one thing people write rather than read, and the right answer depends on who is doing the writing. Ask it as its own onboarding question and present it in these terms — not in terms of storage mechanics:
 
-1. **The build's own `test_log` tab** — editable outside the dashboard, survives republishing, readable by people who never open the dashboard, and backed up with the rest of the sheet. Preferred whenever a sheet is configured.
-2. **`data/board.json` in the published artifact** — for builds with no sheet. Shared with everyone who has edit access on the artifact, written behind the explicit Save button.
-3. **`localStorage`** — the fallback when neither exists. One board per browser, per device, shared with nobody. Say so plainly rather than calling it "persistent".
+**Option A — the sheet's `test_log` tab.** Cards live in Google Sheets.
+- Anyone can edit the log without opening the dashboard, on a phone, in a meeting.
+- Backed up, versioned and searchable with the rest of the sheet.
+- Readable by people who never open the dashboard at all.
+- Everyone who edits needs access to the sheet.
+- Edits appear on the board at the next refresh, not instantly.
+
+**Option B — the shared board in the published dashboard.** Cards live in the published page itself, at `data/board.json`.
+- Drag-and-drop editing right on the board; no spreadsheet to open.
+- Everyone with edit access on the link sees the same cards.
+- No Google account or sheet access needed.
+- Only works on the published dashboard — a downloaded copy of the file falls back to local-only.
+- Last Save wins if two people edit at once. Fine for a small team, wrong for a busy one.
+- Edits stay in the page; they do not flow back to the sheet.
+
+**Requires `capabilities: {artifact: {}}` at publish time.** Without that declaration `claude.use('artifact')` returns `null`, the Save button never appears, and the board silently falls back to local-only — the failure looks exactly like the feature simply not existing. If Option B is chosen, declare the capability and confirm the state line reads "shared board" before calling it done.
+
+**Neither chosen, or an example/demo build** → `localStorage`. One board per browser, per device, shared with nobody. Say that plainly; never call it "persistent" without saying to whom.
+
+Do not build both stores into one dashboard. Two places to write the same log is how the two quietly disagree.
 
 ## Fixed page specs
 
@@ -173,9 +191,10 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 1. Motion type: Sales-led, Ecommerce, or Product-led? *(Determines relevant KPIs — template stays identical, only metric set changes.)*
 2. Channels to track? *(Two or three. Beyond three the tab rows and funnel grid stop being readable — push back and suggest folding the smallest channel into a combined view.)*
 3. The sheet: create a new one for this company, or point at an existing sheet? *(Every build gets its own — never reuse another company's, and never hardcode a sheet ID into the template. If creating, provision it from `sheet-template/` and report the new file ID back. Then ask how the refresh job will write to it: service account, Apps Script endpoint, or manual for now.)*
-4. Per channel — data access: Google Sheet / Direct MCP / Both?
-5. Per channel — action layer: Read-only, or read-only + specific actions (name + which MCP)?
-6. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. *(Do not ask about date ranges — the windows are fixed above.)* Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
+4. Where should the test log live — the sheet, or the dashboard itself? *(See **Where the Changelog board lives** below and present the two options in those terms. If they pick the dashboard, declare `capabilities: {artifact: {}}` at publish and verify the shared-board state line. If they have no preference, default to the sheet.)*
+5. Per channel — data access: Google Sheet / Direct MCP / Both?
+6. Per channel — action layer: Read-only, or read-only + specific actions (name + which MCP)?
+7. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. *(Do not ask about date ranges — the windows are fixed above.)* Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
 
 ## Motion-type default metrics
 
@@ -297,6 +316,7 @@ Every item here came from a real bug. Run it as a test pass, not a self-assessme
 - Every period row resolves to at least one creative. If it cannot, the drill-down shows an empty state and the creative data is incomplete.
 
 **Data sourcing**
+- The chosen test-log store actually works. If it is the shared board, open the published link and confirm the state line says "shared board" rather than "local to this browser" — an undeclared capability fails silently and looks identical to the feature not existing. If it is the sheet, confirm a row added in Sheets reaches the board on refresh.
 - No sheet ID, file ID or account ID from a real build appears anywhere in the template repo. Grep for them before every commit.
 - The sheet, not the HTML, is the source of truth. Grep the build for any number that exists only in the file — if a person could want to correct it and there is no sheet cell behind it, it is in the wrong place.
 - Confirm the refresh job can actually *write* the sheet it reads. `create_file` returns a new file ID; if the build assumed in-place updates, every refresh silently orphans the sheet the dashboard was built from.
