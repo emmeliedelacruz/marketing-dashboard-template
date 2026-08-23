@@ -136,24 +136,22 @@ The ads-manager URLs in `AD_PLATFORM` are starting points. **Verify them against
 
 ## Where to run it
 
-Every situation is different — a solo consultant, a two-person growth team, ten people who live in it daily — so pick the one that matches yours. This decides what the dashboard can do more than anything else you choose.
+Two options. This decides what the dashboard can do more than anything else you pick.
 
 | | Cost | Shared board | Reads the sheet live | Can act on ads | Setup |
 |---|---|---|---|---|---|
-| **A file you open** | free | No — one board per person, per device | Yes | Opens the ads manager for you | None |
-| **A Claude link** | free | **Yes** — one board, Save button | No — baked in at each refresh | Hands the job to Claude, or opens the ads manager | Publish it |
-| **Your own web address** | ~free | No — one board per person | Yes | Needs an endpoint you run | A deploy |
-| **A server with a database** | monthly bill | **Yes** — live, no Save button | Yes | Yes, directly | A real build |
+| **An AI link** | free | On Claude yes, with a Save button. Elsewhere no | No — baked in at each refresh | Hands the job to the assistant, or opens the ads manager | Publish it |
+| **A server with a database** | monthly bill | Yes — live, no Save button | Yes | Yes, directly | A real build |
 
-**A file you open** — email it, open it from your desktop. Right for one person, or as a deliverable for a client.
+**An AI link** — publish it and share the URL. No infrastructure, no cost, opens on a phone.
 
-**A Claude link** — the only option that gives a genuinely shared board with no infrastructure and no cost. The trade: a published page can't reach outside itself, so the numbers are baked in at each refresh rather than read live, and if two people save at once the last one wins. Right for a small team.
+The page can't reach outside itself on these hosts, so the numbers are baked in at each refresh rather than read live. And the shared board is **Claude-specific**: it works through a hook (`claude.use('artifact')`) that Claude provides and other assistants don't. On Claude, everyone with edit access shares one board and the last Save wins. On another assistant the dashboard still renders correctly, but the board goes back to one per person, per browser. Worth knowing before you promise a teammate a shared board.
 
-**Your own web address** (Netlify, Vercel, GitHub Pages) — a normal static site. It can read your sheet live, but there's nothing to write to, so the board goes back to one-per-person. Choose it if you want your own URL and the test log is one person's job.
+**A server with a database** (Railway, Render, Fly) — everything works properly: several people editing the board at once with no Save button and no conflicts, live data, credentials held on the server so ad actions run for real, and the refresh job on a schedule beside it. **This repo doesn't ship that** — there's no server or database code here, so this route means building that part.
 
-**A server with a database** (Railway, Render, Fly) — everything works properly: several people editing the board at once with no Save button and no conflicts, credentials held on the server so ad actions run for real, and the refresh job on a schedule beside it. **This repo doesn't ship that** — there's no server or database code here, so this route means building that part. Right for a team that lives in the dashboard daily, or one that wants it to *do* things rather than recommend them.
+Two questions settle it: **how many people edit the board at once**, and **should the dashboard act on ads or just report on them**. A few people who mostly read → an AI link. A daily-driver for a team, several editors, or anything where a wrong click spends money → a server, so credentials are never sitting in the page.
 
-Two questions settle it: **how many people edit the board at once**, and **should the dashboard act on ads or just report on them**. A handful of people who mostly read → a Claude link. A daily-driver for a team → a server. Anything where a wrong click spends money → a server, so credentials are never sitting in the page.
+Opening the HTML file directly is how you *look* at a build — a demo, a client deliverable, a check before publishing. It isn't one of the two options above, because nothing is shared and nothing refreshes.
 
 ## Sharing the board
 
@@ -164,6 +162,8 @@ The Changelog is the one part of the dashboard people write to, so the board sta
 **Board, mirrored to the sheet.** Same editing, plus the refresh job copies the board into the `test_log` tab each run — so you get a searchable, backed-up history that people can read without opening the dashboard. The mirror is **one-way**: the sheet is a copy, and anything typed into it is overwritten on the next run.
 
 Mirroring is the better default when you have a sheet and a refresh job. Either way the board needs `capabilities: {artifact: {}}` declared at publish time — without it the Save button never appears and the board silently falls back to local-only, which looks identical to the feature not existing.
+
+**This all describes the AI-link route.** On a server the board lives in the database instead: it saves as you drag, several people can edit at once, and there is no Save button and no conflict to resolve. The rest of this section — the Save button, last-Save-wins, the capability declaration — applies only to a published artifact.
 
 Why not make the sheet the source and skip the board? Because a web page cannot write cells into a Google Sheet — the Drive connector only changes a file's title and folder, and a published page is blocked from calling the Sheets API directly. A sheet-sourced log means a **read-only** board: every change made in Sheets, no dragging. That trades away the reason a board exists.
 
