@@ -27,24 +27,39 @@ No build step, no backend required — it's one HTML file you open in a browser.
    | `MM` / `GM` | Monthly — Channel 1 (ad set) / Channel 2 (ad group) |
    | `MW` / `GW` | Weekly — same grain as Monthly |
    | `MD` / `GD` | Daily — campaign level, per channel |
-   | `CR` | Creatives — Channel 1, ad level |
+   | `CR` / `GCR` | Creatives — Channel 1 ads, Channel 2 campaigns |
+   | `CR_L30` / `GCR_L30` | The same two tables for the Last-30-days window |
    | `ADD` / `CUT` | Optimization — Scale Up / Pull Back |
    | `VM` / `VG` | Funnel heatmap segments, per channel |
    | `ADS` | Ad Library gallery |
+   | `NOTES` | Seeded Changelog cards (leave empty for a clean board) |
+   | `PLATFORM_LOG` | Platform change-log entries, keyed by channel (`c1`, `c2`, …) |
 
-   All three examples have these populated — copy the row shapes from whichever one matches your motion.
+   **Every creative row needs an `ad_id`.** That is what links a Changelog card's control and test ads to their live numbers; without it the Testing card has nothing to read.
 
-   The two three-channel examples use **index-based names instead**, because channel initials stop scaling once there are more than two: `M1`/`M2`/`M3` (monthly), `W1`/`W2`/`W3` (weekly), `D1`/`D2`/`D3` (daily), `CR1`/`CR2`/`CR3` (creatives), `V1`/`V2`/`V3` (heatmap), with `ADD`/`CUT`/`ADS` unchanged. Same data shapes, clearer numbering — worth copying if you are adding a third channel.
-5. Update the KPI labels if your metrics differ. Each table has a matching `*_LABELS` / `*_KEYS` / `*_RIGHTS` triple, all the same length: `PL_MW_*` and `GL_MW_*` (Monthly and Weekly), `PL_D_*` and `GL_D_*` (Daily), `REC_*` (Optimization), `CR_*` (Creatives). `LABELS` sets the header text, `KEYS` names the field sorting reads, `RIGHTS` right-aligns the column.
+5. Set the five config values just below the arrays:
+
+   | Value | What it does |
+   |---|---|
+   | `PERF_RATE_LABEL` | Column label for your motion's conversion rate — `Submit%` / `ATC%` / `Signup%` |
+   | `PERF_RATE_KEY` | The field that label reads, e.g. `submit_pct` |
+   | `AD_PLATFORM` | Per channel: platform name and its ads-manager URL (`{account}` is substituted from Settings) |
+   | `DRILL` | Maps each Monthly/Weekly table to its channel tab and creatives table |
+   | `DUP_RELAY` | Optional; normally left empty and set from Settings at runtime |
+
+   All three examples have every one of these populated — copy from whichever matches your motion.
+
+   The two three-channel examples use **index-based names instead**, because channel initials stop scaling once there are more than two: `M1`/`M2`/`M3` (monthly), `W1`/`W2`/`W3` (weekly), `D1`/`D2`/`D3` (daily), `CR1`/`CR2`/`CR3` (creatives, each with a `_L30` sibling), `V1`/`V2`/`V3` (heatmap), with `ADD`/`CUT`/`ADS`, `PLATFORM_LOG`, `AD_PLATFORM` and `DRILL` keyed by `c1`/`c2`/`c3`. Same data shapes, clearer numbering — worth copying if you are adding a third channel.
+6. Update the KPI labels if your metrics differ. Each table has a matching `*_LABELS` / `*_KEYS` / `*_RIGHTS` triple, all the same length: `PL_MW_*` and `GL_MW_*` (Monthly and Weekly), `PL_D_*` and `GL_D_*` (Daily), `REC_*` (Optimization), `CR_*` (Creatives). `LABELS` sets the header text, `KEYS` names the field sorting reads, `RIGHTS` right-aligns the column.
 
    Note that the table cells themselves are emitted by the `render*` functions (`renderMW`, `renderGMW`, `renderDaily`, `renderGDaily`, `renderRec`, `renderCr`), which reference row fields by name. To swap a metric end to end (e.g. product-led teams trading SAL/SQL/ICP for Signup/Activation/PQL — see the skill file for full definitions), edit the label array *and* the matching render function.
-6. Open in a browser. That's it — no server needed.
+7. Open in a browser. That's it — no server needed.
 
 ## Quick start (with Claude)
 
 1. Create a Claude project (claude.ai) or open Claude Code.
 2. Add `skills/dashboard-builder.md` to the project's skill files.
-3. Ask Claude: *"build me a dashboard for [my company]"*. It will ask you one question at a time — channels, data access (Google Sheet vs. live MCP connectors vs. both), motion type (sales-led vs. product-led), and which metrics to track — then generate the file for you.
+3. Ask Claude: *"build me a dashboard for [my company]"*. It will ask you one question at a time — motion type (sales-led, ecommerce or product-led) first, since that decides the metric set, then channels, data access (Google Sheet vs. live MCP connectors vs. both), the action layer per channel, and which metrics to track — then generate the file for you.
 
 ## Data sources
 
@@ -82,7 +97,7 @@ The Creatives toggle swaps a genuine second dataset (`CR1` / `CR1_L30`), not a s
 - **Monthly / Weekly row click** drills into Creatives — it switches to that unit's channel tab and filters the ad table to that ad set or ad group, with a Clear filter button. Names are matched loosely, and the row's campaign is matched too, so search channels reporting creatives at campaign level still resolve.
 - **Pencil button** on those rows logs a Changelog note (the row click is taken by the drill-down). On Daily, Creatives and Optimization the row click still opens the note modal.
 - **Changelog card click** opens the card in the same modal for editing — note, hypothesis, variable, test setup, verdict, priority and column — and saves back to that card.
-- **The Changelog board persists** to `localStorage`, so cards you add or move survive a reload. A data refresh replaces the metrics, not the test log. "Archive Done" archives completed cards (with a restore link) rather than deleting them.
+- **The Changelog board persists** to `localStorage`, so cards you add or move survive a reload. The saved copy is stamped with a fingerprint of the seeded cards it came from: rebuild the file with different seeds and the current seed wins, keeping only the cards you added yourself. A data refresh replaces the metrics, not the test log. "Archive Done" archives completed cards (with a restore link) rather than deleting them.
 - **Duplicate** writes versioned ad IDs (`<control>_V2`) onto the card and moves it to Testing, and the card then shows a Control vs Test strip with spend, CTR and the motion's conversion rate.
 - **That strip auto-populates.** Move a card into Testing and it finds the unit's ads in the creative data by itself — no ad IDs to type. Explicit IDs written by Duplicate take precedence; where no test ad exists yet the test column shows an em dash.
 - It **reads the live ad rows**, looked up by `ad_id`, always on the MTD window so a card's numbers don't shift when the Creatives page is toggled to L30. The values stored on the card are a fallback for ad IDs that don't resolve — a campaign-level channel, a deleted ad — and the card labels itself "snapshot" when it uses them.
@@ -114,7 +129,7 @@ The ads-manager URLs in `AD_PLATFORM` are starting points. **Verify them against
 
 ## Live actions (pause/resume/duplicate ads)
 
-The Settings modal (gear icon, top right) accepts an API key and account ID for live actions via MCP-connected tools. **Never commit real API keys to this repo or any fork of it** — they're meant to be entered locally in your browser session, not stored in code.
+The Settings modal (gear icon, top right) accepts an API key, an ad account ID, and an optional duplication relay URL. **Never commit real API keys to this repo or any fork of it**, and note that nothing typed into Settings is persisted — not to `localStorage`, not anywhere. It lives in the page for that session only, which is verified by a test that types a sentinel into both credential fields, saves, and asserts it never reaches storage.
 
 ## Testing a build
 
