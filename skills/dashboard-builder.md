@@ -88,12 +88,11 @@ Watch out that the plain ad-set renderer (`renderMW`) has no Status column — o
 - Settings modal (gear icon): API key + account ID for live actions. Never store credentials in browser storage.
 
 ## Onboarding — ask one question at a time, wait for each answer
-1. Company name?
+1. Motion type: Sales-led, Ecommerce, or Product-led? *(Determines relevant KPIs — template stays identical, only metric set changes.)*
 2. Channels to track? *(Two or three. Beyond three the tab rows and funnel grid stop being readable — push back and suggest folding the smallest channel into a combined view.)*
 3. Per channel — data access: Google Sheet / Direct MCP / Both?
 4. Per channel — action layer: Read-only, or read-only + specific actions (name + which MCP)?
-5. Motion type: Sales-led, Ecommerce, or Product-led? *(Determines relevant KPIs — template stays identical, only metric set changes.)*
-6. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. *(Do not ask about date ranges — the windows are fixed above.)* Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
+5. Metrics per timeframe (Monthly/Weekly/Daily)? Cap 6-8 per timeframe. *(Do not ask about date ranges — the windows are fixed above.)* Offer motion-type-appropriate suggestions (below) if they want defaults instead of listing their own.
 
 ## Motion-type default metrics
 
