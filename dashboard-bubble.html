@@ -467,9 +467,9 @@ input::placeholder,textarea::placeholder{color:#9CA3AF;opacity:1;}
   <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Duplication relay URL <span style="font-weight:400;color:#9CA3AF;">(optional — your own endpoint, never a platform URL)</span></label>
   <input id="cfg-relay-url" placeholder="https://your-service.example.com/ads/duplicate" oninput="DUP_RELAY=this.value.trim()" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#111827;margin-bottom:12px;">
   <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Ad Account ID</label>
-  <input id="cfg-account-id" type="text" placeholder="123456789" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;font-family:monospace;margin-bottom:16px;outline:none;color:#111827;">
+  <input id="cfg-account-id" type="text" placeholder="123456789" value="10150695931986273" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;font-family:monospace;margin-bottom:16px;outline:none;color:#111827;">
   <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:6px;padding:10px 12px;font-size:11px;color:#92400E;margin-bottom:16px;">
-    Never commit real credentials to a shared or public copy of this file. This field is for local use only.
+    The Ad Account ID is pre-filled with the account this dashboard was built from; change it to point the deep links elsewhere. The API key and relay URL are held in memory for this session only and are never written to storage — but never commit real credentials to a shared or public copy of this file either.
   </div>
   <div style="display:flex;gap:8px;">
     <button onclick="closeSettings()" style="flex:1;padding:10px;background:#111827;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Save</button>
@@ -1035,10 +1035,17 @@ function platformFor(n){
   var p=(typeof AD_PLATFORM!=='undefined'&&AD_PLATFORM[key])?AD_PLATFORM[key]:null;
   return p||{name:'the ad platform',manager:''};
 }
+/* Settings wins; otherwise fall back to the account this build was pulled
+   from, so a deep link is never account-ambiguous out of the box. */
+function accountId(){
+  var el=document.getElementById('cfg-account-id');
+  var v=el&&el.value?el.value.trim():'';
+  return v||AD_ACCOUNT||'';
+}
 function adManagerUrl(n){
   var p=platformFor(n);
   if(!p.manager)return'';
-  var acct=(document.getElementById('cfg-account-id')||{}).value||'';
+  var acct=accountId();
   var url=p.manager.replace('{account}',encodeURIComponent(acct));
   // Drop an account parameter we have no value for rather than sending an empty one.
   if(!acct)url=url.replace(/[?&][a-z_]+=(?=$|&)/i,'').replace(/\?$/,'');
@@ -1047,7 +1054,7 @@ function adManagerUrl(n){
 
 function duplicateRequest(n,newId){
   return{action:'duplicate_ad',platform:platformFor(n).name,
-    ad_account:(document.getElementById('cfg-account-id')||{}).value||null,
+    ad_account:accountId()||null,
     unit:n.unit,control_ad_id:n.controlAdId||null,new_ad_id:newId,
     new_ad_name:n.unit+'_'+newId,variable:n.variable||null,hypothesis:n.hyp||null,
     status:'PAUSED'};
