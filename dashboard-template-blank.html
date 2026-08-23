@@ -691,7 +691,9 @@ function cardHtml(n){
     ids='<div class="kb-card-ids">control '+(n.controlAdId||'\u2014')+' &middot; test '+n.testAdId
       +((ctl||tst)?'':' &middot; snapshot, ads not in this window')+'</div>';
   }
-  var verdict=n.verdict?'<div class="kb-card-verdict">Verdict: '+n.verdict+'</div>':'';
+  // Verdict is gated on the column, not just on the field existing: the note modal
+  // lets you write one early, but it must not surface until the test is Evaluated.
+  var verdict=((n.status==='done'||n.status==='completed')&&n.verdict)?'<div class="kb-card-verdict">Verdict: '+n.verdict+'</div>':'';
   // Setup stays visible once a test is running, through Evaluated and Completed.
   var testSetup=(n.status!=='todo')&&n.testSetup?'<div class="kb-card-var">Setup: '+n.testSetup+'</div>':'';
   return'<div class="kb-card" draggable="true" ondragstart="dragStart(event,'+n.id+')" ondragend="dragEnd(event)" onclick="openCard('+n.id+',event)" title="Click to open, drag to move" data-id="'+n.id+'">'
