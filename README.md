@@ -12,6 +12,7 @@ No build step, no backend required — it's one HTML file you open in a browser.
 | `dashboard-example-filled.html` | **Sales-led** example, 2 channels — a fictional roofing supplier ("Acme Roofing") on Meta + Google, tracking SAL/SQL/ICP/BTC/DPC. |
 | `dashboard-example-ecommerce.html` | **Ecommerce** example, 3 channels — a fictional DTC home-goods retailer ("Harborline Goods") on Meta + Google Shopping + TikTok, tracking add-to-cart, checkout, orders, ROAS and refunds. |
 | `dashboard-example-product-led.html` | **Product-led** example, 3 channels — a fictional PLG SaaS ("Loomstack") on Meta + LinkedIn + Google, tracking signups, activation, PQL, trial-to-paid and churn. |
+| `docs/railway-setup.md` | Runbook for the server + database option — code spec, Railway clicks, and what to do when Postgres won't connect. |
 | `sheet-template/` | Schema for the two hand-edited tabs (`test_log`, `platform_log`) of the Google Sheet that backs a real build. **Create your own** — nothing here points at anyone's data, and the examples use no sheet. |
 | `skills/dashboard-builder.md` | A Claude "skill" file — paste this into a Claude project and Claude will walk you through building your own version, onboarding you on your channels, metrics, and motion type. |
 | `LICENSE` | MIT |
@@ -147,7 +148,9 @@ Two options. This decides what the dashboard can do more than anything else you 
 
 The page can't reach outside itself on these hosts, so the numbers are baked in at each refresh rather than read live. And the shared board is **Claude-specific**: it works through a hook (`claude.use('artifact')`) that Claude provides and other assistants don't. On Claude, everyone with edit access shares one board and the last Save wins. On another assistant the dashboard still renders correctly, but the board goes back to one per person, per browser. Worth knowing before you promise a teammate a shared board.
 
-**A server with a database** (Railway, Render, Fly) — everything works properly: several people editing the board at once with no Save button and no conflicts, live data, credentials held on the server so ad actions run for real, and the refresh job on a schedule beside it. **This repo doesn't ship that** — there's no server or database code here, so this route means building that part.
+**A server with a database** (Railway, Render, Fly) — everything works properly: several people editing the board at once with no Save button and no conflicts, live data, credentials held on the server so ad actions run for real, and the refresh job on a schedule beside it. The board moves into Postgres, and the seeded cards in the HTML become the table's starting contents.
+
+**This repo doesn't ship the server** — but [`docs/railway-setup.md`](docs/railway-setup.md) is the full runbook: what the code has to do, the Railway clicks in order, and a troubleshooting table for when the database won't connect. Hand it to Claude and it can build against the spec.
 
 Two questions settle it: **how many people edit the board at once**, and **should the dashboard act on ads or just report on them**. A few people who mostly read → an AI link. A daily-driver for a team, several editors, or anything where a wrong click spends money → a server, so credentials are never sitting in the page.
 
