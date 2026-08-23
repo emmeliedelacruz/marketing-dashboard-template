@@ -19,7 +19,7 @@
 - 2026-08-23: Duplicate now actually creates the ad — MCP through the host, else an operator-run relay, else a deep link into the native ads manager. Always PAUSED, always confirmed, and the card reports requested / created / failed.
 - 2026-08-23: The Changelog board is shareable. On a local file it stays in `localStorage` — one board per browser, per device — and the docs now say so plainly. Published as an artifact with `capabilities: {artifact: {}}`, the page reads and writes one team board at `data/board.json` behind an explicit "Save to shared board" button.
 - 2026-08-23: The Google Sheet is the database. Specified the three legs — MCP populates the sheet on a schedule, the sheet holds every dataset plus the human-authored fields, and the HTML is baked from it rather than fetching at load. Records the write constraint that shapes the whole thing: the Drive connector can create a sheet but cannot update one, so the refresh job needs Sheets API v4 or an Apps Script endpoint.
-- 2026-08-23 (latest): One sheet per build, provisioned at onboarding from `sheet-template/`. This is a template repo, so no sheet ID is ever committed and no build reuses another's data. Split provisioning (a one-time `create_file`, which the Drive connector handles fine) from the recurring refresh write (which it cannot do at all).
+- 2026-08-23 (latest): One sheet per build, provisioned at onboarding. This is a template repo, so no sheet ID is ever committed and no build reuses another's data. Split provisioning (a one-time `create_file`, which the Drive connector handles fine) from the recurring refresh write (which it cannot do at all). `sheet-template/` pins only `test_log` and `platform_log` — the tabs a human edits; metric columns are derived per build. The examples get no sheet: demo data, nothing to refresh, nothing to persist.
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
 
@@ -65,11 +65,15 @@ Two rules that follow from this:
 
 The dashboard is a **rendered view of a sheet**, never a place data lives. Three legs, and the middle one is where the available connectors run out — so it is specified here rather than assumed.
 
-**One sheet per build.** Every company gets its own, provisioned at onboarding. Never reuse another build's sheet, never commit a sheet ID to this repo, and never let the template ship pointing at anyone's real data — the file ID belongs in the generated dashboard's config and the refresh job, nowhere else.
+**One sheet per build.** Every company gets its own, provisioned at onboarding.
+
+**Examples and the blank template are the exception — they get no sheet at all.** `dashboard-example-*.html` carry seeded demo data whose whole job is to render on open, with nothing to refresh and nothing worth persisting; `dashboard-template-blank.html` is a starting point, not a build. Do not provision a sheet for them, do not declare the `artifact` capability on them, and do not treat their local-only Changelog board as a gap. A demo that quietly writes to a real sheet is worse than one that forgets. Never reuse another build's sheet, never commit a sheet ID to this repo, and never let the template ship pointing at anyone's real data — the file ID belongs in the generated dashboard's config and the refresh job, nowhere else.
 
 ### Leg 0 — provisioning the sheet (once, per build)
 
-`sheet-template/` holds the header CSVs. Create the sheet with the Drive connector — `create_file` with `textContent` as CSV and `contentMimeType: 'text/csv'`, which Drive converts to a native Sheet — one call per tab, appending the motion's metric columns from `sheet-template/README.md`. This is the one place `create_file` is exactly the right tool: it is a one-time create, so the new-file-ID problem below does not apply. Report the file ID back to the person and hand them the tab list.
+Create the sheet with the Drive connector — `create_file` with `textContent` as CSV and `contentMimeType: 'text/csv'`, which Drive converts to a native Sheet — one call per tab. This is the one place `create_file` is exactly the right tool: it is a one-time create, so the new-file-ID problem below does not apply. Report the file ID back to the person and hand them the tab list.
+
+`sheet-template/` pins the header rows for `test_log` and `platform_log` only — the two tabs a human types into, whose columns must match the board's data model exactly. **Derive the metric tabs' columns from that build's own data arrays**, not from a stored list: they follow the motion type and the chosen metrics, and a second copy of them in the repo would only drift.
 
 If they already have a sheet, read it and reconcile against the schema before building — a missing `ad_id` column is the failure that shows up much later as a Changelog card with no stats.
 
@@ -87,7 +91,7 @@ Runs on a schedule in an agent session, never in the page. Pull each channel fro
 
 ### Leg 2 — the Sheet
 
-One tab per dataset, header row = field names, one row per entity. Full schema and the per-motion column lists live in `sheet-template/README.md`; the tabs are:
+One tab per dataset, header row = field names, one row per entity. `sheet-template/README.md` pins `test_log` and `platform_log`; the metric tabs follow the build's metric set. The tabs are:
 
 | Tab | Grain | Key columns |
 |---|---|---|
