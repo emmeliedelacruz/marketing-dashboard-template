@@ -680,13 +680,21 @@ function renderKanban(){
 function cardHtml(n){
   // Perf strip and ad IDs appear once the ad has actually been duplicated.
   var perf='',ids='';
-  if(n.testAdId){
-    // Live MTD rows where the ad IDs resolve; the card's stored values otherwise
-    // (a campaign-level channel, a deleted ad, or an ad that did not run this month).
-    var ctl=adRowById(n.controlAdId),tst=adRowById(n.testAdId);
+  // Explicit ad IDs (written by Duplicate) win. Otherwise, once a card is past
+  // To Test its stats auto-populate from whatever ads the unit has in the data,
+  // so a card moved into Testing by hand is not blank.
+  var ctl=null,tst=null,auto=false;
+  if(n.controlAdId||n.testAdId){
+    ctl=adRowById(n.controlAdId);tst=adRowById(n.testAdId);
+  }else if(n.status!=='todo'){
+    var found=resolveUnitAds(n.unit);
+    ctl=found.control;tst=found.test;auto=!!(ctl||tst);
+  }
+  if(n.testAdId||ctl||tst){
     function pick(row,key,fb){return(row&&row[key]!==undefined&&row[key]!==null)?row[key]:fb;}
     function cell(v,suffix,places){return(v===null||v===undefined)?'\u2014':v.toFixed(places)+suffix;}
-    var rows=[['Spend',fs(pick(ctl,'spend',n.controlSpend)||0),fs(pick(tst,'spend',n.testSpend)||0)],
+    function money(v){return(v===null||v===undefined)?'\u2014':fs(v);}
+    var rows=[['Spend',money(pick(ctl,'spend',n.controlSpend)),money(pick(tst,'spend',n.testSpend))],
               ['CTR',cell(pick(ctl,'ctr',n.controlCtr),'%',2),cell(pick(tst,'ctr',n.testCtr),'%',2)],
               [PERF_RATE_LABEL,cell(pick(ctl,PERF_RATE_KEY,n.controlRate),'%',1),cell(pick(tst,PERF_RATE_KEY,n.testRate),'%',1)]];
     perf='<div class="kb-card-perf"><table style="width:100%;border-collapse:collapse;font-size:10px;">'
@@ -695,8 +703,9 @@ function cardHtml(n){
         +'<td style="text-align:right;font-weight:600;">'+r[1]+'</td>'
         +'<td style="text-align:right;font-weight:600;">'+r[2]+'</td></tr>';}).join('')
       +'</table></div>';
-    ids='<div class="kb-card-ids">control '+(n.controlAdId||'\u2014')+' &middot; test '+n.testAdId
-      +((ctl||tst)?'':' &middot; snapshot, ads not in this window')+'</div>';
+    var cId=n.controlAdId||(ctl?ctl.ad_id:null),tId=n.testAdId||(tst?tst.ad_id:null);
+    var note=auto?' &middot; matched from ad set':((ctl||tst)?'':' &middot; snapshot, ads not in this window');
+    ids='<div class="kb-card-ids">control '+(cId||'\u2014')+' &middot; test '+(tId||'\u2014')+note+'</div>';
   }
   // Verdict is gated on the column, not just on the field existing: the note modal
   // lets you write one early, but it must not surface until the test is Evaluated.
@@ -888,6 +897,26 @@ function setCrWindow(w,el){
 // written when the card was authored. It always reads the MTD window, whatever
 // the Creatives page is toggled to, so a card's numbers do not change meaning
 // when someone switches that page to L30.
+// Finds a unit's control and test ads in the creative data, so a card put into
+// Testing by hand shows its stats without anyone typing ad IDs. A `_V<n>` suffix
+// marks the test ad; the highest-spending ad without one is the control.
+function resolveUnitAds(unit){
+  var key=normKey(unit),ctl=null,tst=null;
+  if(!key)return{control:null,test:null};
+  Object.keys(CONFIGS).forEach(function(id){
+    var cfg=CONFIGS[id];
+    if(!cfg.windows||!cfg.windows.mtd)return;
+    cfg.windows.mtd.forEach(function(a){
+      if(!a.ad_id)return;
+      if(normKey(a.ad_set)!==key&&normKey(a.name)!==key)return;
+      if(/_V\d+$/.test(a.ad_id)){
+        if(!tst||String(a.ad_id)>String(tst.ad_id))tst=a;
+      }else if(!ctl||(a.spend||0)>(ctl.spend||0)){ctl=a;}
+    });
+  });
+  return{control:ctl,test:tst};
+}
+
 function adRowById(id){
   if(!id)return null;
   var found=null;
