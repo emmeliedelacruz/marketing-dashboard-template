@@ -100,6 +100,18 @@ The blank template ships with two channels. Both three-channel examples show wha
 
 Use the "ad group" renderers (`renderGMW` / `renderGDaily`, which add Campaign and Status columns) for whichever channel is search-like, and the plain ones for the rest. In the ecommerce example that is Google Shopping (`c2`); in the product-led example it is Google (`c3`).
 
+## Duplicate: creating the ad for real
+
+A single HTML file cannot call Meta, Google, TikTok or LinkedIn directly — those APIs send no CORS headers, and an access token in the page would be a leaked credential. So Duplicate takes the best route available:
+
+1. **MCP** — if the dashboard is open inside a host (Claude, or the Visualizer widget), it hands the job to the agent, which calls the connected ad-platform MCP server and reports the real ad ID back.
+2. **Relay** — if you set a *Duplication relay URL* in Settings, it POSTs the request there. That endpoint is yours and holds the platform credentials server-side. A published artifact's CSP blocks outbound fetches, so this route works from a standalone file or your own host.
+3. **Deep link** — always works, no credentials: it opens the native ads manager for that channel (from `AD_PLATFORM`, with your ad account ID substituted) and shows the exact payload to replicate.
+
+Every new ad is requested **PAUSED**, and every route confirms first. The card then shows whether the test ad is `requested`, `created` or `failed`, and says "awaiting next data refresh" until an ad with that ID actually appears in the creative data — so a requested ad never reads as a measured one.
+
+The ads-manager URLs in `AD_PLATFORM` are starting points. **Verify them against your own accounts** — account-ID parameters differ per platform and the URL shapes change.
+
 ## Live actions (pause/resume/duplicate ads)
 
 The Settings modal (gear icon, top right) accepts an API key and account ID for live actions via MCP-connected tools. **Never commit real API keys to this repo or any fork of it** — they're meant to be entered locally in your browser session, not stored in code.
