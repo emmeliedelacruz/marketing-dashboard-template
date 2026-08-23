@@ -7,7 +7,9 @@
 - 2026-08-23: Documented reporting granularity per page — Monthly/Weekly = ad set/ad group level, Daily = campaign level, Creatives = ad level. KPIs vary by company/motion type; only granularity level is fixed.
 - 2026-08-23: Adopted richer 4-column Kanban spec (Duplicate/Hypothesis/Verdict) as canonical, replacing the simpler 3-column hearth-HTML version. Pause and unpause both fire live MCP calls (symmetric).
 - 2026-08-23: Added Product-led metric definitions (parallel to Sales-led set) so the motion-type onboarding question has concrete defaults for both paths.
-- 2026-08-23 (latest): Added Ecommerce as a third motion type with its own metric definitions and funnel-stage analog. Worked examples now ship for all three motions (`dashboard-example-filled.html` sales-led, `dashboard-example-ecommerce.html`, `dashboard-example-product-led.html`).
+- 2026-08-23: Added Ecommerce as a third motion type with its own metric definitions and funnel-stage analog. Worked examples now ship for all three motions (`dashboard-example-filled.html` sales-led, `dashboard-example-ecommerce.html`, `dashboard-example-product-led.html`).
+- 2026-08-23: Channel count is two **or three** — the funnel and heatmap grids reflow, and every per-channel surface (tabs, panes, platform-changelog panels) repeats per channel. Both three-channel examples use index-based array names (M1/M2/M3 …) rather than channel initials.
+- 2026-08-23 (latest): Fixed the Monthly/Weekly row-inclusion rule — period tables show every unit that was active at any point in the window, including paused and deleted ones, scoped by delivery rather than current status.
 
 **Name:** `dashboard-builder` — *use when building a custom HTML performance dashboard for a company/product, sourcing from a Google Sheet, direct MCP pull, or both.*
 
@@ -33,9 +35,13 @@ KPIs/metrics shown at each level vary by company and motion type (per onboarding
 
 ## Fixed page specs
 
-**Funnel:** 2-col grid, one funnel card per channel (Impressions→Clicks→Submits→SAL→SQL→ICP→BTC→DPC→Sold for sales-led; see Product-led analog below). Below: 2-col heatmap grid, one table per channel, verticals/segments as rows.
+**Funnel:** reflowing grid (`repeat(auto-fit,minmax(340px,1fr))`), one funnel card per channel — two or three across (Impressions→Clicks→Submits→SAL→SQL→ICP→BTC→DPC→Sold for sales-led; see Product-led analog below). Below: 2-col heatmap grid, one table per channel, verticals/segments as rows.
 
 **Monthly / Weekly:** Channel tabs. Per channel: single sortable table — Name, $/Sold, Won $, RoS, Sold, Spend, $/SAL, SAL, ICP%, BTC%, DPC%, Stuck%, Net EV (+pause column; Google adds Status + Campaign). Weekly row-click opens 2-button modal (View Creatives / Log Optimization).
+
+**Row inclusion — Monthly / Weekly (fixed):** show every ad set / ad group that was **active at any point during the period**, not just the ones live right now. A unit that spent for three weeks and was paused on the 22nd still owns that spend for the month; filtering by current status silently drops its cost, understates blended CAC and overstates efficiency for everything left in the table. Include paused, ended, budget-exhausted and deleted units as long as they delivered in the window, and render them with the Paused chip and 40% opacity rather than hiding them. Scope rows by *delivery during the window*, never by *current state*. Daily is the exception: it reports the most recent day, so only units that delivered that day appear.
+
+Watch out that the plain ad-set renderer (`renderMW`) has no Status column — only the ad-group renderer (`renderGMW`) does. If a non-search channel carries paused-but-spending units, add a Status column to the plain renderer too, or the rows read as live.
 
 **Daily:** Channel tabs (campaign-level). Table: Name, (Status if applicable), CRM Sync%, Submit%, SAL, $/SAL, ICP%, BTC%, DPC%, Stuck%, Net EV (+pause column). No Won$/Sold/RoS — attribution lag makes them misleading daily.
 
@@ -55,7 +61,7 @@ KPIs/metrics shown at each level vary by company and motion type (per onboarding
 
 ## Onboarding — ask one question at a time, wait for each answer
 1. Company name?
-2. Channels to track?
+2. Channels to track? *(Two or three. Beyond three the tab rows and funnel grid stop being readable — push back and suggest folding the smallest channel into a combined view.)*
 3. Per channel — data access: Google Sheet / Direct MCP / Both?
 4. Per channel — action layer: Read-only, or read-only + specific actions (name + which MCP)?
 5. Motion type: Sales-led, Ecommerce, or Product-led? *(Determines relevant KPIs — template stays identical, only metric set changes.)*
@@ -160,6 +166,8 @@ KPIs/metrics shown at each level vary by company and motion type (per onboarding
 - Changing a metric means editing three things in step: the `*_LABELS` array (header), the matching `render*` function (the cell), and the chip helper that colors it. Retune the chip thresholds to the client's economics — the defaults are per-motion, not universal.
 - "CRM Sync%" is a generic label — rename per company's actual CRM stack, but the underlying check (lead-submit-to-CRM sync health) stays fixed as a Daily-page metric.
 - Cap KPI strip at 6-8 metrics per timeframe or it becomes noise.
+- Never scope Monthly/Weekly rows to currently-active units. Period tables report what happened in the period, so anything that delivered in the window belongs in the table even if it is paused or deleted now — otherwise spend goes missing and the totals stop reconciling with the ad platform.
+- Channel count drives repetition, not structure: adding a third channel means one more funnel card, heatmap card, tab, pane, `CONFIGS` entry and changelog panel — never a new page or a different layout. Use the ad-group renderers (`renderGMW`/`renderGDaily`, which add Campaign and Status) for the search-like channel and the plain ones for the rest.
 
 ## Output format
 Single HTML artifact, exact template structure (7 fixed pages), channels/metrics/actions populated per onboarding answers, action buttons (Pause/Unpause/Duplicate/Sync) call back via `sendPrompt()` for confirmation rather than direct MCP execution. Auto-refreshes daily.

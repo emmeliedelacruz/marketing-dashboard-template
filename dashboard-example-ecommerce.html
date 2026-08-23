@@ -66,10 +66,10 @@ tbody tr{cursor:pointer;}
 .sc.g{background:#F0FDF4;color:#15803D;}.sc.y{background:#FFFBEB;color:#A16207;}.sc.r{background:#FEF2F2;color:#B91C1C;}
 .paused{display:inline-block;padding:1px 5px;border-radius:4px;font-size:10px;font-weight:600;background:#F9FAFB;color:#9CA3AF;border:1px solid #E5E7EB;}
 .plat{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;}
-.plat.c1{background:#EFF6FF;color:#1D4ED8;}.plat.c2{background:#F0FDF4;color:#16A34A;}
+.plat.c1{background:#EFF6FF;color:#1D4ED8;}.plat.c2{background:#F0FDF4;color:#16A34A;}.plat.c3{background:#F5F3FF;color:#6D28D9;}
 .fmt-tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#F5F3FF;color:#6D28D9;}
 
-.funnel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.funnel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;}
 .f-col-title{font-size:13px;font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;}
 .f-stage{display:grid;grid-template-columns:72px 1fr 52px 44px;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #F9FAFB;}
 .f-stage:last-child{border-bottom:none;}
@@ -83,7 +83,7 @@ tbody tr{cursor:pointer;}
 .f-sum-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:#9CA3AF;display:block;margin-bottom:2px;}
 .f-sum-val{font-size:16px;font-weight:700;color:#111827;}
 
-.hm-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.hm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;}
 .hm-title{font-size:13px;font-weight:600;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;}
 .hmt{width:100%;border-collapse:separate;border-spacing:2px;font-size:11px;}
 .hmt th{background:none;padding:4px 6px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#9CA3AF;text-align:center;cursor:default;border:none;}
@@ -177,16 +177,18 @@ tbody tr{cursor:pointer;}
 
 <!-- FUNNEL -->
 <div class="page active" id="pg-funnel">
-  <div class="ph"><h2>Funnel Overview</h2><span class="ph-sub">Aug MTD &middot; Meta vs Google Shopping</span></div>
+  <div class="ph"><h2>Funnel Overview</h2><span class="ph-sub">Aug MTD &middot; Meta vs Google Shopping vs TikTok</span></div>
   <div class="sec-title">Pipeline by Channel</div>
   <div class="funnel-grid" style="margin-top:10px;">
     <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#2563EB;" id="c1-funnel-title">Meta &mdash; $31,600 spend</div><div id="c1-funnel"></div></div>
-    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#16A34A;" id="c2-funnel-title">Google Shopping &mdash; $20,100 spend</div><div id="c2-funnel"></div></div>
+    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#16A34A;" id="c2-funnel-title">Google Shopping &mdash; $21,900 spend</div><div id="c2-funnel"></div></div>
+    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#7C3AED;" id="c3-funnel-title">TikTok &mdash; $13,600 spend</div><div id="c3-funnel"></div></div>
   </div>
   <div class="sec-title" style="margin-top:20px;">Conversion by Product Category</div>
   <div class="hm-grid" style="margin-top:10px;">
     <div class="card" style="padding:16px;"><div class="hm-title">Meta</div><table class="hmt" id="c1-hm"></table></div>
     <div class="card" style="padding:16px;"><div class="hm-title">Google Shopping</div><table class="hmt" id="c2-hm"></table></div>
+    <div class="card" style="padding:16px;"><div class="hm-title">TikTok</div><table class="hmt" id="c3-hm"></table></div>
   </div>
 </div>
 
@@ -195,10 +197,12 @@ tbody tr{cursor:pointer;}
   <div class="ph"><h2>Monthly</h2><span class="ph-sub">Ad set / ad group level &middot; Click column header to sort</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('monthly','c1',this)">Meta <span class="ct">4 ad sets</span></button>
-    <button class="ch-tab" onclick="showCh('monthly','c2',this)">Google Shopping <span class="ct">3 ad groups</span></button>
+    <button class="ch-tab" onclick="showCh('monthly','c2',this)">Google Shopping <span class="ct">4 ad groups</span></button>
+    <button class="ch-tab" onclick="showCh('monthly','c3',this)">TikTok <span class="ct">3 ad sets</span></button>
   </div>
-  <div id="ch-monthly-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-mm"></table></div></div></div>
-  <div id="ch-monthly-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-gm"></table></div></div></div>
+  <div id="ch-monthly-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-m1"></table></div></div></div>
+  <div id="ch-monthly-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-m2"></table></div></div></div>
+  <div id="ch-monthly-c3" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-m3"></table></div></div></div>
 </div>
 
 <!-- WEEKLY -->
@@ -207,9 +211,11 @@ tbody tr{cursor:pointer;}
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('weekly','c1',this)">Meta <span class="ct">2 ad sets</span></button>
     <button class="ch-tab" onclick="showCh('weekly','c2',this)">Google Shopping <span class="ct">1 ad group</span></button>
+    <button class="ch-tab" onclick="showCh('weekly','c3',this)">TikTok <span class="ct">1 ad set</span></button>
   </div>
-  <div id="ch-weekly-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-mw"></table></div></div></div>
-  <div id="ch-weekly-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-gw"></table></div></div></div>
+  <div id="ch-weekly-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-w1"></table></div></div></div>
+  <div id="ch-weekly-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-w2"></table></div></div></div>
+  <div id="ch-weekly-c3" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-w3"></table></div></div></div>
 </div>
 
 <!-- DAILY -->
@@ -218,9 +224,11 @@ tbody tr{cursor:pointer;}
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('daily','c1',this)">Meta <span class="ct">2 campaigns</span></button>
     <button class="ch-tab" onclick="showCh('daily','c2',this)">Google Shopping <span class="ct">2 campaigns</span></button>
+    <button class="ch-tab" onclick="showCh('daily','c3',this)">TikTok <span class="ct">2 campaigns</span></button>
   </div>
-  <div id="ch-daily-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-md"></table></div></div></div>
-  <div id="ch-daily-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-gd"></table></div></div></div>
+  <div id="ch-daily-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-d1"></table></div></div></div>
+  <div id="ch-daily-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-d2"></table></div></div></div>
+  <div id="ch-daily-c3" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-d3"></table></div></div></div>
 </div>
 
 <!-- CREATIVES -->
@@ -228,7 +236,8 @@ tbody tr{cursor:pointer;}
   <div class="ph"><h2>Creatives</h2><span class="ph-sub">Ad-level performance</span></div>
   <div class="ch-tabs">
     <button class="ch-tab active" onclick="showCh('creatives','c1',this)">Meta Ads <span class="ct">4 ads</span></button>
-    <button class="ch-tab" onclick="showCh('creatives','c2',this)">Google Shopping <span class="ct">3 campaigns</span></button>
+    <button class="ch-tab" onclick="showCh('creatives','c2',this)">Google Shopping <span class="ct">4 campaigns</span></button>
+    <button class="ch-tab" onclick="showCh('creatives','c3',this)">TikTok Ads <span class="ct">3 ads</span></button>
     <button class="ch-tab" onclick="showCh('creatives','adlib',this)">Ad Library <span class="ct">3 live ads</span></button>
   </div>
   <div id="ch-creatives-c1">
@@ -239,10 +248,13 @@ tbody tr{cursor:pointer;}
       <button class="srtbtn" id="sb-atc" onclick="sortCr('atc_pct','desc')">ATC Rate</button>
       <button class="srtbtn" id="sb-cost" onclick="sortCr('atc_cost','asc')">Cost per ATC</button>
     </div>
-    <div class="card"><div class="tbl-wrap"><table id="tbl-cr"></table></div></div>
+    <div class="card"><div class="tbl-wrap"><table id="tbl-cr1"></table></div></div>
   </div>
   <div id="ch-creatives-c2" style="display:none">
-    <div class="card"><div class="tbl-wrap"><table id="tbl-gcr"></table></div></div>
+    <div class="card"><div class="tbl-wrap"><table id="tbl-cr2"></table></div></div>
+  </div>
+  <div id="ch-creatives-c3" style="display:none">
+    <div class="card"><div class="tbl-wrap"><table id="tbl-cr3"></table></div></div>
   </div>
   <div id="ch-creatives-adlib" style="display:none">
     <div class="ad-filters">
@@ -260,8 +272,8 @@ tbody tr{cursor:pointer;}
   <div class="ph"><h2>Optimization</h2><span class="ph-sub">Profit/Spend = contribution profit per ad dollar, at a 55% blended gross margin</span></div>
   <div class="net-row">
     <div><label>Scale-Up Potential</label><div class="nv" style="color:#15803D;">+$25,090</div><div style="font-size:11px;color:#6B7280;">MTD profit from top units</div></div>
-    <div><label>Bleed to Stop</label><div class="nv" style="color:#B91C1C;">&minus;$1,524</div><div style="font-size:11px;color:#6B7280;">MTD loss from bottom units</div></div>
-    <div><label>Net Opportunity</label><div class="nv" style="color:#D97706;">+$26,614</div><div style="font-size:11px;color:#6B7280;">if both executed</div></div>
+    <div><label>Bleed to Stop</label><div class="nv" style="color:#B91C1C;">&minus;$4,628</div><div style="font-size:11px;color:#6B7280;">MTD loss from bottom units</div></div>
+    <div><label>Net Opportunity</label><div class="nv" style="color:#D97706;">+$29,718</div><div style="font-size:11px;color:#6B7280;">if both executed</div></div>
     <div style="margin-left:auto;font-size:11px;color:#9CA3AF;max-width:210px;">Add: Profit/Spend &ge;0.30&times;. Cut: Profit/Spend &le;0&times;.</div>
   </div>
   <div>
@@ -308,11 +320,19 @@ tbody tr{cursor:pointer;}
     </details>
     <details class="cl-panel">
       <summary class="cl-summary">
-        <span style="font-weight:700;font-size:13px;">Google Ads Platform Changes</span>
+        <span style="font-weight:700;font-size:13px;">Google Shopping Platform Changes</span>
         <button class="cl-sync-btn" onclick="event.preventDefault();alert('Wire this to your MCP connector to sync live changes.')">Sync</button>
         <span class="cl-chevron">&#9660;</span>
       </summary>
-      <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for Google Ads to pull live change history.</div></div>
+      <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for Google Shopping to pull live change history.</div></div>
+    </details>
+    <details class="cl-panel">
+      <summary class="cl-summary">
+        <span style="font-weight:700;font-size:13px;">TikTok Platform Changes</span>
+        <button class="cl-sync-btn" onclick="event.preventDefault();alert('Wire this to your MCP connector to sync live changes.')">Sync</button>
+        <span class="cl-chevron">&#9660;</span>
+      </summary>
+      <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for TikTok to pull live change history.</div></div>
     </details>
   </div>
 </div>
@@ -369,48 +389,71 @@ tbody tr{cursor:pointer;}
 
 <script>
 // ── DUMMY DATA — fictional DTC retailer, made-up numbers, demo purposes only ──
-// Ecommerce motion. Column key reference:
+// Ecommerce motion, three channels. Arrays are indexed by channel position:
+//   M1/M2/M3 monthly, W1/W2/W3 weekly, D1/D2/D3 daily, CR1/CR2/CR3 creatives,
+//   V1/V2/V3 funnel heatmap. c1 = Meta, c2 = Google Shopping, c3 = TikTok.
+// Column key reference:
 //   spend, atc, checkouts, orders, revenue, roas, order_cost, atc_cost,
 //   checkout_rate, purchase_rate, repeat_rate, refund_rate, profit, pv
-// Rates are stored as percentages already computed upstream, so every column
-// sorts on a real number. profit = (revenue x 0.55 gross margin) - spend.
+// Rates are stored as already-computed percentages so every column sorts on a
+// real number. profit = (revenue x 0.55 gross margin) - spend.
 
-var MM=[
+var M1=[
   {name:"Retarget_Cart_7D",spend:3400,atc:690,checkouts:402,orders:262,revenue:19870,roas:5.84,order_cost:13,atc_cost:4.93,checkout_rate:58.3,purchase_rate:65.2,repeat_rate:23.3,refund_rate:3.1,profit:7530},
   {name:"Kitchen_Broad_Prospect",spend:14200,atc:1180,checkouts:512,orders:268,revenue:24120,roas:1.70,order_cost:53,atc_cost:12.03,checkout_rate:43.4,purchase_rate:52.3,repeat_rate:12.7,refund_rate:7.8,profit:-934},
   {name:"Outdoor_Advantage_Plus",spend:8900,atc:742,checkouts:388,orders:214,revenue:20330,roas:2.28,order_cost:42,atc_cost:11.99,checkout_rate:52.3,purchase_rate:55.2,repeat_rate:13.6,refund_rate:5.1,profit:2280},
   {name:"Lighting_Video_UGC",spend:5100,atc:388,checkouts:176,orders:88,revenue:8360,roas:1.64,order_cost:58,atc_cost:13.14,checkout_rate:45.4,purchase_rate:50.0,repeat_rate:10.2,refund_rate:8.0,profit:-500}
 ];
-var GM=[
+var M2=[
   {name:"Brand_Exact",campaign:"Branded Shopping",status:"ENABLED",spend:4600,atc:810,checkouts:540,orders:402,revenue:33770,roas:7.34,order_cost:11,atc_cost:5.68,checkout_rate:66.7,purchase_rate:74.4,repeat_rate:23.9,refund_rate:2.2,profit:13970},
   {name:"PMax_Kitchen",campaign:"NB > Performance Max",status:"ENABLED",spend:9300,atc:604,checkouts:322,orders:186,revenue:16740,roas:1.80,order_cost:50,atc_cost:15.40,checkout_rate:53.3,purchase_rate:57.8,repeat_rate:11.3,refund_rate:7.5,profit:-90},
-  {name:"Shopping_Outdoor_NB",campaign:"NB > Shopping",status:"ENABLED",spend:6200,atc:512,checkouts:296,orders:178,revenue:17800,roas:2.87,order_cost:35,atc_cost:12.11,checkout_rate:57.8,purchase_rate:60.1,repeat_rate:13.5,refund_rate:4.5,profit:3590}
+  {name:"Shopping_Outdoor_NB",campaign:"NB > Shopping",status:"ENABLED",spend:6200,atc:512,checkouts:296,orders:178,revenue:17800,roas:2.87,order_cost:35,atc_cost:12.11,checkout_rate:57.8,purchase_rate:60.1,repeat_rate:13.5,refund_rate:4.5,profit:3590},
+  // Paused Aug 14 but delivered Aug 1-14, so it still belongs in the MTD table.
+  {name:"Clearance_Bath",campaign:"NB > Clearance",status:"PAUSED",spend:1800,atc:96,checkouts:38,orders:14,revenue:1120,roas:0.62,order_cost:129,atc_cost:18.75,checkout_rate:39.6,purchase_rate:36.8,repeat_rate:0,refund_rate:14.3,profit:-1184}
 ];
-var MW=[
+var M3=[
+  {name:"Spark_UGC_Kitchen",spend:6800,atc:920,checkouts:318,orders:142,revenue:10650,roas:1.57,order_cost:48,atc_cost:7.39,checkout_rate:34.6,purchase_rate:44.7,repeat_rate:7.0,refund_rate:11.3,profit:-940},
+  {name:"Creator_Outdoor_Q3",spend:4200,atc:486,checkouts:198,orders:96,revenue:8640,roas:2.06,order_cost:44,atc_cost:8.64,checkout_rate:40.7,purchase_rate:48.5,repeat_rate:8.3,refund_rate:9.4,profit:550},
+  {name:"Trending_Lighting_Hook",spend:2600,atc:214,checkouts:74,orders:31,revenue:2945,roas:1.13,order_cost:84,atc_cost:12.15,checkout_rate:34.6,purchase_rate:41.9,repeat_rate:3.2,refund_rate:12.9,profit:-980}
+];
+var W1=[
   {name:"Retarget_Cart_7D",spend:820,atc:168,checkouts:98,orders:64,revenue:4850,roas:5.91,order_cost:13,atc_cost:4.88,checkout_rate:58.3,purchase_rate:65.3,repeat_rate:23.4,refund_rate:3.1,profit:1850},
   {name:"Kitchen_Broad_Prospect",spend:3300,atc:274,checkouts:119,orders:62,revenue:5580,roas:1.69,order_cost:53,atc_cost:12.04,checkout_rate:43.4,purchase_rate:52.1,repeat_rate:12.9,refund_rate:8.1,profit:-230}
 ];
-var GW=[
+var W2=[
   {name:"Brand_Exact",campaign:"Branded Shopping",status:"ENABLED",spend:1080,atc:190,checkouts:127,orders:94,revenue:7900,roas:7.31,order_cost:11,atc_cost:5.68,checkout_rate:66.8,purchase_rate:74.0,repeat_rate:23.4,refund_rate:2.1,profit:3270}
 ];
-var MD=[
+var W3=[
+  {name:"Creator_Outdoor_Q3",spend:980,atc:112,checkouts:46,orders:22,revenue:1980,roas:2.02,order_cost:45,atc_cost:8.75,checkout_rate:41.1,purchase_rate:47.8,repeat_rate:9.1,refund_rate:9.1,profit:110}
+];
+var D1=[
   {name:"Kitchen_Prospecting",spend:640,atc:52,atc_cost:12.31,feed_rate:100,cvr:2.4,checkout_rate:46.2,purchase_rate:58.3,refund_rate:0,profit:53},
   {name:"Retargeting_Cart",spend:180,atc:38,atc_cost:4.74,feed_rate:100,cvr:6.8,checkout_rate:57.9,purchase_rate:68.2,refund_rate:0,profit:447}
 ];
-var GD=[
+var D2=[
   {name:"Branded_Shopping",status:"ENABLED",spend:220,atc:39,atc_cost:5.64,feed_rate:98,cvr:7.9,checkout_rate:66.7,purchase_rate:73.1,refund_rate:0,profit:658},
   {name:"PMax_Kitchen",status:"ENABLED",spend:420,atc:27,atc_cost:15.56,feed_rate:92,cvr:2.1,checkout_rate:51.9,purchase_rate:57.1,refund_rate:12.5,profit:-24}
 ];
-var CR=[
+var D3=[
+  {name:"TikTok_UGC_Prospecting",spend:310,atc:44,atc_cost:7.05,feed_rate:100,cvr:3.6,checkout_rate:34.1,purchase_rate:46.7,refund_rate:0,profit:-21},
+  {name:"TikTok_Creator_Retarget",spend:95,atc:19,atc_cost:5.00,feed_rate:100,cvr:5.8,checkout_rate:42.1,purchase_rate:62.5,refund_rate:0,profit:125}
+];
+var CR1=[
   {name:"Kitchen_Hero_Static",ad_set:"Kitchen_Broad_Prospect",fmt:"Static",copy:"Product Hero",impr:1240000,clicks:14800,ctr:1.19,atc_pct:8.0,checkout_rate:43.4,purchase_rate:52.3,atc_cost:12.03,refund_rate:7.8},
   {name:"UGC_Unboxing_V2",ad_set:"Lighting_Video_UGC",fmt:"UGC Video",copy:"Social Proof",impr:890000,clicks:9600,ctr:1.08,atc_pct:4.0,checkout_rate:45.4,purchase_rate:50.0,atc_cost:13.14,refund_rate:8.0},
   {name:"Cart_Reminder_Dynamic",ad_set:"Retarget_Cart_7D",fmt:"Dynamic Product",copy:"Urgency",impr:210000,clicks:4200,ctr:2.00,atc_pct:16.4,checkout_rate:58.3,purchase_rate:65.2,atc_cost:4.93,refund_rate:3.1},
   {name:"Outdoor_Lifestyle_Carousel",ad_set:"Outdoor_Advantage_Plus",fmt:"Carousel",copy:"Lifestyle",impr:640000,clicks:7100,ctr:1.11,atc_pct:10.5,checkout_rate:52.3,purchase_rate:55.2,atc_cost:11.99,refund_rate:5.1}
 ];
-var GCR=[
+var CR2=[
   {name:"Branded_Shopping",fmt:"Shopping",copy:"Brand Terms",impr:148000,clicks:9200,ctr:6.22,atc_pct:8.8,checkout_rate:66.7,purchase_rate:74.4,atc_cost:5.68,refund_rate:2.2},
   {name:"PMax_Kitchen",fmt:"Performance Max",copy:"Auto Assets",impr:620000,clicks:11400,ctr:1.84,atc_pct:5.3,checkout_rate:53.3,purchase_rate:57.8,atc_cost:15.40,refund_rate:7.5},
-  {name:"Shopping_Outdoor_NB",fmt:"Shopping",copy:"Category Terms",impr:310000,clicks:7800,ctr:2.52,atc_pct:6.6,checkout_rate:57.8,purchase_rate:60.1,atc_cost:12.11,refund_rate:4.5}
+  {name:"Shopping_Outdoor_NB",fmt:"Shopping",copy:"Category Terms",impr:310000,clicks:7800,ctr:2.52,atc_pct:6.6,checkout_rate:57.8,purchase_rate:60.1,atc_cost:12.11,refund_rate:4.5},
+  {name:"Clearance_Bath",fmt:"Shopping",copy:"Clearance",impr:82000,clicks:1400,ctr:1.71,atc_pct:6.9,checkout_rate:39.6,purchase_rate:36.8,atc_cost:18.75,refund_rate:14.3}
+];
+var CR3=[
+  {name:"Spark_Kitchen_Creator1",ad_set:"Spark_UGC_Kitchen",fmt:"Spark Ad",copy:"Creator Demo",impr:2100000,clicks:31000,ctr:1.48,atc_pct:3.0,checkout_rate:34.6,purchase_rate:44.7,atc_cost:7.39,refund_rate:11.3},
+  {name:"Outdoor_Setup_Tutorial",ad_set:"Creator_Outdoor_Q3",fmt:"In-Feed Video",copy:"Tutorial",impr:1180000,clicks:16800,ctr:1.42,atc_pct:2.9,checkout_rate:40.7,purchase_rate:48.5,atc_cost:8.64,refund_rate:9.4},
+  {name:"Lighting_Trend_Audio",ad_set:"Trending_Lighting_Hook",fmt:"In-Feed Video",copy:"Trend Audio",impr:740000,clicks:8900,ctr:1.20,atc_pct:2.4,checkout_rate:34.6,purchase_rate:41.9,atc_cost:12.15,refund_rate:12.9}
 ];
 var ADD=[
   {name:"Retarget_Cart_7D",platform:"c1",spend:3400,pv:2.21,order_cost:13,orders:262,profit:7530},
@@ -420,21 +463,30 @@ var ADD=[
 var CUT=[
   {name:"Kitchen_Broad_Prospect",platform:"c1",spend:14200,pv:-0.07,order_cost:53,orders:268,profit:-934},
   {name:"Lighting_Video_UGC",platform:"c1",spend:5100,pv:-0.10,order_cost:58,orders:88,profit:-500},
-  {name:"PMax_Kitchen",platform:"c2",spend:9300,pv:-0.01,order_cost:50,orders:186,profit:-90}
+  {name:"PMax_Kitchen",platform:"c2",spend:9300,pv:-0.01,order_cost:50,orders:186,profit:-90},
+  {name:"Spark_UGC_Kitchen",platform:"c3",spend:6800,pv:-0.14,order_cost:48,orders:142,profit:-940},
+  {name:"Trending_Lighting_Hook",platform:"c3",spend:2600,pv:-0.38,order_cost:84,orders:31,profit:-980},
+  {name:"Clearance_Bath",platform:"c2",spend:1800,pv:-0.66,order_cost:129,orders:14,profit:-1184}
 ];
-var VM=[
+var V1=[
   {n:"Kitchen",atc:1180,checkouts:512,orders:268,refunds:21},
   {n:"Outdoor",atc:742,checkouts:388,orders:214,refunds:11},
   {n:"Bath",atc:690,checkouts:402,orders:262,refunds:8},
   {n:"Lighting",atc:388,checkouts:176,orders:88,refunds:7}
 ];
-var VG=[
+var V2=[
   {n:"Branded",atc:810,checkouts:540,orders:402,refunds:9},
   {n:"Kitchen NB",atc:604,checkouts:322,orders:186,refunds:14},
-  {n:"Outdoor NB",atc:512,checkouts:296,orders:178,refunds:8}
+  {n:"Outdoor NB",atc:512,checkouts:296,orders:178,refunds:8},
+  {n:"Bath Clearance",atc:96,checkouts:38,orders:14,refunds:2}
+];
+var V3=[
+  {n:"Kitchen",atc:920,checkouts:318,orders:142,refunds:16},
+  {n:"Outdoor",atc:486,checkouts:198,orders:96,refunds:9},
+  {n:"Lighting",atc:214,checkouts:74,orders:31,refunds:4}
 ];
 var ADS=[
-  {id:"demo1",type:"image",body:"The 12-piece ceramic set our customers keep coming back for — oven-safe, dishwasher-safe, and backed by a 5-year replacement guarantee.",title:"Kitchen Essentials, Built to Last",cta:"Shop the set",link:"#",img:"",vid:""},
+  {id:"demo1",type:"image",body:"The 12-piece ceramic set our customers keep coming back for \u2014 oven-safe, dishwasher-safe, and backed by a 5-year replacement guarantee.",title:"Kitchen Essentials, Built to Last",cta:"Shop the set",link:"#",img:"",vid:""},
   {id:"demo2",type:"video",body:"See the whole unboxing in 20 seconds. Real customer, real kitchen, no studio lighting.",title:"Unboxed by a Real Customer",cta:"Watch and shop",link:"#",img:"",vid:""},
   {id:"demo3",type:"image",body:"Still thinking it over? Your cart is saved and free shipping is still on for orders over $75.",title:"Your Cart Is Waiting",cta:"Finish checkout",link:"#",img:"",vid:""}
 ];
@@ -549,7 +601,7 @@ function renderGDaily(r){
 function renderRec(r){
   var adUrl=REC_AD_LINK[r.name]||'';
   var nameHtml=adUrl?'<a href="'+adUrl+'" target="_blank" style="color:inherit;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#D1D5DB;">'+r.name+' <span style="font-size:9px;color:#9CA3AF;">\u2197</span></a>':r.name;
-  return'<td class="nm">'+nameHtml+'</td>'+'<td><span class="plat '+(r.platform==='c1'?'c1':'c2')+'">'+r.platform+'</span></td>'
+  return'<td class="nm">'+nameHtml+'</td>'+'<td><span class="plat '+r.platform+'">'+r.platform+'</span></td>'
     +'<td class="r">'+pvChip(r.pv)+'</td>'+'<td class="r">'+orderChip(r.order_cost)+'</td>'
     +'<td class="r" style="color:#9CA3AF;">'+fs(r.spend)+'</td>'+'<td class="r">'+fn(r.orders)+'</td>'+netTd(r.profit);
 }
@@ -614,7 +666,7 @@ function renderAdGallery(){
   }).join('')||'<p style="color:#9CA3AF;font-size:13px;">No ads yet \u2014 populate the ADS array.</p>';
 }
 function sortCr(col,dir){
-  SORT['tbl-cr']={col:col,dir:dir};rerender('tbl-cr');
+  SORT['tbl-cr1']={col:col,dir:dir};rerender('tbl-cr1');
   var MAP={impr:'sb-impr',ctr:'sb-ctr',atc_pct:'sb-atc',atc_cost:'sb-cost'};
   Object.keys(MAP).forEach(function(k){var e=document.getElementById(MAP[k]);if(e)e.className='srtbtn';});
   var a=document.getElementById(MAP[col]);if(a)a.className='srtbtn on';
@@ -625,55 +677,65 @@ document.addEventListener('DOMContentLoaded', function() {
   // load rather than only after the first sort.
   wirePauseAndClick();
   [
-    ['tbl-mm',MM,EC_MW_LABELS,EC_MW_KEYS,EC_MW_RIGHTS,renderMW,'order_cost','asc'],
-    ['tbl-gm',GM,GL_MW_LABELS,GL_MW_KEYS,GL_MW_RIGHTS,renderGMW,'order_cost','asc'],
-    ['tbl-mw',MW,EC_MW_LABELS,EC_MW_KEYS,EC_MW_RIGHTS,renderMW,'order_cost','asc'],
-    ['tbl-gw',GW,GL_MW_LABELS,GL_MW_KEYS,GL_MW_RIGHTS,renderGMW,'order_cost','asc'],
-    ['tbl-md',MD,EC_D_LABELS,EC_D_KEYS,EC_D_RIGHTS,renderDaily,'atc_cost','desc'],
-    ['tbl-gd',GD,GL_D_LABELS,GL_D_KEYS,GL_D_RIGHTS,renderGDaily,'atc_cost','desc'],
+    ['tbl-m1',M1,EC_MW_LABELS,EC_MW_KEYS,EC_MW_RIGHTS,renderMW,'order_cost','asc'],
+    ['tbl-m2',M2,GL_MW_LABELS,GL_MW_KEYS,GL_MW_RIGHTS,renderGMW,'order_cost','asc'],
+    ['tbl-m3',M3,EC_MW_LABELS,EC_MW_KEYS,EC_MW_RIGHTS,renderMW,'order_cost','asc'],
+    ['tbl-w1',W1,EC_MW_LABELS,EC_MW_KEYS,EC_MW_RIGHTS,renderMW,'order_cost','asc'],
+    ['tbl-w2',W2,GL_MW_LABELS,GL_MW_KEYS,GL_MW_RIGHTS,renderGMW,'order_cost','asc'],
+    ['tbl-w3',W3,EC_MW_LABELS,EC_MW_KEYS,EC_MW_RIGHTS,renderMW,'order_cost','asc'],
+    ['tbl-d1',D1,EC_D_LABELS,EC_D_KEYS,EC_D_RIGHTS,renderDaily,'atc_cost','desc'],
+    ['tbl-d2',D2,GL_D_LABELS,GL_D_KEYS,GL_D_RIGHTS,renderGDaily,'atc_cost','desc'],
+    ['tbl-d3',D3,EC_D_LABELS,EC_D_KEYS,EC_D_RIGHTS,renderDaily,'atc_cost','desc'],
     ['tbl-add',ADD,REC_LABELS,REC_KEYS,REC_RIGHTS,renderRec,'pv','desc'],
     ['tbl-cut',CUT,REC_LABELS,REC_KEYS,REC_RIGHTS,renderRec,'pv','desc'],
-    ['tbl-cr',CR,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
-    ['tbl-gcr',GCR,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
+    ['tbl-cr1',CR1,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
+    ['tbl-cr2',CR2,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
+    ['tbl-cr3',CR3,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
   ].forEach(function(x){
     CONFIGS[x[0]]={data:x[1],labels:x[2],keys:x[3],rights:x[4],render:x[5],def:x[6],dd:x[7]||'desc'};
     SORT[x[0]]={col:x[6],dir:x[7]||'desc'};
     rerender(x[0]);
   });
   renderFunnel('c1-funnel',[{l:'Clicks',n:35700},{l:'Sessions',n:32100},{l:'Product Views',n:18400},{l:'Add to Cart',n:3000},{l:'Checkouts',n:1478},{l:'Purchases',n:832},{l:'Repeat Orders',n:133}],'#2563EB',35700,{spend:31600,rev:72680});
-  renderFunnel('c2-funnel',[{l:'Clicks',n:28400},{l:'Sessions',n:26100},{l:'Product Views',n:15900},{l:'Add to Cart',n:1926},{l:'Checkouts',n:1158},{l:'Purchases',n:766},{l:'Repeat Orders',n:141}],'#16A34A',28400,{spend:20100,rev:68310});
-  renderHm('c1-hm', VM);
-  renderHm('c2-hm', VG);
+  renderFunnel('c2-funnel',[{l:'Clicks',n:29800},{l:'Sessions',n:27400},{l:'Product Views',n:16700},{l:'Add to Cart',n:2022},{l:'Checkouts',n:1196},{l:'Purchases',n:780},{l:'Repeat Orders',n:141}],'#16A34A',29800,{spend:21900,rev:69430});
+  renderFunnel('c3-funnel',[{l:'Clicks',n:56700},{l:'Sessions',n:49200},{l:'Product Views',n:24800},{l:'Add to Cart',n:1620},{l:'Checkouts',n:590},{l:'Purchases',n:269},{l:'Repeat Orders',n:19}],'#7C3AED',56700,{spend:13600,rev:22235});
+  renderHm('c1-hm', V1);
+  renderHm('c2-hm', V2);
+  renderHm('c3-hm', V3);
   renderKanban();
 });
 
 // ── KANBAN (4-column: To Test / Testing / Evaluated / Completed) ───────────
 var NOTES=[
-  {id:1,unit:"Kitchen_Broad_Prospect",ctx:"MM",date:"Aug 21",status:"todo",priority:"high",
+  {id:1,unit:"Kitchen_Broad_Prospect",ctx:"M1",date:"Aug 21",status:"todo",priority:"high",
    note:"Cost per order up 34% MoM on flat AOV.",
    hyp:"Prospecting CAC is being driven by creative fatigue rather than auction price \u2014 the hero static has run 41 days unchanged.",
    variable:"Creative refresh (new hero angle)"},
-  {id:2,unit:"PMax_Kitchen",ctx:"GM",date:"Aug 20",status:"todo",priority:"medium",
+  {id:2,unit:"PMax_Kitchen",ctx:"M2",date:"Aug 20",status:"todo",priority:"medium",
    note:"Feed health at 92% \u2014 44 SKUs disapproved.",
    hyp:"Clearing the GTIN and image-size disapprovals will recover impression share without any added budget.",
    variable:"Product feed hygiene"},
-  {id:3,unit:"Lighting_Video_UGC",ctx:"MM",date:"Aug 14",status:"doing",priority:"high",
+  {id:3,unit:"Spark_UGC_Kitchen",ctx:"M3",date:"Aug 22",status:"todo",priority:"high",
+   note:"Refund rate 11.3% against a 5.9% account average.",
+   hyp:"TikTok creator demos are overselling capacity; putting the real spec on screen in the first five seconds should pull refunds under 8% without hurting add-to-cart.",
+   variable:"Creative claim accuracy"},
+  {id:4,unit:"Lighting_Video_UGC",ctx:"M1",date:"Aug 14",status:"doing",priority:"high",
    note:"Hook variant running against the control.",
    hyp:"A first-3-second product-in-use hook will lift the add-to-cart rate above 6% versus the 4.0% control.",
    variable:"Video hook (first 3 seconds)",testSetup:"Duplicated ad set, 50/50 budget split, 14-day read",
    testAdId:2,controlSpend:5100,testSpend:2400},
-  {id:4,unit:"Retarget_Cart_7D",ctx:"MW",date:"Aug 17",status:"doing",priority:"medium",
+  {id:5,unit:"Retarget_Cart_7D",ctx:"W1",date:"Aug 17",status:"doing",priority:"medium",
    note:"Widening the retargeting window from 7 to 14 days.",
    hyp:"The 7-day window leaves profitable cart abandoners unserved; 14 days should hold ROAS above 4.0x.",
    variable:"Retargeting window",testSetup:"New ad set at 14 days, original left untouched",
    testAdId:2,controlSpend:3400,testSpend:900},
-  {id:5,unit:"Outdoor_Advantage_Plus",ctx:"MM",date:"Aug 8",status:"done",priority:"medium",
-   note:"Advantage+ placements against a manual ad set.",
-   hyp:"Advantage+ will beat the manual structure on cost per add-to-cart at equal spend.",
-   variable:"Campaign structure",testSetup:"Parallel manual ad set, 21-day read",
-   verdict:"Confirmed \u2014 $12.00 vs $15.80 cost per ATC. Shifting 70% of prospecting budget over.",
-   testAdId:2,controlSpend:8900,testSpend:6100},
-  {id:6,unit:"Brand_Exact",ctx:"GM",date:"Aug 4",status:"completed",priority:"low",
+  {id:6,unit:"Trending_Lighting_Hook",ctx:"M3",date:"Aug 9",status:"done",priority:"high",
+   note:"Trending-audio hook against a product-led hook.",
+   hyp:"Riding trending audio will cut CPM enough to offset a weaker purchase rate.",
+   variable:"Audio strategy",testSetup:"Parallel ad set, 14-day read",
+   verdict:"Rejected \u2014 CPM fell 31% but cost per order rose to $84 and refunds hit 12.9%. Killing the ad set.",
+   testAdId:2,controlSpend:2600,testSpend:1900},
+  {id:7,unit:"Brand_Exact",ctx:"M2",date:"Aug 4",status:"completed",priority:"low",
    note:"Raised target ROAS from 4.0 to 6.0 on branded shopping.",
    hyp:"Branded shopping is capped by the tROAS target rather than by demand, so raising it will grow revenue at similar efficiency.",
    variable:"tROAS bid target",testSetup:"Target raised Aug 4, three-week read",

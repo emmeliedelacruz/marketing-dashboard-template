@@ -1,6 +1,6 @@
 # Marketing Performance Dashboard — Template
 
-A single-file HTML performance dashboard for paid acquisition teams. Built for sales-led, ecommerce, *or* product-led motions, tracking any two channels (Meta/Google/LinkedIn/TikTok/etc.) across Monthly, Weekly, Daily, Creative, Optimization, and Changelog views.
+A single-file HTML performance dashboard for paid acquisition teams. Built for sales-led, ecommerce, *or* product-led motions, tracking two or three channels (Meta/Google/LinkedIn/TikTok/etc.) across Monthly, Weekly, Daily, Creative, Optimization, and Changelog views.
 
 No build step, no backend required — it's one HTML file you open in a browser.
 
@@ -8,10 +8,10 @@ No build step, no backend required — it's one HTML file you open in a browser.
 
 | File | What it is |
 |---|---|
-| `dashboard-template-blank.html` | Empty template — placeholder channel names, empty data arrays. Start here. |
-| `dashboard-example-filled.html` | **Sales-led** example — dummy data for a fictional roofing supplier ("Acme Roofing") on Meta + Google, tracking SAL/SQL/ICP/BTC/DPC. |
-| `dashboard-example-ecommerce.html` | **Ecommerce** example — a fictional DTC home-goods retailer ("Harborline Goods") on Meta + Google Shopping, tracking add-to-cart, checkout, orders, ROAS and refunds. |
-| `dashboard-example-product-led.html` | **Product-led** example — a fictional PLG SaaS ("Loomstack") on LinkedIn + Google, tracking signups, activation, PQL, trial-to-paid and churn. |
+| `dashboard-template-blank.html` | Empty template — two channels, placeholder names, empty data arrays. Start here. |
+| `dashboard-example-filled.html` | **Sales-led** example, 2 channels — a fictional roofing supplier ("Acme Roofing") on Meta + Google, tracking SAL/SQL/ICP/BTC/DPC. |
+| `dashboard-example-ecommerce.html` | **Ecommerce** example, 3 channels — a fictional DTC home-goods retailer ("Harborline Goods") on Meta + Google Shopping + TikTok, tracking add-to-cart, checkout, orders, ROAS and refunds. |
+| `dashboard-example-product-led.html` | **Product-led** example, 3 channels — a fictional PLG SaaS ("Loomstack") on Meta + LinkedIn + Google, tracking signups, activation, PQL, trial-to-paid and churn. |
 | `skills/dashboard-builder.md` | A Claude "skill" file — paste this into a Claude project and Claude will walk you through building your own version, onboarding you on your channels, metrics, and motion type. |
 | `LICENSE` | MIT |
 
@@ -32,7 +32,9 @@ No build step, no backend required — it's one HTML file you open in a browser.
    | `VM` / `VG` | Funnel heatmap segments, per channel |
    | `ADS` | Ad Library gallery |
 
-   All three examples have these populated — copy the row shapes from whichever one matches your motion. The ecommerce and product-led examples also populate `GCR` (the channel-2 campaign table on the Creatives page).
+   All three examples have these populated — copy the row shapes from whichever one matches your motion.
+
+   The two three-channel examples use **index-based names instead**, because channel initials stop scaling once there are more than two: `M1`/`M2`/`M3` (monthly), `W1`/`W2`/`W3` (weekly), `D1`/`D2`/`D3` (daily), `CR1`/`CR2`/`CR3` (creatives), `V1`/`V2`/`V3` (heatmap), with `ADD`/`CUT`/`ADS` unchanged. Same data shapes, clearer numbering — worth copying if you are adding a third channel.
 5. Update the KPI labels if your metrics differ. Each table has a matching `*_LABELS` / `*_KEYS` / `*_RIGHTS` triple, all the same length: `PL_MW_*` and `GL_MW_*` (Monthly and Weekly), `PL_D_*` and `GL_D_*` (Daily), `REC_*` (Optimization), `CR_*` (Creatives). `LABELS` sets the header text, `KEYS` names the field sorting reads, `RIGHTS` right-aligns the column.
 
    Note that the table cells themselves are emitted by the `render*` functions (`renderMW`, `renderGMW`, `renderDaily`, `renderGDaily`, `renderRec`, `renderCr`), which reference row fields by name. To swap a metric end to end (e.g. product-led teams trading SAL/SQL/ICP for Signup/Activation/PQL — see the skill file for full definitions), edit the label array *and* the matching render function.
@@ -59,6 +61,18 @@ This template is intentionally opinionated about **layout**, not about **metrics
 - Changelog is a 4-column Kanban (To Test → Testing → Evaluated → Completed) with hypothesis/verdict tracking and a live platform-changes feed
 
 What *does* vary per company: channel names, which KPIs populate the tables, and which motion you're tracking — sales-led (SAL/SQL/ICP/BTC/DPC), ecommerce (ATC/Checkout/Orders/ROAS/Refunds), or product-led (Signup/Activation/PQL/Trial-to-Paid/Expansion). All three metric sets are documented in the skill file, and each has a worked example in this repo.
+
+Both three-channel examples also carry one **paused** ad group that still spent during the month, to show the Monthly/Weekly rule: period tables include everything that delivered in the window, not just what is live now. Filtering those rows out silently drops their spend and flatters every remaining row.
+
+## Adding a third channel
+
+The blank template ships with two channels. Both three-channel examples show what changes — nothing about the page structure, only how many of each thing there are:
+
+- **CSS** — `.funnel-grid` and `.hm-grid` go from `1fr 1fr` to `repeat(auto-fit,minmax(340px,1fr))` so the cards reflow instead of squashing, and a `.plat.c3` chip colour is added.
+- **Markup** — one more funnel card and heatmap card on the Funnel page; one more tab and pane on Monthly, Weekly, Daily and Creatives; one more collapsible panel on the Changelog page.
+- **JS** — one more entry per page in the `CONFIGS` registration list, one more `renderFunnel` / `renderHm` call, and the third channel's data arrays.
+
+Use the "ad group" renderers (`renderGMW` / `renderGDaily`, which add Campaign and Status columns) for whichever channel is search-like, and the plain ones for the rest. In the ecommerce example that is Google Shopping (`c2`); in the product-led example it is Google (`c3`).
 
 ## Live actions (pause/resume/duplicate ads)
 

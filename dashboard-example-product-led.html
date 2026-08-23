@@ -66,10 +66,10 @@ tbody tr{cursor:pointer;}
 .sc.g{background:#F0FDF4;color:#15803D;}.sc.y{background:#FFFBEB;color:#A16207;}.sc.r{background:#FEF2F2;color:#B91C1C;}
 .paused{display:inline-block;padding:1px 5px;border-radius:4px;font-size:10px;font-weight:600;background:#F9FAFB;color:#9CA3AF;border:1px solid #E5E7EB;}
 .plat{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;}
-.plat.c1{background:#EFF6FF;color:#1D4ED8;}.plat.c2{background:#F0FDF4;color:#16A34A;}
+.plat.c1{background:#EFF6FF;color:#1D4ED8;}.plat.c2{background:#F0FDF4;color:#16A34A;}.plat.c3{background:#F5F3FF;color:#6D28D9;}
 .fmt-tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#F5F3FF;color:#6D28D9;}
 
-.funnel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.funnel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;}
 .f-col-title{font-size:13px;font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;}
 .f-stage{display:grid;grid-template-columns:72px 1fr 52px 44px;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #F9FAFB;}
 .f-stage:last-child{border-bottom:none;}
@@ -83,7 +83,7 @@ tbody tr{cursor:pointer;}
 .f-sum-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:#9CA3AF;display:block;margin-bottom:2px;}
 .f-sum-val{font-size:16px;font-weight:700;color:#111827;}
 
-.hm-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.hm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;}
 .hm-title{font-size:13px;font-weight:600;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;}
 .hmt{width:100%;border-collapse:separate;border-spacing:2px;font-size:11px;}
 .hmt th{background:none;padding:4px 6px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#9CA3AF;text-align:center;cursor:default;border:none;}
@@ -177,16 +177,18 @@ tbody tr{cursor:pointer;}
 
 <!-- FUNNEL -->
 <div class="page active" id="pg-funnel">
-  <div class="ph"><h2>Funnel Overview</h2><span class="ph-sub">Aug MTD &middot; LinkedIn vs Google</span></div>
+  <div class="ph"><h2>Funnel Overview</h2><span class="ph-sub">Aug MTD &middot; Meta vs LinkedIn vs Google</span></div>
   <div class="sec-title">Pipeline by Channel</div>
   <div class="funnel-grid" style="margin-top:10px;">
-    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#2563EB;" id="c1-funnel-title">LinkedIn &mdash; $30,200 spend</div><div id="c1-funnel"></div></div>
-    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#16A34A;" id="c2-funnel-title">Google &mdash; $16,300 spend</div><div id="c2-funnel"></div></div>
+    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#2563EB;" id="c1-funnel-title">Meta &mdash; $12,200 spend</div><div id="c1-funnel"></div></div>
+    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#16A34A;" id="c2-funnel-title">LinkedIn &mdash; $30,200 spend</div><div id="c2-funnel"></div></div>
+    <div class="card" style="padding:16px;"><div class="f-col-title" style="color:#7C3AED;" id="c3-funnel-title">Google &mdash; $18,700 spend</div><div id="c3-funnel"></div></div>
   </div>
   <div class="sec-title" style="margin-top:20px;">Conversion by ICP Segment</div>
   <div class="hm-grid" style="margin-top:10px;">
-    <div class="card" style="padding:16px;"><div class="hm-title">LinkedIn</div><table class="hmt" id="c1-hm"></table></div>
-    <div class="card" style="padding:16px;"><div class="hm-title">Google</div><table class="hmt" id="c2-hm"></table></div>
+    <div class="card" style="padding:16px;"><div class="hm-title">Meta</div><table class="hmt" id="c1-hm"></table></div>
+    <div class="card" style="padding:16px;"><div class="hm-title">LinkedIn</div><table class="hmt" id="c2-hm"></table></div>
+    <div class="card" style="padding:16px;"><div class="hm-title">Google</div><table class="hmt" id="c3-hm"></table></div>
   </div>
 </div>
 
@@ -194,41 +196,48 @@ tbody tr{cursor:pointer;}
 <div class="page" id="pg-monthly">
   <div class="ph"><h2>Monthly</h2><span class="ph-sub">Ad set / ad group level &middot; Click column header to sort</span></div>
   <div class="ch-tabs">
-    <button class="ch-tab active" onclick="showCh('monthly','c1',this)">LinkedIn <span class="ct">4 ad sets</span></button>
-    <button class="ch-tab" onclick="showCh('monthly','c2',this)">Google <span class="ct">3 ad groups</span></button>
+    <button class="ch-tab active" onclick="showCh('monthly','c1',this)">Meta <span class="ct">3 ad sets</span></button>
+    <button class="ch-tab" onclick="showCh('monthly','c2',this)">LinkedIn <span class="ct">4 ad sets</span></button>
+    <button class="ch-tab" onclick="showCh('monthly','c3',this)">Google <span class="ct">4 ad groups</span></button>
   </div>
-  <div id="ch-monthly-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-mm"></table></div></div></div>
-  <div id="ch-monthly-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-gm"></table></div></div></div>
+  <div id="ch-monthly-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-m1"></table></div></div></div>
+  <div id="ch-monthly-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-m2"></table></div></div></div>
+  <div id="ch-monthly-c3" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-m3"></table></div></div></div>
 </div>
 
 <!-- WEEKLY -->
 <div class="page" id="pg-weekly">
   <div class="ph"><h2>Weekly</h2><span class="ph-sub">Ad set / ad group level &middot; Click column header to sort</span></div>
   <div class="ch-tabs">
-    <button class="ch-tab active" onclick="showCh('weekly','c1',this)">LinkedIn <span class="ct">2 ad sets</span></button>
-    <button class="ch-tab" onclick="showCh('weekly','c2',this)">Google <span class="ct">1 ad group</span></button>
+    <button class="ch-tab active" onclick="showCh('weekly','c1',this)">Meta <span class="ct">1 ad set</span></button>
+    <button class="ch-tab" onclick="showCh('weekly','c2',this)">LinkedIn <span class="ct">2 ad sets</span></button>
+    <button class="ch-tab" onclick="showCh('weekly','c3',this)">Google <span class="ct">1 ad group</span></button>
   </div>
-  <div id="ch-weekly-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-mw"></table></div></div></div>
-  <div id="ch-weekly-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-gw"></table></div></div></div>
+  <div id="ch-weekly-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-w1"></table></div></div></div>
+  <div id="ch-weekly-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-w2"></table></div></div></div>
+  <div id="ch-weekly-c3" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-w3"></table></div></div></div>
 </div>
 
 <!-- DAILY -->
 <div class="page" id="pg-daily">
   <div class="ph"><h2>Daily</h2><span class="ph-sub">Campaign level &middot; most recent day</span></div>
   <div class="ch-tabs">
-    <button class="ch-tab active" onclick="showCh('daily','c1',this)">LinkedIn <span class="ct">2 campaigns</span></button>
-    <button class="ch-tab" onclick="showCh('daily','c2',this)">Google <span class="ct">2 campaigns</span></button>
+    <button class="ch-tab active" onclick="showCh('daily','c1',this)">Meta <span class="ct">2 campaigns</span></button>
+    <button class="ch-tab" onclick="showCh('daily','c2',this)">LinkedIn <span class="ct">2 campaigns</span></button>
+    <button class="ch-tab" onclick="showCh('daily','c3',this)">Google <span class="ct">2 campaigns</span></button>
   </div>
-  <div id="ch-daily-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-md"></table></div></div></div>
-  <div id="ch-daily-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-gd"></table></div></div></div>
+  <div id="ch-daily-c1"><div class="card"><div class="tbl-wrap"><table id="tbl-d1"></table></div></div></div>
+  <div id="ch-daily-c2" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-d2"></table></div></div></div>
+  <div id="ch-daily-c3" style="display:none"><div class="card"><div class="tbl-wrap"><table id="tbl-d3"></table></div></div></div>
 </div>
 
 <!-- CREATIVES -->
 <div class="page" id="pg-creatives">
   <div class="ph"><h2>Creatives</h2><span class="ph-sub">Ad-level performance</span></div>
   <div class="ch-tabs">
-    <button class="ch-tab active" onclick="showCh('creatives','c1',this)">LinkedIn Ads <span class="ct">4 ads</span></button>
-    <button class="ch-tab" onclick="showCh('creatives','c2',this)">Google Campaigns <span class="ct">3 campaigns</span></button>
+    <button class="ch-tab active" onclick="showCh('creatives','c1',this)">Meta Ads <span class="ct">3 ads</span></button>
+    <button class="ch-tab" onclick="showCh('creatives','c2',this)">LinkedIn Ads <span class="ct">4 ads</span></button>
+    <button class="ch-tab" onclick="showCh('creatives','c3',this)">Google Campaigns <span class="ct">4 campaigns</span></button>
     <button class="ch-tab" onclick="showCh('creatives','adlib',this)">Ad Library <span class="ct">3 live ads</span></button>
   </div>
   <div id="ch-creatives-c1">
@@ -239,10 +248,13 @@ tbody tr{cursor:pointer;}
       <button class="srtbtn" id="sb-act" onclick="sortCr('activation_rate','desc')">Activation%</button>
       <button class="srtbtn" id="sb-cost" onclick="sortCr('signup_cost','asc')">Cost per Signup</button>
     </div>
-    <div class="card"><div class="tbl-wrap"><table id="tbl-cr"></table></div></div>
+    <div class="card"><div class="tbl-wrap"><table id="tbl-cr1"></table></div></div>
   </div>
   <div id="ch-creatives-c2" style="display:none">
-    <div class="card"><div class="tbl-wrap"><table id="tbl-gcr"></table></div></div>
+    <div class="card"><div class="tbl-wrap"><table id="tbl-cr2"></table></div></div>
+  </div>
+  <div id="ch-creatives-c3" style="display:none">
+    <div class="card"><div class="tbl-wrap"><table id="tbl-cr3"></table></div></div>
   </div>
   <div id="ch-creatives-adlib" style="display:none">
     <div class="ad-filters">
@@ -259,9 +271,9 @@ tbody tr{cursor:pointer;}
 <div class="page" id="pg-recs">
   <div class="ph"><h2>Optimization</h2><span class="ph-sub">LTV/CAC = modeled lifetime value per acquisition dollar, on a 24-month horizon at 80% gross margin</span></div>
   <div class="net-row">
-    <div><label>Scale-Up Potential</label><div class="nv" style="color:#15803D;">+$18,290</div><div style="font-size:11px;color:#6B7280;">net new MRR from top units</div></div>
-    <div><label>Spend Below Payback</label><div class="nv" style="color:#B91C1C;">$12,100</div><div style="font-size:11px;color:#6B7280;">units under 3.0&times; LTV/CAC</div></div>
-    <div><label>Net MRR at Stake</label><div class="nv" style="color:#D97706;">+$17,460</div><div style="font-size:11px;color:#6B7280;">gained minus forgone</div></div>
+    <div><label>Scale-Up Potential</label><div class="nv" style="color:#15803D;">+$19,650</div><div style="font-size:11px;color:#6B7280;">net new MRR from top units</div></div>
+    <div><label>Spend Below Payback</label><div class="nv" style="color:#B91C1C;">$13,400</div><div style="font-size:11px;color:#6B7280;">units under 3.0&times; LTV/CAC</div></div>
+    <div><label>Net MRR at Stake</label><div class="nv" style="color:#D97706;">+$18,970</div><div style="font-size:11px;color:#6B7280;">gained minus forgone</div></div>
     <div style="margin-left:auto;font-size:11px;color:#9CA3AF;max-width:210px;">Add: LTV/CAC &ge;5.0&times;. Cut: LTV/CAC &le;3.0&times;.</div>
   </div>
   <div>
@@ -298,6 +310,14 @@ tbody tr{cursor:pointer;}
   </div>
 
   <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px;" id="platform-changelogs">
+    <details class="cl-panel">
+      <summary class="cl-summary">
+        <span style="font-weight:700;font-size:13px;">Meta Platform Changes</span>
+        <button class="cl-sync-btn" onclick="event.preventDefault();alert('Wire this to your MCP connector to sync live changes.')">Sync</button>
+        <span class="cl-chevron">&#9660;</span>
+      </summary>
+      <div class="cl-body"><div class="cl-empty">Not connected yet. Connect an MCP tool for Meta to pull live change history.</div></div>
+    </details>
     <details class="cl-panel">
       <summary class="cl-summary">
         <span style="font-weight:700;font-size:13px;">LinkedIn Platform Changes</span>
@@ -369,72 +389,103 @@ tbody tr{cursor:pointer;}
 
 <script>
 // ── DUMMY DATA — fictional PLG SaaS, made-up numbers, demo purposes only ──
-// Product-led motion. Column key reference:
+// Product-led motion, three channels. Arrays are indexed by channel position:
+//   M1/M2/M3 monthly, W1/W2/W3 weekly, D1/D2/D3 daily, CR1/CR2/CR3 creatives,
+//   V1/V2/V3 funnel heatmap. c1 = Meta, c2 = LinkedIn, c3 = Google.
+// Column key reference:
 //   spend, signups, activated, pql, paid, mrr, net_mrr, ltv_cac,
 //   paid_cost, signup_cost, activation_rate, pql_rate, paid_rate, churn_rate
 // Rates are stored as already-computed percentages so every column sorts on a
 // real number. mrr = new MRR booked; net_mrr = new MRR minus churned MRR.
 // ltv_cac = (ARPA x 24 months x 0.80 gross margin) / cost per paid conversion.
 
-var MM=[
+var M1=[
+  {name:"Retarget_Site_Visitors",spend:2100,signups:96,activated:51,pql:17,paid:9,mrr:1530,net_mrr:1360,ltv_cac:14.0,paid_cost:233,signup_cost:22,activation_rate:53.1,pql_rate:17.7,paid_rate:9.4,churn_rate:11.1},
+  {name:"Lookalike_Trial_Starters",spend:5400,signups:268,activated:94,pql:21,paid:8,mrr:1200,net_mrr:810,ltv_cac:4.3,paid_cost:675,signup_cost:20,activation_rate:35.1,pql_rate:7.8,paid_rate:3.0,churn_rate:25.0},
+  {name:"Interest_DevTools_Broad",spend:4700,signups:312,activated:71,pql:12,paid:4,mrr:560,net_mrr:210,ltv_cac:2.3,paid_cost:1175,signup_cost:15,activation_rate:22.8,pql_rate:3.8,paid_rate:1.3,churn_rate:50.0}
+];
+var M2=[
   {name:"Retarget_Docs_Visitors",spend:2900,signups:132,activated:84,pql:38,paid:24,mrr:5040,net_mrr:4830,ltv_cac:33.3,paid_cost:121,signup_cost:22,activation_rate:63.6,pql_rate:28.8,paid_rate:18.2,churn_rate:4.2},
   {name:"ICP_Eng_Leaders",spend:12400,signups:168,activated:96,pql:41,paid:22,mrr:4180,net_mrr:3800,ltv_cac:6.5,paid_cost:564,signup_cost:74,activation_rate:57.1,pql_rate:24.4,paid_rate:13.1,churn_rate:9.1},
   {name:"Lookalike_DevTools",spend:8600,signups:214,activated:88,pql:26,paid:11,mrr:1760,net_mrr:1280,ltv_cac:3.9,paid_cost:782,signup_cost:40,activation_rate:41.1,pql_rate:12.1,paid_rate:5.1,churn_rate:27.3},
   {name:"Thought_Leadership_Video",spend:6300,signups:96,activated:31,pql:8,paid:3,mrr:480,net_mrr:320,ltv_cac:1.5,paid_cost:2100,signup_cost:66,activation_rate:32.3,pql_rate:8.3,paid_rate:3.1,churn_rate:33.3}
 ];
-var GM=[
+var M3=[
   {name:"Brand_Exact",campaign:"Branded Search",status:"ENABLED",spend:3100,signups:186,activated:132,pql:71,paid:48,mrr:10080,net_mrr:9660,ltv_cac:62.0,paid_cost:65,signup_cost:17,activation_rate:71.0,pql_rate:38.2,paid_rate:25.8,churn_rate:4.2},
   {name:"NB_Competitor_Alt",campaign:"NB > Competitor",status:"ENABLED",spend:7400,signups:104,activated:52,pql:19,paid:9,mrr:1890,net_mrr:1470,ltv_cac:4.9,paid_cost:822,signup_cost:71,activation_rate:50.0,pql_rate:18.3,paid_rate:8.7,churn_rate:22.2},
-  {name:"NB_Category_Broad",campaign:"NB > Category",status:"ENABLED",spend:5800,signups:142,activated:58,pql:16,paid:6,mrr:1020,net_mrr:510,ltv_cac:3.4,paid_cost:967,signup_cost:41,activation_rate:40.8,pql_rate:11.3,paid_rate:4.2,churn_rate:50.0}
+  {name:"NB_Category_Broad",campaign:"NB > Category",status:"ENABLED",spend:5800,signups:142,activated:58,pql:16,paid:6,mrr:1020,net_mrr:510,ltv_cac:3.4,paid_cost:967,signup_cost:41,activation_rate:40.8,pql_rate:11.3,paid_rate:4.2,churn_rate:50.0},
+  // Paused Aug 11 but delivered Aug 1-11, so it still belongs in the MTD table.
+  {name:"NB_Integrations_Exact",campaign:"NB > Integrations",status:"PAUSED",spend:2400,signups:38,activated:14,pql:3,paid:1,mrr:150,net_mrr:150,ltv_cac:1.2,paid_cost:2400,signup_cost:63,activation_rate:36.8,pql_rate:7.9,paid_rate:2.6,churn_rate:0}
 ];
-var MW=[
+var W1=[
+  {name:"Retarget_Site_Visitors",spend:510,signups:24,activated:13,pql:4,paid:2,mrr:340,net_mrr:340,ltv_cac:13.6,paid_cost:255,signup_cost:21,activation_rate:54.2,pql_rate:16.7,paid_rate:8.3,churn_rate:0}
+];
+var W2=[
   {name:"Retarget_Docs_Visitors",spend:690,signups:32,activated:21,pql:9,paid:6,mrr:1260,net_mrr:1260,ltv_cac:35.1,paid_cost:115,signup_cost:22,activation_rate:65.6,pql_rate:28.1,paid_rate:18.8,churn_rate:0},
   {name:"ICP_Eng_Leaders",spend:2900,signups:38,activated:22,pql:9,paid:5,mrr:950,net_mrr:760,ltv_cac:6.3,paid_cost:580,signup_cost:76,activation_rate:57.9,pql_rate:23.7,paid_rate:13.2,churn_rate:20.0}
 ];
-var GW=[
+var W3=[
   {name:"Brand_Exact",campaign:"Branded Search",status:"ENABLED",spend:740,signups:44,activated:31,pql:17,paid:11,mrr:2310,net_mrr:2310,ltv_cac:60.2,paid_cost:67,signup_cost:17,activation_rate:70.5,pql_rate:38.6,paid_rate:25.0,churn_rate:0}
 ];
-var MD=[
+var D1=[
+  {name:"Meta_Retargeting",spend:72,signups:3,signup_cost:24,event_rate:100,cvr:4.2,activation_rate:53.0,pql_rate:17.0,paid_rate:9.0,churn_rate:0,net_mrr:46},
+  {name:"Meta_Broad_Prospecting",spend:210,signups:14,signup_cost:15,event_rate:100,cvr:2.1,activation_rate:23.0,pql_rate:4.0,paid_rate:1.3,churn_rate:0,net_mrr:25}
+];
+var D2=[
   {name:"LinkedIn_ICP_Prospecting",spend:420,signups:6,signup_cost:70,event_rate:100,cvr:1.9,activation_rate:50.0,pql_rate:16.7,paid_rate:6.7,churn_rate:0,net_mrr:76},
   {name:"LinkedIn_Retargeting",spend:110,signups:5,signup_cost:22,event_rate:100,cvr:6.1,activation_rate:60.0,pql_rate:28.0,paid_rate:18.0,churn_rate:0,net_mrr:189}
 ];
-var GD=[
+var D3=[
   {name:"Branded_Search",status:"ENABLED",spend:105,signups:6,signup_cost:18,event_rate:100,cvr:8.4,activation_rate:70.0,pql_rate:38.3,paid_rate:25.0,churn_rate:0,net_mrr:315},
   {name:"NB_Competitor_Alt",status:"ENABLED",spend:340,signups:4,signup_cost:85,event_rate:96,cvr:1.7,activation_rate:50.0,pql_rate:17.5,paid_rate:7.5,churn_rate:0,net_mrr:63}
 ];
-var CR=[
+var CR1=[
+  {name:"Trial_Offer_Static",ad_set:"Lookalike_Trial_Starters",fmt:"Static",copy:"Free Trial",impr:1840000,clicks:22000,ctr:1.20,signup_rate:1.2,activation_rate:35.1,pql_rate:7.8,signup_cost:20,churn_rate:25.0},
+  {name:"Dashboard_Demo_Video",ad_set:"Interest_DevTools_Broad",fmt:"Video",copy:"Product Demo",impr:2600000,clicks:28400,ctr:1.09,signup_rate:1.1,activation_rate:22.8,pql_rate:3.8,signup_cost:15,churn_rate:50.0},
+  {name:"Site_Retarget_Carousel",ad_set:"Retarget_Site_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:310000,clicks:6100,ctr:1.97,signup_rate:1.6,activation_rate:53.1,pql_rate:17.7,signup_cost:22,churn_rate:11.1}
+];
+var CR2=[
   {name:"Migration_Guide_Doc",ad_set:"ICP_Eng_Leaders",fmt:"Document Ad",copy:"Migration",impr:412000,clicks:3100,ctr:0.75,signup_rate:5.4,activation_rate:57.1,pql_rate:24.4,signup_cost:74,churn_rate:9.1},
   {name:"Benchmark_Report_Static",ad_set:"Lookalike_DevTools",fmt:"Single Image",copy:"Benchmark Data",impr:680000,clicks:4900,ctr:0.72,signup_rate:4.4,activation_rate:41.1,pql_rate:12.1,signup_cost:40,churn_rate:27.3},
   {name:"DocsRetarget_Carousel",ad_set:"Retarget_Docs_Visitors",fmt:"Carousel",copy:"Feature Depth",impr:96000,clicks:1840,ctr:1.92,signup_rate:7.2,activation_rate:63.6,pql_rate:28.8,signup_cost:22,churn_rate:4.2},
   {name:"Founder_Talking_Head",ad_set:"Thought_Leadership_Video",fmt:"Video",copy:"Founder POV",impr:540000,clicks:2200,ctr:0.41,signup_rate:4.4,activation_rate:32.3,pql_rate:8.3,signup_cost:66,churn_rate:33.3}
 ];
-var GCR=[
+var CR3=[
   {name:"Branded_Search",fmt:"Search",copy:"Brand Terms",impr:74000,clicks:6200,ctr:8.38,signup_rate:3.0,activation_rate:71.0,pql_rate:38.2,signup_cost:17,churn_rate:4.2},
   {name:"NB_Competitor_Alt",fmt:"Search",copy:"Competitor Alt",impr:210000,clicks:4100,ctr:1.95,signup_rate:2.5,activation_rate:50.0,pql_rate:18.3,signup_cost:71,churn_rate:22.2},
-  {name:"NB_Category_Broad",fmt:"Search",copy:"Category Terms",impr:386000,clicks:5600,ctr:1.45,signup_rate:2.5,activation_rate:40.8,pql_rate:11.3,signup_cost:41,churn_rate:50.0}
+  {name:"NB_Category_Broad",fmt:"Search",copy:"Category Terms",impr:386000,clicks:5600,ctr:1.45,signup_rate:2.5,activation_rate:40.8,pql_rate:11.3,signup_cost:41,churn_rate:50.0},
+  {name:"NB_Integrations_Exact",fmt:"Search",copy:"Integration Terms",impr:118000,clicks:2100,ctr:1.78,signup_rate:1.8,activation_rate:36.8,pql_rate:7.9,signup_cost:63,churn_rate:0}
 ];
 var ADD=[
-  {name:"Brand_Exact",platform:"c2",spend:3100,ltv_cac:62.0,signup_cost:17,signups:186,net_mrr:9660},
-  {name:"Retarget_Docs_Visitors",platform:"c1",spend:2900,ltv_cac:33.3,signup_cost:22,signups:132,net_mrr:4830},
-  {name:"ICP_Eng_Leaders",platform:"c1",spend:12400,ltv_cac:6.5,signup_cost:74,signups:168,net_mrr:3800}
+  {name:"Brand_Exact",platform:"c3",spend:3100,ltv_cac:62.0,signup_cost:17,signups:186,net_mrr:9660},
+  {name:"Retarget_Docs_Visitors",platform:"c2",spend:2900,ltv_cac:33.3,signup_cost:22,signups:132,net_mrr:4830},
+  {name:"Retarget_Site_Visitors",platform:"c1",spend:2100,ltv_cac:14.0,signup_cost:22,signups:96,net_mrr:1360},
+  {name:"ICP_Eng_Leaders",platform:"c2",spend:12400,ltv_cac:6.5,signup_cost:74,signups:168,net_mrr:3800}
 ];
 var CUT=[
-  {name:"Thought_Leadership_Video",platform:"c1",spend:6300,ltv_cac:1.5,signup_cost:66,signups:96,net_mrr:320},
-  {name:"NB_Category_Broad",platform:"c2",spend:5800,ltv_cac:3.4,signup_cost:41,signups:142,net_mrr:510}
+  {name:"Interest_DevTools_Broad",platform:"c1",spend:4700,ltv_cac:2.3,signup_cost:15,signups:312,net_mrr:210},
+  {name:"Thought_Leadership_Video",platform:"c2",spend:6300,ltv_cac:1.5,signup_cost:66,signups:96,net_mrr:320},
+  {name:"NB_Integrations_Exact",platform:"c3",spend:2400,ltv_cac:1.2,signup_cost:63,signups:38,net_mrr:150}
 ];
-var VM=[
+var V1=[
+  {n:"Startup",signups:312,activated:71,pql:12,paid:4,churned:2},
+  {n:"Mid-Market",signups:268,activated:94,pql:21,paid:8,churned:2},
+  {n:"Enterprise",signups:96,activated:51,pql:17,paid:9,churned:1}
+];
+var V2=[
   {n:"Mid-Market",signups:168,activated:96,pql:41,paid:22,churned:2},
   {n:"Startup",signups:214,activated:88,pql:26,paid:11,churned:3},
   {n:"Agency",signups:132,activated:84,pql:38,paid:24,churned:1},
   {n:"Enterprise",signups:96,activated:31,pql:8,paid:3,churned:1}
 ];
-var VG=[
+var V3=[
   {n:"Branded",signups:186,activated:132,pql:71,paid:48,churned:2},
   {n:"Competitor NB",signups:104,activated:52,pql:19,paid:9,churned:2},
-  {n:"Category NB",signups:142,activated:58,pql:16,paid:6,churned:3}
+  {n:"Category NB",signups:142,activated:58,pql:16,paid:6,churned:3},
+  {n:"Integrations NB",signups:38,activated:14,pql:3,paid:1,churned:0}
 ];
 var ADS=[
-  {id:"demo1",type:"image",body:"The 40-page migration guide our customers actually use — schema mapping, backfill strategy, and a dual-write cutover plan you can run in a week.",title:"Migrating Off Legacy Analytics",cta:"Get the guide",link:"#",img:"",vid:""},
+  {id:"demo1",type:"image",body:"The 40-page migration guide our customers actually use \u2014 schema mapping, backfill strategy, and a dual-write cutover plan you can run in a week.",title:"Migrating Off Legacy Analytics",cta:"Get the guide",link:"#",img:"",vid:""},
   {id:"demo2",type:"image",body:"We looked at how 1,200 engineering teams instrument product events. Most of them are double-counting sessions. Here is the data.",title:"2026 Instrumentation Benchmarks",cta:"Read the report",link:"#",img:"",vid:""},
   {id:"demo3",type:"video",body:"Two minutes on why event schemas drift, and the one naming convention that stops it before it reaches your warehouse.",title:"Why Your Event Schema Breaks",cta:"Watch the walkthrough",link:"#",img:"",vid:""}
 ];
@@ -547,7 +598,7 @@ function renderGDaily(r){
 function renderRec(r){
   var adUrl=REC_AD_LINK[r.name]||'';
   var nameHtml=adUrl?'<a href="'+adUrl+'" target="_blank" style="color:inherit;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#D1D5DB;">'+r.name+' <span style="font-size:9px;color:#9CA3AF;">\u2197</span></a>':r.name;
-  return'<td class="nm">'+nameHtml+'</td>'+'<td><span class="plat '+(r.platform==='c1'?'c1':'c2')+'">'+r.platform+'</span></td>'
+  return'<td class="nm">'+nameHtml+'</td>'+'<td><span class="plat '+r.platform+'">'+r.platform+'</span></td>'
     +'<td class="r">'+ltvChip(r.ltv_cac)+'</td>'+'<td class="r">'+signupChip(r.signup_cost)+'</td>'
     +'<td class="r" style="color:#9CA3AF;">'+fs(r.spend)+'</td>'+'<td class="r">'+fn(r.signups)+'</td>'+netTd(r.net_mrr);
 }
@@ -612,7 +663,7 @@ function renderAdGallery(){
   }).join('')||'<p style="color:#9CA3AF;font-size:13px;">No ads yet \u2014 populate the ADS array.</p>';
 }
 function sortCr(col,dir){
-  SORT['tbl-cr']={col:col,dir:dir};rerender('tbl-cr');
+  SORT['tbl-cr1']={col:col,dir:dir};rerender('tbl-cr1');
   var MAP={impr:'sb-impr',ctr:'sb-ctr',activation_rate:'sb-act',signup_cost:'sb-cost'};
   Object.keys(MAP).forEach(function(k){var e=document.getElementById(MAP[k]);if(e)e.className='srtbtn';});
   var a=document.getElementById(MAP[col]);if(a)a.className='srtbtn on';
@@ -623,55 +674,65 @@ document.addEventListener('DOMContentLoaded', function() {
   // load rather than only after the first sort.
   wirePauseAndClick();
   [
-    ['tbl-mm',MM,PL_MW_LABELS,PL_MW_KEYS,PL_MW_RIGHTS,renderMW,'paid_cost','asc'],
-    ['tbl-gm',GM,GL_MW_LABELS,GL_MW_KEYS,GL_MW_RIGHTS,renderGMW,'paid_cost','asc'],
-    ['tbl-mw',MW,PL_MW_LABELS,PL_MW_KEYS,PL_MW_RIGHTS,renderMW,'paid_cost','asc'],
-    ['tbl-gw',GW,GL_MW_LABELS,GL_MW_KEYS,GL_MW_RIGHTS,renderGMW,'paid_cost','asc'],
-    ['tbl-md',MD,PL_D_LABELS,PL_D_KEYS,PL_D_RIGHTS,renderDaily,'signup_cost','desc'],
-    ['tbl-gd',GD,GL_D_LABELS,GL_D_KEYS,GL_D_RIGHTS,renderGDaily,'signup_cost','desc'],
+    ['tbl-m1',M1,PL_MW_LABELS,PL_MW_KEYS,PL_MW_RIGHTS,renderMW,'paid_cost','asc'],
+    ['tbl-m2',M2,PL_MW_LABELS,PL_MW_KEYS,PL_MW_RIGHTS,renderMW,'paid_cost','asc'],
+    ['tbl-m3',M3,GL_MW_LABELS,GL_MW_KEYS,GL_MW_RIGHTS,renderGMW,'paid_cost','asc'],
+    ['tbl-w1',W1,PL_MW_LABELS,PL_MW_KEYS,PL_MW_RIGHTS,renderMW,'paid_cost','asc'],
+    ['tbl-w2',W2,PL_MW_LABELS,PL_MW_KEYS,PL_MW_RIGHTS,renderMW,'paid_cost','asc'],
+    ['tbl-w3',W3,GL_MW_LABELS,GL_MW_KEYS,GL_MW_RIGHTS,renderGMW,'paid_cost','asc'],
+    ['tbl-d1',D1,PL_D_LABELS,PL_D_KEYS,PL_D_RIGHTS,renderDaily,'signup_cost','desc'],
+    ['tbl-d2',D2,PL_D_LABELS,PL_D_KEYS,PL_D_RIGHTS,renderDaily,'signup_cost','desc'],
+    ['tbl-d3',D3,GL_D_LABELS,GL_D_KEYS,GL_D_RIGHTS,renderGDaily,'signup_cost','desc'],
     ['tbl-add',ADD,REC_LABELS,REC_KEYS,REC_RIGHTS,renderRec,'ltv_cac','desc'],
     ['tbl-cut',CUT,REC_LABELS,REC_KEYS,REC_RIGHTS,renderRec,'ltv_cac','desc'],
-    ['tbl-cr',CR,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
-    ['tbl-gcr',GCR,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
+    ['tbl-cr1',CR1,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
+    ['tbl-cr2',CR2,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
+    ['tbl-cr3',CR3,CR_LABELS,CR_KEYS,CR_RIGHTS,renderCr,'impr','desc'],
   ].forEach(function(x){
     CONFIGS[x[0]]={data:x[1],labels:x[2],keys:x[3],rights:x[4],render:x[5],def:x[6],dd:x[7]||'desc'};
     SORT[x[0]]={col:x[6],dir:x[7]||'desc'};
     rerender(x[0]);
   });
-  renderFunnel('c1-funnel',[{l:'Clicks',n:12040},{l:'Signups',n:610},{l:'Activated',n:299},{l:'PQL',n:113},{l:'Paid',n:60},{l:'Expansion',n:14}],'#2563EB',12040,{spend:30200,mrr:11460});
-  renderFunnel('c2-funnel',[{l:'Clicks',n:15900},{l:'Signups',n:432},{l:'Activated',n:242},{l:'PQL',n:106},{l:'Paid',n:63},{l:'Expansion',n:19}],'#16A34A',15900,{spend:16300,mrr:12990});
-  renderHm('c1-hm', VM);
-  renderHm('c2-hm', VG);
+  renderFunnel('c1-funnel',[{l:'Clicks',n:56500},{l:'Signups',n:676},{l:'Activated',n:216},{l:'PQL',n:50},{l:'Paid',n:21},{l:'Expansion',n:3}],'#2563EB',56500,{spend:12200,mrr:3290});
+  renderFunnel('c2-funnel',[{l:'Clicks',n:12040},{l:'Signups',n:610},{l:'Activated',n:299},{l:'PQL',n:113},{l:'Paid',n:60},{l:'Expansion',n:14}],'#16A34A',12040,{spend:30200,mrr:11460});
+  renderFunnel('c3-funnel',[{l:'Clicks',n:18000},{l:'Signups',n:470},{l:'Activated',n:256},{l:'PQL',n:109},{l:'Paid',n:64},{l:'Expansion',n:19}],'#7C3AED',18000,{spend:18700,mrr:13140});
+  renderHm('c1-hm', V1);
+  renderHm('c2-hm', V2);
+  renderHm('c3-hm', V3);
   renderKanban();
 });
 
 // ── KANBAN (4-column: To Test / Testing / Evaluated / Completed) ───────────
 var NOTES=[
-  {id:1,unit:"Thought_Leadership_Video",ctx:"MM",date:"Aug 19",status:"todo",priority:"high",
+  {id:1,unit:"Interest_DevTools_Broad",ctx:"M1",date:"Aug 21",status:"todo",priority:"high",
+   note:"LTV/CAC at 2.3x, below the 3.0x payback floor.",
+   hyp:"Broad interest targeting on Meta is buying hobbyist signups; restricting to the trial-starter lookalike should lift activation from 23% toward 35%.",
+   variable:"Audience (broad interest \u2192 lookalike only)"},
+  {id:2,unit:"Thought_Leadership_Video",ctx:"M2",date:"Aug 19",status:"todo",priority:"high",
    note:"LTV/CAC at 1.5x \u2014 three paid conversions on $6.3k.",
    hyp:"Founder-POV video is buying curiosity signups rather than intent; gating the offer behind the benchmark report should lift activation past 45%.",
    variable:"Offer (open video \u2192 gated report)"},
-  {id:2,unit:"NB_Category_Broad",ctx:"GM",date:"Aug 18",status:"todo",priority:"medium",
+  {id:3,unit:"NB_Category_Broad",ctx:"M3",date:"Aug 18",status:"todo",priority:"medium",
    note:"50% churn on category-term signups.",
    hyp:"Broad category terms attract evaluators with no live project; layering in-market intent audiences should push Trial\u2192Paid past 6%.",
    variable:"Audience layer on broad terms"},
-  {id:3,unit:"Lookalike_DevTools",ctx:"MM",date:"Aug 12",status:"doing",priority:"high",
+  {id:4,unit:"Lookalike_DevTools",ctx:"M2",date:"Aug 12",status:"doing",priority:"high",
    note:"Activation-event lookalike running against the signup lookalike.",
    hyp:"Seeding the lookalike on activated users instead of all signups will pull activation from 41% toward the 57% ICP benchmark.",
    variable:"Lookalike seed event",testSetup:"Duplicated ad set on the activated-user seed, 50/50 split, 21-day read",
    testAdId:2,controlSpend:8600,testSpend:3200},
-  {id:4,unit:"NB_Competitor_Alt",ctx:"GM",date:"Aug 15",status:"doing",priority:"medium",
+  {id:5,unit:"NB_Competitor_Alt",ctx:"M3",date:"Aug 15",status:"doing",priority:"medium",
    note:"Landing page test \u2014 docs sandbox versus demo form.",
    hyp:"Competitor-alternative traffic is bottom-of-funnel; sending it to a live docs sandbox instead of a demo form should lift signup CVR above 3.5%.",
    variable:"Landing page destination",testSetup:"50/50 ad-group split, 14-day read",
    testAdId:2,controlSpend:7400,testSpend:2600},
-  {id:5,unit:"Retarget_Docs_Visitors",ctx:"MM",date:"Aug 5",status:"done",priority:"medium",
+  {id:6,unit:"Retarget_Docs_Visitors",ctx:"M2",date:"Aug 5",status:"done",priority:"medium",
    note:"Widened docs retargeting to changelog and pricing readers.",
    hyp:"Pricing-page readers convert at least as well as docs readers, so widening the pool will hold cost per signup under $30.",
    variable:"Retargeting source pages",testSetup:"New audience, 18-day read",
    verdict:"Confirmed \u2014 $22 per signup at 64% activation, best unit on the account. Budget doubled.",
    testAdId:2,controlSpend:2900,testSpend:1900},
-  {id:6,unit:"ICP_Eng_Leaders",ctx:"MM",date:"Jul 28",status:"completed",priority:"low",
+  {id:7,unit:"ICP_Eng_Leaders",ctx:"M2",date:"Jul 28",status:"completed",priority:"low",
    note:"Document ad versus single image for the migration offer.",
    hyp:"A document ad will pre-qualify readers and lift PQL% above 20% even at a higher cost per click.",
    variable:"Ad format",testSetup:"Parallel creative in the same ad set, 28-day read",
